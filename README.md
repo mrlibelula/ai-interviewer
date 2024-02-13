@@ -1,4 +1,18 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+<div align="center" style="
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    column-gap: 1rem;
+    font-size: 1.5rem;
+    line-height: 2rem;
+">
+    <div>
+        <a href="https://libe.dev" target="_blank">
+            <img src="https://libe.dev/images/libesoft.io_inv.png" width="50" style="border-radius: 0.5rem;" alt="Libe.dev Logo">
+        </a>
+    </div>
+    <div>AI Interviewer</div>
+</div>
 
 
 ## Project Features
