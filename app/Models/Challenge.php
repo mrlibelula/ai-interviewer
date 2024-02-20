@@ -14,7 +14,7 @@ class Challenge extends Model
 
     public function difficulty()
     {
-        return $this->belongsTo(Difficulty::class, 'dificulty_id');
+        return $this->belongsTo(Difficulty::class, 'difficulty_id');
     }
 
     public function status()
