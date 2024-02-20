@@ -26,7 +26,7 @@ class ChallengeFactory extends Factory
         shuffle($script_extensions);
 
         return [
-            'title' => $this->faker->text(35), 
+            'title' => $this->faker->text(50), 
             'descr_blade_filename' => $this->faker->word() . '.blade.php', 
             'difficulty_id' => Difficulty::inRandomOrder()->first()->id, 
             'initial_code_script_filename' => $this->faker->word() . '' . $script_extensions[0], 

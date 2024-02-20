@@ -24,13 +24,13 @@ class DatabaseSeeder extends Seeder
     {
         // seed difficulties
         $difficulty_easy = Difficulty::firstOrCreate([
-            'title' => 'easy', 
+            'name' => 'easy', 
         ]);
         $difficulty_medium = Difficulty::firstOrCreate([
-            'title' => 'medium', 
+            'name' => 'medium', 
         ]);
         $difficulty_hard = Difficulty::firstOrCreate([
-            'title' => 'hard', 
+            'name' => 'hard', 
         ]);
 
         $difficulties = [$difficulty_easy, $difficulty_medium, $difficulty_hard, ];
@@ -60,56 +60,56 @@ class DatabaseSeeder extends Seeder
 
         // seed tags
 
-        $tag_front_end = Tag::firstOrCreate(['title' => 'Front-End']);
-        $tag_back_end = Tag::firstOrCreate(['title' => 'Back-End']);
-        $tag_full_stack = Tag::firstOrCreate(['title' => 'Full-Stack']);
-        $tag_dev_ops = Tag::firstOrCreate(['title' => 'Dev-Ops']);
-        $tag_db = Tag::firstOrCreate(['title' => 'Database']);
-        $tag_storage = Tag::firstOrCreate(['title' => 'Storage']);
-        $tag_ecommerce = Tag::firstOrCreate(['title' => 'eCommerce']);
-        $tag_design_patterns = Tag::firstOrCreate(['title' => 'Design Patterns']);
-        $tag_setup = Tag::firstOrCreate(['title' => 'Setup']);
-        $tag_machine_learning = Tag::firstOrCreate(['title' => 'Machine Learning']);
-        $tag_block_chain = Tag::firstOrCreate(['title' => 'Block Chain']);
-        $tag_bootcamp = Tag::firstOrCreate(['title' => 'Bootcamp']);
-        $tag_learning = Tag::firstOrCreate(['title' => 'Learning']);
-        $tag_docs = Tag::firstOrCreate(['title' => 'Docs']);
-        $tag_portfolio = Tag::firstOrCreate(['title' => 'Portfolio']);
-        $tag_data_structures = Tag::firstOrCreate(['title' => 'Data Structures']);
-        $tag_interview = Tag::firstOrCreate(['title' => 'Interview']);
-        $tag_ui = Tag::firstOrCreate(['title' => 'UI']);
-        $tag_ux = Tag::firstOrCreate(['title' => 'UX']);
-        $tag_dx = Tag::firstOrCreate(['title' => 'DX']);
-        $tag_hosting = Tag::firstOrCreate(['title' => 'Hosting']);
-        $tag_debug = Tag::firstOrCreate(['title' => 'Debug']);
-        $tag_cpanel = Tag::firstOrCreate(['title' => 'cPanel']);
-        $tag_ssh = Tag::firstOrCreate(['title' => 'SSH']);
-        $tag_git = Tag::firstOrCreate(['title' => 'Git']);
-        $tag_terminal = Tag::firstOrCreate(['title' => 'Terminal']);
-        $tag_i18n = Tag::firstOrCreate(['title' => 'i18n']);
-        $tag_marketing = Tag::firstOrCreate(['title' => 'Marketing']);
-        $tag_recruiting = Tag::firstOrCreate(['title' => 'Recruiting']);
-        $tag_linkedin = Tag::firstOrCreate(['title' => 'LinkedIn']);
-        $tag_ffmpeg = Tag::firstOrCreate(['title' => 'FFMpeg']);
-        $tag_icons = Tag::firstOrCreate(['title' => 'Icons']);
-        $tag_auth = Tag::firstOrCreate(['title' => 'Auth']);
-        $tag_sanctum = Tag::firstOrCreate(['title' => 'Sanctum']);
-        $tag_web_console = Tag::firstOrCreate(['title' => 'Web Console']);
-        $tag_toastr = Tag::firstOrCreate(['title' => 'Toastr']);
-        $tag_software_engineering = Tag::firstOrCreate(['title' => 'Software Engineering']);
-        $tag_ai = Tag::firstOrCreate(['title' => 'AI']);
-        $tag_game_dev = Tag::firstOrCreate(['title' => 'Game Development']);
-        $tag_math = Tag::firstOrCreate(['title' => 'Math']);
-        $tag_crypto = Tag::firstOrCreate(['title' => 'Crypto Currency']);
-        $tag_backup = Tag::firstOrCreate(['title' => 'Backup']);
-        $tag_deploy = Tag::firstOrCreate(['title' => 'Deployment']);
-        $tag_slack = Tag::firstOrCreate(['title' => 'Slack']);
-        $tag_package = Tag::firstOrCreate(['title' => 'Package']);
-        $tag_middleware = Tag::firstOrCreate(['title' => 'Middleware']);
-        $tag_localization = Tag::firstOrCreate(['title' => 'Localization']);
-        $tag_tall_stack = Tag::firstOrCreate(['title' => 'TALL Stack']);
-        $tag_package = Tag::firstOrCreate(['title' => 'Package']);
-        $tag_dependency = Tag::firstOrCreate(['title' => 'Dependency']);
+        $tag_front_end = Tag::firstOrCreate(['name' => 'Front-End']);
+        $tag_back_end = Tag::firstOrCreate(['name' => 'Back-End']);
+        $tag_full_stack = Tag::firstOrCreate(['name' => 'Full-Stack']);
+        $tag_dev_ops = Tag::firstOrCreate(['name' => 'Dev-Ops']);
+        $tag_db = Tag::firstOrCreate(['name' => 'Database']);
+        $tag_storage = Tag::firstOrCreate(['name' => 'Storage']);
+        $tag_ecommerce = Tag::firstOrCreate(['name' => 'eCommerce']);
+        $tag_design_patterns = Tag::firstOrCreate(['name' => 'Design Patterns']);
+        $tag_setup = Tag::firstOrCreate(['name' => 'Setup']);
+        $tag_machine_learning = Tag::firstOrCreate(['name' => 'Machine Learning']);
+        $tag_block_chain = Tag::firstOrCreate(['name' => 'Block Chain']);
+        $tag_bootcamp = Tag::firstOrCreate(['name' => 'Bootcamp']);
+        $tag_learning = Tag::firstOrCreate(['name' => 'Learning']);
+        $tag_docs = Tag::firstOrCreate(['name' => 'Docs']);
+        $tag_portfolio = Tag::firstOrCreate(['name' => 'Portfolio']);
+        $tag_data_structures = Tag::firstOrCreate(['name' => 'Data Structures']);
+        $tag_interview = Tag::firstOrCreate(['name' => 'Interview']);
+        $tag_ui = Tag::firstOrCreate(['name' => 'UI']);
+        $tag_ux = Tag::firstOrCreate(['name' => 'UX']);
+        $tag_dx = Tag::firstOrCreate(['name' => 'DX']);
+        $tag_hosting = Tag::firstOrCreate(['name' => 'Hosting']);
+        $tag_debug = Tag::firstOrCreate(['name' => 'Debug']);
+        $tag_cpanel = Tag::firstOrCreate(['name' => 'cPanel']);
+        $tag_ssh = Tag::firstOrCreate(['name' => 'SSH']);
+        $tag_git = Tag::firstOrCreate(['name' => 'Git']);
+        $tag_terminal = Tag::firstOrCreate(['name' => 'Terminal']);
+        $tag_i18n = Tag::firstOrCreate(['name' => 'i18n']);
+        $tag_marketing = Tag::firstOrCreate(['name' => 'Marketing']);
+        $tag_recruiting = Tag::firstOrCreate(['name' => 'Recruiting']);
+        $tag_linkedin = Tag::firstOrCreate(['name' => 'LinkedIn']);
+        $tag_ffmpeg = Tag::firstOrCreate(['name' => 'FFMpeg']);
+        $tag_icons = Tag::firstOrCreate(['name' => 'Icons']);
+        $tag_auth = Tag::firstOrCreate(['name' => 'Auth']);
+        $tag_sanctum = Tag::firstOrCreate(['name' => 'Sanctum']);
+        $tag_web_console = Tag::firstOrCreate(['name' => 'Web Console']);
+        $tag_toastr = Tag::firstOrCreate(['name' => 'Toastr']);
+        $tag_software_engineering = Tag::firstOrCreate(['name' => 'Software Engineering']);
+        $tag_ai = Tag::firstOrCreate(['name' => 'AI']);
+        $tag_game_dev = Tag::firstOrCreate(['name' => 'Game Development']);
+        $tag_math = Tag::firstOrCreate(['name' => 'Math']);
+        $tag_crypto = Tag::firstOrCreate(['name' => 'Crypto Currency']);
+        $tag_backup = Tag::firstOrCreate(['name' => 'Backup']);
+        $tag_deploy = Tag::firstOrCreate(['name' => 'Deployment']);
+        $tag_slack = Tag::firstOrCreate(['name' => 'Slack']);
+        $tag_package = Tag::firstOrCreate(['name' => 'Package']);
+        $tag_middleware = Tag::firstOrCreate(['name' => 'Middleware']);
+        $tag_localization = Tag::firstOrCreate(['name' => 'Localization']);
+        $tag_tall_stack = Tag::firstOrCreate(['name' => 'TALL Stack']);
+        $tag_package = Tag::firstOrCreate(['name' => 'Package']);
+        $tag_dependency = Tag::firstOrCreate(['name' => 'Dependency']);
 
         $tags = [$tag_front_end, $tag_back_end, $tag_full_stack, $tag_dev_ops, $tag_db, $tag_storage, $tag_ecommerce, $tag_design_patterns, $tag_setup, $tag_machine_learning, $tag_block_chain, $tag_bootcamp, $tag_learning, $tag_docs, $tag_portfolio, $tag_data_structures, $tag_interview, $tag_ui, $tag_ux, $tag_dx, $tag_hosting, $tag_debug, $tag_cpanel, $tag_ssh, $tag_git, $tag_terminal, $tag_i18n, $tag_marketing, $tag_recruiting, $tag_linkedin, $tag_ffmpeg, $tag_icons, $tag_auth, $tag_sanctum, $tag_web_console, $tag_toastr, $tag_software_engineering, $tag_ai, $tag_game_dev, $tag_math, $tag_crypto, $tag_backup, $tag_deploy, $tag_slack, $tag_package, $tag_middleware, $tag_localization, $tag_tall_stack, $tag_package, $tag_dependency, ];
 

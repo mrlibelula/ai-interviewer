@@ -14,7 +14,7 @@ return new class extends Migration
         // easy, medium, hard
         Schema::create('difficulties', function (Blueprint $table) {
             $table->id();
-            $table->string('title');
+            $table->string('name');
             $table->string('description')->nullable();
             $table->timestamps();
         });
