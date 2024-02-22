@@ -30,4 +30,6 @@ By automating where appropriate and integrating AI for a more efficient approach
 
 In turn, the burden is also taken off of candidates, they need only create a job interview and share the link on their career page, social media, or jobs site, and the AI Interviewer platform takes care of the rest. Creating symbiosis between employees and employers, AI Interviewer will help turn a page on the “Great Resignation” and write a new chapter for hiring.
 
+# Resources
 
+- [UI model](https://dribbble.com/shots/22237746-Intervio-AI-Interview-Dashboard#)

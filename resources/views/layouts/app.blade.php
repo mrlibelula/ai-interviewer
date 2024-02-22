@@ -22,7 +22,7 @@
         <!-- Styles -->
         @livewireStyles
     </head>
-    <body class="font-sans antialiased cursor-default dark:text-gray-400 text-xl">
+    {{-- <body class="font-sans antialiased cursor-default dark:text-gray-400 text-xl">
         <x-banner />
 
         <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
@@ -37,6 +37,10 @@
                 </header>
             @endif
 
+            <div>
+                @livewire('sidebar')
+            </div>
+
             <!-- Page Content -->
             <main>
                 {{ $slot }}
@@ -46,5 +50,42 @@
         @stack('modals')
 
         @livewireScripts
+    </body> --}}
+
+    <body class="font-sans antialiased cursor-default dark:text-gray-400 text-xl bg-white dark:bg-gray-900">
+        <div class="flex">
+            <!-- sidebar -->
+            <div class=" fixed h-full z-50">
+                @livewire('sidebar')
+            </div>
+
+            <div class="w-full ml-[4rem]">
+                <div class="fixed w-full z-40">
+                    {{-- @livewire('navigation-menu') --}}
+                    @livewire('top-header')
+                </div>
+
+                <div class=" mt-[3.3rem]">
+                    <!-- Page Heading -->
+                    @if (isset($header))
+                    <header class="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+                        <div class="text-2xl max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                            {{ $header }}
+                        </div>
+                    </header>
+                    @endif
+                    <!-- content -->
+                    <main class="w-full">
+                        {{ $slot }}
+                    </main>
+                </div>
+            </div>
+
+        </div>
+
+
+        @stack('modals')
+        @livewireScripts
     </body>
+    
 </html>

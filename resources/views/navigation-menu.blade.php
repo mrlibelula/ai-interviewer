@@ -1,4 +1,4 @@
-<nav x-data="{ open: false }" class="bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
+<nav x-data="{ open: false }" class="bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700 mr-[4rem]">
     <!-- Primary Navigation Menu -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
@@ -7,9 +7,6 @@
                 <div class="shrink-0 flex items-center">
                     <a wire:navigate href="{{ route('dashboard') }}" class="group flex items-center gap-x-4">
                         <x-logo class="block h-[1.7rem] w-auto" />
-                        <div class="text-gradient font-semibold">
-                            A.I. Interviewer
-                        </div>
                     </a>
                 </div>
 
