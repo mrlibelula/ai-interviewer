@@ -6,7 +6,7 @@
             {{ $title }}
         </div>
 
-        <div class="mt-4 text-sm text-gray-600 dark:text-gray-400">
+        <div class="mt-4 text-base text-gray-600 dark:text-gray-400">
             {{ $content }}
         </div>
     </div>

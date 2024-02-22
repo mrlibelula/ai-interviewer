@@ -25,12 +25,14 @@ class ChallengeFactory extends Factory
 
         shuffle($script_extensions);
 
+        $filename = $this->faker->word();
+
         return [
-            'title' => $this->faker->text(50), 
-            'descr_blade_filename' => $this->faker->word() . '.blade.php', 
+            'title' => $this->faker->text(120), 
+            'descr_blade_filename' => $filename . '.blade.php', 
             'difficulty_id' => Difficulty::inRandomOrder()->first()->id, 
-            'initial_code_script_filename' => $this->faker->word() . '' . $script_extensions[0], 
-            'solution_script_filename' => $this->faker->word() . '' . $script_extensions[0], 
+            'initial_code_script_filename' => $filename . '.initial.' . $script_extensions[0], 
+            'solution_script_filename' => $filename . '.solution.' . $script_extensions[0], 
             'time_limit' => \Carbon\CarbonInterval::minutes(rand(5, 90))->cascade()->format('%H:%I:%S'), 
             'status_id' => Status::inRandomOrder()->first()->id, 
             'visibility_id' => Visibility::inRandomOrder()->first()->id, 

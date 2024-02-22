@@ -23,38 +23,34 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // seed difficulties
+        
         $difficulty_easy = Difficulty::firstOrCreate([
             'name' => 'easy', 
+            'description' => 'Coding challenges categorized as "easy" typically involve straightforward problems that require basic programming concepts and minimal problem-solving skills. These challenges are suitable for beginners and serve as a gentle introduction to coding exercises', 
         ]);
         $difficulty_medium = Difficulty::firstOrCreate([
             'name' => 'medium', 
+            'description' => 'Challenges classified as "medium" difficulty present more complex problems that require a deeper understanding of programming principles and problem-solving techniques. They may involve multiple steps or require applying several concepts in combination', 
         ]);
         $difficulty_hard = Difficulty::firstOrCreate([
             'name' => 'hard', 
+            'description' => '"Hard" difficulty challenges pose significant challenges that demand advanced problem-solving skills, algorithmic thinking, and proficiency in the chosen programming language. These challenges often involve intricate logic, optimization, or creative solutions and are suitable for experienced developers or those seeking a rigorous test of their abilities', 
         ]);
 
         $difficulties = [$difficulty_easy, $difficulty_medium, $difficulty_hard, ];
 
         // seed statuses
-        $status_active = Status::firstOrCreate([
-            'name' => 'active', 
-        ]);
-        $status_inactive = Status::firstOrCreate([
-            'name' => 'inactive', 
-        ]);
-        $status_archived = Status::firstOrCreate([
-            'name' => 'archived', 
-        ]);
+
+        $status_active = Status::firstOrCreate(['name' => 'active']);
+        $status_inactive = Status::firstOrCreate(['name' => 'inactive']);
+        $status_archived = Status::firstOrCreate(['name' => 'archived']);
 
         $statuses = [$status_active, $status_inactive, $status_archived, ];
 
         // seed visibilities
-        $visibility_private = Visibility::firstOrCreate([
-            'name' => 'private', 
-        ]);
-        $visibility_public = Visibility::firstOrCreate([
-            'name' => 'public', 
-        ]);
+
+        $visibility_private = Visibility::firstOrCreate(['name' => 'private']);
+        $visibility_public = Visibility::firstOrCreate(['name' => 'public']);
 
         $visibilities = [$visibility_private, $visibility_public, ];
 
@@ -108,10 +104,13 @@ class DatabaseSeeder extends Seeder
         $tag_middleware = Tag::firstOrCreate(['name' => 'Middleware']);
         $tag_localization = Tag::firstOrCreate(['name' => 'Localization']);
         $tag_tall_stack = Tag::firstOrCreate(['name' => 'TALL Stack']);
-        $tag_package = Tag::firstOrCreate(['name' => 'Package']);
         $tag_dependency = Tag::firstOrCreate(['name' => 'Dependency']);
+        $tag_sociability = Tag::firstOrCreate(['name' => 'Sociability']);
+        $tag_professionalism = Tag::firstOrCreate(['name' => 'Professionalism']);
+        $tag_energy = Tag::firstOrCreate(['name' => 'Energy']);
+        $tag_communication = Tag::firstOrCreate(['name' => 'Communication']);
 
-        $tags = [$tag_front_end, $tag_back_end, $tag_full_stack, $tag_dev_ops, $tag_db, $tag_storage, $tag_ecommerce, $tag_design_patterns, $tag_setup, $tag_machine_learning, $tag_block_chain, $tag_bootcamp, $tag_learning, $tag_docs, $tag_portfolio, $tag_data_structures, $tag_interview, $tag_ui, $tag_ux, $tag_dx, $tag_hosting, $tag_debug, $tag_cpanel, $tag_ssh, $tag_git, $tag_terminal, $tag_i18n, $tag_marketing, $tag_recruiting, $tag_linkedin, $tag_ffmpeg, $tag_icons, $tag_auth, $tag_sanctum, $tag_web_console, $tag_toastr, $tag_software_engineering, $tag_ai, $tag_game_dev, $tag_math, $tag_crypto, $tag_backup, $tag_deploy, $tag_slack, $tag_package, $tag_middleware, $tag_localization, $tag_tall_stack, $tag_package, $tag_dependency, ];
+        $tags = [$tag_front_end, $tag_back_end, $tag_full_stack, $tag_dev_ops, $tag_db, $tag_storage, $tag_ecommerce, $tag_design_patterns, $tag_setup, $tag_machine_learning, $tag_block_chain, $tag_bootcamp, $tag_learning, $tag_docs, $tag_portfolio, $tag_data_structures, $tag_interview, $tag_ui, $tag_ux, $tag_dx, $tag_hosting, $tag_debug, $tag_cpanel, $tag_ssh, $tag_git, $tag_terminal, $tag_i18n, $tag_marketing, $tag_recruiting, $tag_linkedin, $tag_ffmpeg, $tag_icons, $tag_auth, $tag_sanctum, $tag_web_console, $tag_toastr, $tag_software_engineering, $tag_ai, $tag_game_dev, $tag_math, $tag_crypto, $tag_backup, $tag_deploy, $tag_slack, $tag_package, $tag_middleware, $tag_localization, $tag_tall_stack, $tag_dependency, $tag_sociability, $tag_professionalism, $tag_energy, $tag_communication, ];
 
         // seed languages
 

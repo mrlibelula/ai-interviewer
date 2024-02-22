@@ -5,3 +5,7 @@
 [x-cloak] {
     display: none;
 }
+
+.text-gradient {
+    @apply text-transparent bg-clip-text bg-gradient-to-r from-sky-500 dark:from-sky-300 via-gray-400 dark:via-gray-300 to-pink-500 dark:to-pink-400;
+}

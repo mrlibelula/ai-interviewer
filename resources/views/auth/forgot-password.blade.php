@@ -1,15 +1,22 @@
 <x-guest-layout>
     <x-authentication-card>
         <x-slot name="logo">
-            <x-authentication-card-logo />
+            <div class="flex items-center justify-center gap-x-4">
+                <a href="https://libe.dev" target="_other_libedev">
+                    <x-logo class="h-[2rem]" />
+                </a>
+                <div class=" font-semibold text-2xl">
+                    A.I. Interviewer
+                </div>
+            </div>
         </x-slot>
 
-        <div class="mb-4 text-sm text-gray-600 dark:text-gray-400">
+        <div class="mb-4 text-gray-600 dark:text-gray-400">
             {{ __('Forgot your password? No problem. Just let us know your email address and we will email you a password reset link that will allow you to choose a new one.') }}
         </div>
 
         @if (session('status'))
-            <div class="mb-4 font-medium text-sm text-green-600 dark:text-green-400">
+            <div class="mb-4 font-medium text-green-600 dark:text-green-400">
                 {{ session('status') }}
             </div>
         @endif
