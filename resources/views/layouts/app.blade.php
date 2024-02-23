@@ -22,37 +22,13 @@
         <!-- Styles -->
         @livewireStyles
     </head>
-    {{-- <body class="font-sans antialiased cursor-default dark:text-gray-400 text-xl">
+
+    <body 
+        class="font-sans antialiased cursor-default dark:text-gray-400 text-xl bg-white dark:bg-gray-900 h-screen w-screen"
+        :class="{ 'pattern-color-dark': darkMode, 'pattern-squares-light': !darkMode }"
+        style="background-attachment: fixed;"
+    >
         <x-banner />
-
-        <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
-            @livewire('navigation-menu')
-
-            <!-- Page Heading -->
-            @if (isset($header))
-                <header class="bg-white dark:bg-gray-800 shadow">
-                    <div class="text-2xl max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                        {{ $header }}
-                    </div>
-                </header>
-            @endif
-
-            <div>
-                @livewire('sidebar')
-            </div>
-
-            <!-- Page Content -->
-            <main>
-                {{ $slot }}
-            </main>
-        </div>
-
-        @stack('modals')
-
-        @livewireScripts
-    </body> --}}
-
-    <body class="font-sans antialiased cursor-default dark:text-gray-400 text-xl bg-white dark:bg-gray-900">
         <div class="flex">
             <!-- sidebar -->
             <div class=" fixed h-full z-50">
@@ -68,8 +44,11 @@
                 <div class=" mt-[3.3rem]">
                     <!-- Page Heading -->
                     @if (isset($header))
-                    <header class="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-                        <div class="text-2xl max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                    <header 
+                        :class="{ 'pattern-color-blue-2-dark': darkMode, 'pattern-color-light': !darkMode }" 
+                        {{-- class="border-b border-gray-200 dark:border-gray-700 bg-gray-300/20 dark:bg-gray-700/20" --}}
+                    >
+                        <div class="text-2xl sm:text-3xl md:text-4xl max-w-7xl mx-auto py-3 sm:py-6 lg:py-9 px-4 sm:px-6 lg:px-8">
                             {{ $header }}
                         </div>
                     </header>

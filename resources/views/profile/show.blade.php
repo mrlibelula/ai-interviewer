@@ -1,8 +1,13 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-4xl text-gray-800 dark:text-gray-300 leading-tight">
-            {{ __('My Profile') }}
-        </h2>
+        <div class="flex flex-col">
+            <h2 class="font-semibold text-gray-800 dark:text-gray-300 leading-tight">
+                {{ __('My Profile') }}
+            </h2>
+            {{-- <h6 class=" text-xl text-gray-700 dark:text-gray-300/70">
+                {{ __('Welcome to A.I. Interviewer') }}
+            </h6> --}}
+        </div>
     </x-slot>
 
     <div>
