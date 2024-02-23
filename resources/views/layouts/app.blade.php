@@ -24,7 +24,7 @@
     </head>
 
     <body 
-        class="font-sans antialiased cursor-default dark:text-gray-400 text-xl bg-white dark:bg-gray-900 h-screen w-screen"
+        class="font-sans antialiased cursor-default dark:text-gray-400 text-xl bg-white dark:bg-gray-900 h-screen"
         :class="{ 'pattern-color-dark': darkMode, 'pattern-squares-light': !darkMode }"
         style="background-attachment: fixed;"
     >
@@ -46,7 +46,7 @@
                     @if (isset($header))
                     <header 
                         :class="{ 'pattern-color-blue-2-dark': darkMode, 'pattern-color-light': !darkMode }" 
-                        {{-- class="border-b border-gray-200 dark:border-gray-700 bg-gray-300/20 dark:bg-gray-700/20" --}}
+                        
                     >
                         <div class="text-2xl sm:text-3xl md:text-4xl max-w-7xl mx-auto py-3 sm:py-6 lg:py-9 px-4 sm:px-6 lg:px-8">
                             {{ $header }}
