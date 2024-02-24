@@ -11,6 +11,7 @@ use App\Models\Language;
 use App\Models\Challenge;
 use App\Models\Framework;
 use App\Models\Difficulty;
+use App\Models\Topic;
 use App\Models\Visibility;
 use App\Tool;
 use Illuminate\Database\Seeder;
@@ -72,6 +73,7 @@ class DatabaseSeeder extends Seeder
         $tag_docs = Tag::firstOrCreate(['name' => 'Docs']);
         $tag_portfolio = Tag::firstOrCreate(['name' => 'Portfolio']);
         $tag_data_structures = Tag::firstOrCreate(['name' => 'Data Structures']);
+        $tag_algorithms = Tag::firstOrCreate(['name' => 'Algorithms']);
         $tag_interview = Tag::firstOrCreate(['name' => 'Interview']);
         $tag_ui = Tag::firstOrCreate(['name' => 'UI']);
         $tag_ux = Tag::firstOrCreate(['name' => 'UX']);
@@ -110,7 +112,7 @@ class DatabaseSeeder extends Seeder
         $tag_energy = Tag::firstOrCreate(['name' => 'Energy']);
         $tag_communication = Tag::firstOrCreate(['name' => 'Communication']);
 
-        $tags = [$tag_front_end, $tag_back_end, $tag_full_stack, $tag_dev_ops, $tag_db, $tag_storage, $tag_ecommerce, $tag_design_patterns, $tag_setup, $tag_machine_learning, $tag_block_chain, $tag_bootcamp, $tag_learning, $tag_docs, $tag_portfolio, $tag_data_structures, $tag_interview, $tag_ui, $tag_ux, $tag_dx, $tag_hosting, $tag_debug, $tag_cpanel, $tag_ssh, $tag_git, $tag_terminal, $tag_i18n, $tag_marketing, $tag_recruiting, $tag_linkedin, $tag_ffmpeg, $tag_icons, $tag_auth, $tag_sanctum, $tag_web_console, $tag_toastr, $tag_software_engineering, $tag_ai, $tag_game_dev, $tag_math, $tag_crypto, $tag_backup, $tag_deploy, $tag_slack, $tag_package, $tag_middleware, $tag_localization, $tag_tall_stack, $tag_dependency, $tag_sociability, $tag_professionalism, $tag_energy, $tag_communication, ];
+        $tags = [$tag_front_end, $tag_back_end, $tag_full_stack, $tag_dev_ops, $tag_db, $tag_storage, $tag_ecommerce, $tag_design_patterns, $tag_setup, $tag_machine_learning, $tag_block_chain, $tag_bootcamp, $tag_learning, $tag_docs, $tag_portfolio, $tag_data_structures, $tag_interview, $tag_ui, $tag_ux, $tag_dx, $tag_hosting, $tag_debug, $tag_cpanel, $tag_ssh, $tag_git, $tag_terminal, $tag_i18n, $tag_marketing, $tag_recruiting, $tag_linkedin, $tag_ffmpeg, $tag_icons, $tag_auth, $tag_sanctum, $tag_web_console, $tag_toastr, $tag_software_engineering, $tag_ai, $tag_game_dev, $tag_math, $tag_crypto, $tag_backup, $tag_deploy, $tag_slack, $tag_package, $tag_middleware, $tag_localization, $tag_tall_stack, $tag_dependency, $tag_sociability, $tag_professionalism, $tag_energy, $tag_communication, $tag_algorithms, ];
 
         // seed languages
 
@@ -150,6 +152,46 @@ class DatabaseSeeder extends Seeder
         $pack_vite = Package::firstOrCreate(['name' => 'Vite']);
 
         $packages = [$pack_livewire, $pack_alpine, $pack_tailwind, $pack_vite, ];
+
+        // seed topics (tree)
+
+        $topic_data_structures = Topic::firstOrCreate([
+            'name' => 'Data Structures', 
+            'description' => '', 
+            'parent_id' => null, 
+        ]);
+
+        $topic_algorithms = Topic::firstOrCreate([
+            'name' => 'Algorithms', 
+            'description' => '', 
+            'parent_id' => null, 
+        ]);
+
+        $topic_algorithms_search = Topic::firstOrCreate([
+            'name' => 'Search algorithms', 
+            'description' => '', 
+            'parent_id' => 2, 
+        ]);
+
+        $topic_algorithms_sort = Topic::firstOrCreate([
+            'name' => 'Sort algorithms', 
+            'description' => '', 
+            'parent_id' => 2, 
+        ]);
+
+        $topic_algorithms_sort_bubble = Topic::firstOrCreate([
+            'name' => 'Bubble sort', 
+            'description' => '', 
+            'parent_id' => 4, 
+        ]);
+
+        $topic_data_structures = Topic::firstOrCreate([
+            'name' => 'Linked list', 
+            'description' => '', 
+            'parent_id' => 1, 
+        ]);
+
+        $topics = [$topic_data_structures, $topic_algorithms, $topic_algorithms_search, $topic_algorithms_sort, $topic_algorithms_sort_bubble, ];
 
         // seed faker challenges
 
@@ -222,6 +264,15 @@ class DatabaseSeeder extends Seeder
                 $package = array_shift($copy_packages);
                 $challenge->addPackage($package);
             }
+        });
+
+        // assign a random topic to all challenges
+        
+        $challenges->each(function ($challenge) use ($topics) {
+            $copy_topics = $topics;
+            shuffle($copy_topics);
+            $topic = array_shift($copy_topics);
+            $challenge->addTopic($topic);
         });
 
 

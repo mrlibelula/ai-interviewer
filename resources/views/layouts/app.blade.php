@@ -16,6 +16,9 @@
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
+        <!-- icons -->
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
 
@@ -42,16 +45,11 @@
                 </div>
 
                 <div class=" mt-[3.3rem]">
-                    <!-- Page Heading -->
                     @if (isset($header))
-                    <header 
-                        :class="{ 'pattern-color-blue-2-dark': darkMode, 'pattern-color-light': !darkMode }" 
-                        
-                    >
-                        <div class="text-2xl sm:text-3xl md:text-4xl max-w-7xl mx-auto py-3 sm:py-6 lg:py-9 px-4 sm:px-6 lg:px-8">
-                            {{ $header }}
-                        </div>
-                    </header>
+                    <!-- Page Heading -->
+                    <x-heading hasBg="{{ request()->routeIs('dashboard') ? false : false }}">
+                        {{ $header }}
+                    </x-heading>
                     @endif
                     <!-- content -->
                     <main class="w-full">

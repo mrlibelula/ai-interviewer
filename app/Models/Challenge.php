@@ -47,6 +47,11 @@ class Challenge extends Model
         return $this->belongsToMany(Package::class);
     }
 
+    public function topics()
+    {
+        return $this->belongsToMany(Topic::class);
+    }
+
     /*
         ACTIONS API
     */
@@ -89,5 +94,15 @@ class Challenge extends Model
     public function removePackage(Package $package): bool
     {
         return $this->packages()->detach($package);
+    }
+
+    public function addTopic(Topic $topic): Topic
+    {
+        return $this->topics()->save($topic);
+    }
+
+    public function removeTopic(Topic $topic): bool
+    {
+        return $this->topics()->detach($topic);
     }
 }
