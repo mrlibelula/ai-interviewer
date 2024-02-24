@@ -1,6 +1,7 @@
 @props(['hasBg' => false])
 <header 
     @if ($hasBg)
+    class="mb-4 sm:mb-6 lg:mb-10"
     :class="{ 'pattern-color-blue-2-dark': darkMode, 'pattern-color-light': !darkMode }" 
     @endif
 >

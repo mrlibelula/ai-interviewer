@@ -36,6 +36,8 @@ In turn, the burden is also taken off of candidates, they need only create a job
 - Provide feedback
 - Answer user questions
 
-# Resources
+## Resources
 
 - [UI model](https://dribbble.com/shots/22237746-Intervio-AI-Interview-Dashboard#)
+- [OpenAI Client repo](https://github.com/openai-php/client)
+- [OpenAI for Laravel](https://laravel-news.com/openai-for-laravel)
