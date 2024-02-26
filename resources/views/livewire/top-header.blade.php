@@ -18,7 +18,7 @@
         &nbsp;
     </div>
     <div class="flex items-center gap-x-4">
-        <x-icon-cube class="w-7 h-7" />
+        <x-icon-cube class="w-7 h-7 {{ session('openai_status') ? 'text-green-500' : 'text-rose-500' }}" />
         <x-theme-switcher />
     </div>
 </div>
