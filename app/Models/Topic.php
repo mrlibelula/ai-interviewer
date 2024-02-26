@@ -16,4 +16,32 @@ class Topic extends Model
     {
         return $this->belongsToMany(Challenge::class);
     }
+
+    /*
+        Recursive methods for retrieving Topics tree
+    */
+
+    public function children()
+    {
+        return $this->hasMany(Topic::class, 'parent_id');
+    }
+    
+    public function parent()
+    {
+        return $this->belongsTo(Topic::class, 'parent_id');
+    }
+
+    public static function getTree()
+    {
+        return static::with('children', 'challenges:id,title')
+            ->withCount('challenges')
+            ->whereNull('parent_id')
+            ->get();
+    }
+
+    public function recursiveChildren()
+    {
+        return $this->children()
+            ->with('recursiveChildren');
+    }
 }

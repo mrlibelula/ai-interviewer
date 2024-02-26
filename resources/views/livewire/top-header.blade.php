@@ -5,7 +5,7 @@
     <div class=" hidden md:flex border-r border-gray-200 dark:border-gray-700">
         &nbsp;
     </div>
-    <div class=" hidden md:flex whitespace-nowrap text-base opacity-60 font-semibold">
+    <div class=" hidden md:flex whitespace-nowrap text-base opacity-60 font-semibold text-gray-900 dark:text-gray-200">
         Assistant Project Manager
     </div>
     <div class=" hidden md:flex border-r border-gray-200 dark:border-gray-700">
