@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('initial_code_script_filename')->nullable();
             $table->string('test_cases_json')->default(json_encode([]));
             $table->string('hints_json')->default(json_encode([]));
-            $table->string('solution_script_filename');
+            $table->string('solution_script_filename')->nullable();
             $table->string('time_limit')->default('00:00:00');
             $table->unsignedBigInteger('status_id'); // active, inactive, archived
             $table->unsignedBigInteger('visibility_id'); // private, public

@@ -31,6 +31,11 @@ class Topic extends Model
         return $this->belongsTo(Topic::class, 'parent_id');
     }
 
+    /**
+     * Returns the complete Topic recursive tree
+     *
+     * @return mixed
+     */
     public static function getTree()
     {
         return static::with('children', 'challenges:id,title')
@@ -39,6 +44,11 @@ class Topic extends Model
             ->get();
     }
 
+    /**
+     * Returns the recursive children of a specific Topic model
+     *
+     * @return mixed
+     */
     public function recursiveChildren()
     {
         return $this->children()

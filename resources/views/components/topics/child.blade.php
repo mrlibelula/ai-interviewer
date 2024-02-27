@@ -1,7 +1,7 @@
 @props(['children'])
 <div>
     @foreach ($children as $child)
-    <div>
+    <div class=" bg-red-950">
         <i class="caret right icon text-gray-400 dark:text-gray-600"></i>
         {{ $child->name }}
         @if ($child->children->count() > 0)
