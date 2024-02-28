@@ -8,13 +8,11 @@ use App\Models\Tag;
 use App\Models\Status;
 use App\Models\Package;
 use App\Models\Language;
-use App\Models\Challenge;
 use App\Models\Framework;
 use App\Models\Difficulty;
 use App\Models\Topic;
 use App\Models\User;
 use App\Models\Visibility;
-use App\Tool;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -409,6 +407,36 @@ class DatabaseSeeder extends Seeder
             'parent_id' => $topic_algorithms->id, 
         ]);
 
+        $topic_time_complexity = Topic::firstOrCreate([
+            'name' => 'Time Complexity', 
+            'description' => '', 
+            'parent_id' => $topic_algorithms->id, 
+        ]);
+
+        $topic_space_complexity = Topic::firstOrCreate([
+            'name' => 'Space Complexity', 
+            'description' => '', 
+            'parent_id' => $topic_algorithms->id, 
+        ]);
+
+        $topic_big_O_notation = Topic::firstOrCreate([
+            'name' => 'Big O Notation', 
+            'description' => '', 
+            'parent_id' => $topic_algorithms->id, 
+        ]);
+
+        $topic_Analyzing_the_time_complexity_of_algorithms_in_different_scenarios = Topic::firstOrCreate([
+            'name' => 'Analyzing the time complexity of algorithms in different scenarios', 
+            'description' => '', 
+            'parent_id' => $topic_algorithms->id, 
+        ]);
+
+        $topic_common_time_complexities = Topic::firstOrCreate([
+            'name' => 'Common Time Complexities', 
+            'description' => '', 
+            'parent_id' => $topic_algorithms->id, 
+        ]);
+
         $topic_arrays = Topic::firstOrCreate([
             'name' => 'Arrays', 
             'description' => '', 
@@ -691,14 +719,14 @@ class DatabaseSeeder extends Seeder
             'parent_id' => $topic_web_dev->id, 
         ]);
 
-        $topic_frontend_frameworks = Topic::firstOrCreate([
-            'name' => 'Frontend Frameworks', 
+        $topic_frontend = Topic::firstOrCreate([
+            'name' => 'Frontend', 
             'description' => '', 
             'parent_id' => $topic_web_dev->id, 
         ]);
 
-        $topic_backend_frameworks = Topic::firstOrCreate([
-            'name' => 'Backend Frameworks', 
+        $topic_backend = Topic::firstOrCreate([
+            'name' => 'Backend', 
             'description' => '', 
             'parent_id' => $topic_web_dev->id, 
         ]);
@@ -759,6 +787,12 @@ class DatabaseSeeder extends Seeder
 
         $topic_recursion = Topic::firstOrCreate([
             'name' => 'Recursion', 
+            'description' => '', 
+            'parent_id' => $topic_oop->id, 
+        ]);
+
+        $topic_pointers = Topic::firstOrCreate([
+            'name' => 'Pointers', 
             'description' => '', 
             'parent_id' => $topic_oop->id, 
         ]);
@@ -2126,21 +2160,9 @@ class DatabaseSeeder extends Seeder
         ]); 
 
 
-        // $topics = [$topic_data_structures, $topic_algorithms, ];
-
-
         // seed challenges
 
-        // Challenge::firstOrCreate([
-        //     'title' => '', 
-        //     'descr_blade_filename' => '', 
-        //     'difficulty_id' => '', 
-        //     'initial_code_script_filename' => '', 
-        //     'solution_script_filename' => '', 
-        //     'time_limit' => '', 
-        //     'status_id' => '', 
-        //     'visibility_id' => '', 
-        // ]);
+        $this->call(ChallengeSeeder::class);
 
 
         // // seed faker challenges

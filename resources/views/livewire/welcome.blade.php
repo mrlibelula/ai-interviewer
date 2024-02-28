@@ -87,7 +87,7 @@
             </div>
             <div class="flex gap-x-4">
                 <x-icon-info class="w-6 h-6 text-gray-400 dark:text-gray-500" />
-                <i x-cloak x-show="isOpen" @click="isOpen = !isOpen"   class="caret down icon cursor-pointer"></i>
+                <i x-cloak x-show="isOpen" @click="isOpen = !isOpen" class="caret down icon cursor-pointer"></i>
                 <i x-cloak x-show="!isOpen" @click="isOpen = !isOpen" class="caret right icon cursor-pointer"></i>
             </div>
         </div>
