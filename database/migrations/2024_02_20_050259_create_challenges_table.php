@@ -14,18 +14,20 @@ return new class extends Migration
         Schema::create('challenges', function (Blueprint $table) {
             $table->id();
             $table->string('title');
+            $table->text('description')->default('');
             $table->string('challenge_slug');
             $table->unsignedBigInteger('difficulty_id'); // easy, medium, hard
-            $table->string('test_cases_json')->default(json_encode([]));
-            $table->string('hints_json')->default(json_encode([]));
+            $table->mediumText('test_cases')->default(json_encode([]));
+            $table->string('hints')->default('');
             $table->string('time_limit')->default('00:00:00');
             $table->unsignedBigInteger('status_id'); // active, inactive, archived
             $table->unsignedBigInteger('visibility_id'); // private, public
             $table->mediumText('options')->default(json_encode(new stdClass));
+            $table->mediumText('solution_code')->default('// found no solution code');
             $table->softDeletes();
             $table->timestamps();
 
-            $table->index(['difficulty_id', 'status_id']);
+            $table->index(['difficulty_id', 'status_id', 'visibility_id']);
             
             $table->foreign('difficulty_id')
                 ->references('id')

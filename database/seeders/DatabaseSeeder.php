@@ -23,13 +23,9 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // seed user
+        // seed user/s
 
-        $libe = User::firstOrCreate([
-            'name' => 'Libe', 
-            'email' => 'luis@libe.dev', 
-            'password' => Hash::make('password'), 
-        ]);
+        $this->call(UserSeeder::class);
 
         // seed difficulties
         
@@ -124,7 +120,7 @@ class DatabaseSeeder extends Seeder
 
         // seed languages
 
-        $lang_js = Language::firstOrCreate(['name' => 'Javascript']);
+        $lang_js = Language::firstOrCreate(['name' => 'JavaScript']);
         $lang_php = Language::firstOrCreate(['name' => 'PHP']);
         $lang_csharp = Language::firstOrCreate(['name' => 'C#']);
         $lang_sql = Language::firstOrCreate(['name' => 'SQL']);
@@ -2162,7 +2158,7 @@ class DatabaseSeeder extends Seeder
 
         // seed challenges
 
-        $this->call(ChallengeSeeder::class);
+        // $this->call(ChallengeSeeder::class);
 
 
         // // seed faker challenges

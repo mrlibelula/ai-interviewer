@@ -1,5 +1,6 @@
 <?php
 
+use App\Livewire\Admin;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -26,4 +27,13 @@ Route::middleware([
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard');
+});
+
+Route::middleware([
+    'auth:sanctum',
+    'role:admin|recruiter',
+    config('jetstream.auth_session'),
+    'verified',
+])->group(function () {
+    Route::get('/admin', Admin::class)->name('admin');
 });

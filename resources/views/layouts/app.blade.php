@@ -20,6 +20,9 @@
         <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.5.0/components/icon.min.css" integrity="sha512-rTyypI20S663Wq9zrzMSOP1MNPHaYX7+ug5OZ/DTqCDLwRdErCo2W30Hdme3aUzJSvAUap3SmBk0r5j0vRxyGw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" integrity="sha512-vKMx8UnXk60zUwyUnUPM3HbQo8QfmNx7+ltw8Pm5zLusl1XIfwcxo8DbWCqMGKaWeNxWA8yrx5v3SaVpMvR3CA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+        <script src="https://code.jquery.com/jquery-3.6.2.min.js" integrity="sha256-2krYZKh//PcchRtd+H+VyyQoZ/e3EcrkxhM8ycwASPA=" crossorigin="anonymous"></script>
+
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
 
@@ -45,7 +48,7 @@
                     @livewire('top-header')
                 </div>
 
-                <div class=" mt-[3.3rem]">
+                <div class=" mt-[3.8rem]">
                     @if (isset($header))
                     <!-- Page Heading -->
                     <x-heading hasBg="{{ request()->routeIs('dashboard') ? false : false }}">
@@ -64,6 +67,40 @@
 
         @stack('modals')
         @livewireScripts
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js" integrity="sha512-VEd+nq25CkR676O+pLBnDW09R7VQX9Mdiij052gVCp5yVH3jGtH70Ho/UUv4mJDsEdTvqRCFZg0NKGiojGnUCw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+        {{-- Toastr script for Livewire --}}
+        <script>
+            $(document).ready(function() {
+                toastr.options = {
+                    progressBar: true,
+                    positionClass: 'toast-top-right',
+                    closeButton: true,
+                    preventDuplicates: false,
+                    showMethod: 'slideDown',
+                }
+            })
+
+            window.addEventListener('success', event => {
+                toastr.success(event.detail[0].message, event.detail[0].title)
+            })
+            
+            window.addEventListener('warning', event => {
+                toastr.warning(event.detail[0].message, event.detail[0].title)
+            })
+            
+            window.addEventListener('error', event => {
+                toastr.error(event.detail[0].message, event.detail[0].title)
+            })
+            
+            window.addEventListener('info', event => {
+                toastr.info(event.detail[0].message, event.detail[0].title)
+            })
+
+
+        </script>
+
     </body>
     
 </html>
