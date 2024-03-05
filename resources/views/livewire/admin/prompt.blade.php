@@ -33,7 +33,7 @@
         <!-- JSON -->
         <x-descr-list>
             <x-slot name="title">
-                LLM output response will be in <x-bold>JSON</x-bold> format, with the following <x-spot>key/value</x-spot> pairs. The <x-spot>values</x-spot> represent an example of <x-bold>how the LLM should respond with</x-bold>
+                LLM output response will be in <x-bold>JSON</x-bold> format, with the following <x-spot>key/value</x-spot> pairs. The <x-spot>values</x-spot> represent an example of <x-bold>how the LLM should respond</x-bold>
             </x-slot>
             <div class=" grid grid-cols-3 gap-4">
                 <div class="table-header">key</div>
