@@ -46,15 +46,15 @@
                 <div>Sociability</div>
             </div>
             <div class="flex items-center gap-x-6">
-                <x-progress-circle color="deeppink" value="80" />
+                <x-progress-circle value="80" />
                 <div>Professionalism</div>
             </div>
             <div class="flex items-center gap-x-6">
-                <x-progress-circle color="deeppink" value="45" />
+                <x-progress-circle value="45" />
                 <div>Energy level</div>
             </div>
             <div class="flex items-center gap-x-6">
-                <x-progress-circle color="deeppink" value="60" />
+                <x-progress-circle value="60" />
                 <div>Communication skills</div>
             </div>
             

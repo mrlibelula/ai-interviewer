@@ -24,6 +24,7 @@ return new class extends Migration
             $table->unsignedBigInteger('visibility_id'); // private, public
             $table->mediumText('options')->default(json_encode(new stdClass));
             $table->mediumText('solution_code')->default('// found no solution code');
+            $table->text('chatgpt_prompt')->nullable();
             $table->softDeletes();
             $table->timestamps();
 

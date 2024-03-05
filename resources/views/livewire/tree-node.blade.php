@@ -7,7 +7,7 @@
             @else
             <div class="ml-[0.48rem] text-gray-400 dark:text-gray-500" >•&nbsp;&nbsp;</div>
             @endif
-            <div class=" group-hover:text-pink-600 group-hover:dark:text-pink-400 smooth-300">
+            <div class=" group-hover:text-orange-600 group-hover:dark:text-orange-400 smooth-300">
                 {{ $topic->name }}
             </div>
         </div>

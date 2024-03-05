@@ -59,6 +59,16 @@
                     <main class="w-full">
                         {{ $slot }}
                     </main>
+                    
+                    <footer class="p-page-x flex flex-col gap-y-2 justify-center items-center pt-14 lg:pt-20 pb-8">
+                        <a href="https://libe.dev" target="_other_LIBEDEV" class="flex items-center">
+                            <x-libe-dev-logo class=" scale-[.55]" />
+                            <div class=" text-base text-gray-500">
+                                {{ date('Y') }} - libe.dev
+                            </div>
+                        </a>
+                    </footer>
+                    
                 </div>
             </div>
 

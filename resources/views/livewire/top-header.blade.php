@@ -1,4 +1,4 @@
-<div x-data="{ isContextOpen: false }" class=" relative flex items-center gap-x-4 justify-between py-3 px-4_ bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 w-full -ml-[4rem]">
+<div x-data="{ isContextOpen: false }" class=" relative flex items-center gap-x-4 justify-between py-3 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700/50 w-full -ml-[4rem]">
     <div class="ml-[5rem] text-lg font-semibold whitespace-nowrap px-2.5 rounded-full bg-gray-200/50 dark:bg-gray-600 text-gray-600 dark:text-gray-400">
         A.I. Interviewer
     </div>
@@ -12,7 +12,7 @@
         &nbsp;
     </div>
     <div class="w-full px-3">
-        <x-input placeholder="Search" class="h-[2.25rem] w-full text-sm placeholder-gray-500 placeholder:text-sm" />
+        <input placeholder="Search challenges" class="form-input h-[2.25rem] w-full text-sm placeholder-gray-500 placeholder:text-sm " />
     </div>
     <div class=" hidden md:flex border-r border-gray-200 dark:border-gray-700">
         &nbsp;
@@ -58,7 +58,7 @@
             @if (auth()->user()->hasRole('admin') || auth()->user()->hasRole('recruiter'))
             <x-context-divider />
 
-            <x-context-item wire:navigate href="{{ route('admin') }}">
+            <x-context-item wire:navigate href="{{ route('admin-dashboard') }}">
                 <x-slot name="icon"><x-icon-cog-admin /></x-slot>
                 Administrative options
             </x-context-item>

@@ -65,7 +65,7 @@ class UserSeeder extends Seeder
 
         // timo - recruiter
         $timo = User::firstOrCreate([
-            'name' => 'Timio', 
+            'name' => 'Timo', 
             'email' => 'timo@libe.dev', 
             'password' => Hash::make('password'), 
         ]);

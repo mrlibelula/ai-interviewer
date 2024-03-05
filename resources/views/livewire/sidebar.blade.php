@@ -41,7 +41,7 @@
                 <svg class="w-7 h-7 stroke-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"></path>
                 </svg>
-                <span class="absolute top-0 left-0 w-2 h-2 mt-2 ml-2 bg-pink-500 animate-pulse rounded-full"></span>
+                <span class="absolute top-0 left-0 w-2 h-2 mt-2 ml-2 bg-orange-500 animate-pulse rounded-full"></span>
             </a>
             <a wire:navigate href="/user/profile" class="flex items-center justify-center w-12 h-12 mt-2 rounded hover:bg-gray-300 dark:hover:bg-gray-700">
                 <svg class="w-7 h-7 stroke-current" data-slot="icon" fill="none" stroke-width="2" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
