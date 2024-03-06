@@ -8,12 +8,13 @@ use Illuminate\View\Component;
 
 class Nav extends Component
 {
+    public string $currentRoute = '';
     /**
      * Create a new component instance.
      */
-    public function __construct()
+    public function __construct(string $currentRoute)
     {
-        //
+        $this->currentRoute = $currentRoute;
     }
 
     /**

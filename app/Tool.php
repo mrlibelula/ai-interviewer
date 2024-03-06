@@ -88,25 +88,25 @@ class Tool
         }
     }
 
-    /**
-     * Dispatches a Toastr event from '$component'
-     * with specific message type
-     * and ['title', 'message'] array
-     * 
-     * Listeners must be installed in main layout
-     *
-     * @param LivewireComponent|ViewComponent $component
-     * @param string $type
-     * @param array $message_array
-     * @return void
-     */
-    public static function toastr(LivewireComponent|ViewComponent $component, string $type = 'info', array $message_array): void
-    {
-        $component->dispatch($type, [ 
-            'title' => $message_array['title'] ?? '',
-            'message' => $message_array['message'] ?? 'No message', 
-        ]);
-    }
+    // /**
+    //  * Dispatches a Toastr event from '$component'
+    //  * with specific message type
+    //  * and ['title', 'message'] array
+    //  * 
+    //  * Listeners must be installed in main layout
+    //  *
+    //  * @param LivewireComponent|ViewComponent $component
+    //  * @param string $type
+    //  * @param array $message_array
+    //  * @return void
+    //  */
+    // public static function toastr(LivewireComponent|ViewComponent $component, string $type = 'info', array $message_array): void
+    // {
+    //     $component->dispatch($type, [ 
+    //         'title' => $message_array['title'] ?? '',
+    //         'message' => $message_array['message'] ?? 'No message', 
+    //     ]);
+    // }
 
     /**
      * Finds an array item inside an array
@@ -154,17 +154,17 @@ class Tool
      * @param string $topic
      * @return Challenge
      */
-    public static function getLLMChallenge(string $difficulty_level = 'hard', string $topic = 'random'): Challenge
+    public static function getLLMChallenge(string $prompt, string $status = 'active', string $visibility = 'public'): Challenge
     {
         try {
-            $first_level_topics = Topic::where('parent_id', null)->pluck('name');
-            $tags = Tag::all()->pluck('name')->toArray();
-            $topic_str = 'The topic of the challenge ';
-            $topic_str .= strtolower($topic) != 'random'
-                ? 'is "' . ucfirst($topic) . '"'
-                : ' must be contained in this topics list "' . $first_level_topics . '". The challenge must focus on general programming concepts and problem-solving skills';
+            // $first_level_topics = Topic::where('parent_id', '=', null)->pluck('name');
+            // $tags = Tag::all()->pluck('name')->toArray();
+            // $topic_str = 'The topic of the challenge ';
+            // $topic_str .= strtolower($topic) != 'random'
+            //     ? 'is "' . ucfirst($topic) . '"'
+            //     : ' must be contained in this topics list "' . $first_level_topics . '". The challenge must focus on general programming concepts and problem-solving skills';
 
-            $prompt = 'A code challenge commonly assessed in technical interviews. Give me your response in JSON format, example output format: { "title": "", "challenge": "", "difficulty_level": "easy|medium|hard", "time_limit": "H:i:s", "hints": "", "test_cases": ["", ""], "topics": ["", ""], tags: ["", ""], "languages": ["", ""], "frameworks": ["", ""], "packages": ["", ""] }%%%%%solution_code. The difficulty level must be "' . $difficulty_level . '". The "solution_code" area must contain the code with the latest standard recommendations (es6, psr7, pep8, etc.) and must be after "%%%%%" characters. The "frameworks", "packages", "test_cases" and "languages" props can be empty arrays. Append at least one language to languages array. ' . $topic_str . '. The selected "tags" must be contained in this tags list: "' . json_encode($tags) . '". No line break between json and solution_code. Double check the solution_code';
+            // $prompt = 'A code challenge commonly assessed in technical interviews. Give me your response in JSON format, example output format: { "title": "", "challenge": "", "difficulty_level": "easy|medium|hard", "time_limit": "H:i:s", "hints": "", "test_cases": ["", ""], "topics": ["", ""], tags: ["", ""], "languages": ["", ""], "frameworks": ["", ""], "packages": ["", ""] }%%%%%solution_code. The difficulty level must be "' . $difficulty_level . '". The "solution_code" area must contain the code with the latest standard recommendations (es6, psr7, pep8, etc.) and must be after "%%%%%" characters. The "frameworks", "packages", "test_cases" and "languages" props can be empty arrays. Append at least one language to languages array. ' . $topic_str . '. The selected "tags" must be contained in this tags list: "' . json_encode($tags) . '". No line break between json and solution_code. Double check the solution_code';
 
             $messages = [
                 [
@@ -180,7 +180,7 @@ class Tool
             
             $completion_text = $completion->choices[0]->message->content;
 
-            $completion_text_parts = explode('¿¿¿¿¿', $completion_text);
+            $completion_text_parts = explode(env('OPENAI_CODE_SEPARATOR'), $completion_text);
             $challenge = json_decode($completion_text_parts[0] ?? 'n/a');
             $solution_code = $completion_text_parts[1] ?? '';
             $challenge_slug = Str::slug($challenge->title ?? '');
@@ -193,8 +193,8 @@ class Tool
                 'test_cases' => json_encode($challenge->test_cases),
                 'hints' => $challenge->hints,
                 'time_limit' => $challenge->time_limit,
-                'status_id' => Status::select('id')->where('name', '=', 'active')->first()->id,
-                'visibility_id' => Visibility::select('id')->where('name', '=', 'public')->first()->id,
+                'status_id' => Status::select('id')->where('name', '=', $status)->first()->id,
+                'visibility_id' => Visibility::select('id')->where('name', '=', $visibility)->first()->id,
                 'solution_code' => $solution_code,
                 'chatgpt_prompt' => $prompt,
             ]);
@@ -299,5 +299,20 @@ class Tool
             info($te->getMessage());
         }
 
+    }
+
+    /**
+     * Get 'all topic' names or just 'one topic' name
+     *
+     * @param string $topic
+     * @return array
+     */
+    public static function getTopics(string $topic = 'all_topics'): array
+    {
+        if (strtolower($topic) === 'all_topics') {
+            return Topic::where('parent_id', '=', null)->pluck('name')->toArray();
+        } else {
+            return Topic::where('name', 'like', '%' . strtolower($topic) . '%')->pluck('name')->toArray();
+        }
     }
 }

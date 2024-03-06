@@ -1,5 +1,5 @@
 <div>
-    <x-admin.nav />
+    <x-admin.nav currentRoute="{{ $currentRouteName }}" />
     
     <x-container>
         
@@ -8,183 +8,110 @@
         <x-h5>Prompt base text</x-h5>
         
 
-        <!-- dot env -->
+        <!-- dot env blueprint -->
         <x-descr-list>
-            <x-slot name="title">
-                Full prompt from "<x-bold>.env</x-bold>" <x-spot>"OPENAI_PROMPT_BASE_TEXT"</x-spot> key
-            </x-slot>
-            <div class="flex flex-col lg:flex-row gap-y-4 gap-x-4 items-center lg:items-end">
+            <div class="flex flex-col gap-y-4 gap-x-4 items-start">
+                <div>
+                    Full blueprint prompt from "<x-bold>.env</x-bold>" <x-spot>"OPENAI_PROMPT_BASE_TEXT"</x-spot> key
+                </div>
                 <textarea disabled class="form-textarea w-full h-[7rem] font-mono">{{ env('OPENAI_PROMPT_BASE_TEXT') ?? 'n/a' }}</textarea>
             </div>
+            <div class="flex items-center gap-x-4">
+                <div wire:click="loadBlueprintDataAndStoreToDB(true)" class="flex flex-col items-start">
+                    <x-secondary-button class="mt-6">Rebuild prompt from this blueprint</x-secondary-button>
+                </div>
+                <x-secondary-button class="mt-6">Edit blueprint</x-secondary-button>
+            </div>
+            
         </x-descr-list>
 
         <x-h5>Build prompt</x-h5>
 
-        <!-- Intro prompt text -->
+        <!-- select topic/s and difficulty -->
         <x-descr-list>
-            <x-slot name="title">
-                Introduction prompt text
-            </x-slot>
-            <div>
-                <textarea wire:model="build_01_intro_prompt_text" class="form-textarea w-full h-[5rem] font-mono"></textarea>
-            </div>
-        </x-descr-list>
-
-        <!-- JSON -->
-        <x-descr-list>
-            <x-slot name="title">
-                LLM output response will be in <x-bold>JSON</x-bold> format, with the following <x-spot>key/value</x-spot> pairs. The <x-spot>values</x-spot> represent an example of <x-bold>how the LLM should respond</x-bold>
-            </x-slot>
-            <div class=" grid grid-cols-3 gap-4">
-                <div class="table-header">key</div>
-                <div class="table-header">value</div>
-                <div class="table-header">type</div>
-
-                <!-- title -->
-                <input value="title" class="table-row form-input" />
-                <input value="" class="table-row form-input" />
-                <input disabled value="string" class="table-row form-input" />
-                
-                <!-- challenge -->
-                <input value="challenge" class="table-row form-input" />
-                <input value="" class="table-row form-input" />
-                <input disabled value="string" class="table-row form-input" />
-
-                <!-- difficulty_level -->
-                <input value="difficulty_level" class="table-row form-input" />
-                <input value="easy|medium|hard" class="table-row form-input" />
-                <input disabled value="string" class="table-row form-input" />
-
-                <!-- time_limit -->
-                <input value="time_limit" class="table-row form-input" />
-                <input value="H:i:s" class="table-row form-input" />
-                <input disabled value="string" class="table-row form-input" />
-                
-                <!-- hints -->
-                <input value="hints" class="table-row form-input" />
-                <input value="" class="table-row form-input" />
-                <input disabled value="string" class="table-row form-input" />
-                
-                <!-- test_cases -->
-                <input value="test_cases" class="table-row form-input" />
-                <input value="{{ '"", ""' }}" class="table-row form-input" />
-                <input disabled value="array" class="table-row form-input" />
-
+            <div class="flex justify-between gap-x-6">
                 <!-- topics -->
-                <input value="topics" class="table-row form-input" />
-                <input value="{{ '"", ""' }}" class="table-row form-input" />
-                <input disabled value="array" class="table-row form-input" />
-
-                <!-- tags -->
-                <input value="tags" class="table-row form-input" />
-                <input value="{{ '"", ""' }}" class="table-row form-input" />
-                <input disabled value="array" class="table-row form-input" />
-
-                <!-- languages -->
-                <input value="languages" class="table-row form-input" />
-                <input value="{{ '"", ""' }}" class="table-row form-input" />
-                <input disabled value="array" class="table-row form-input" />
-
-                <!-- frameworks -->
-                <input value="frameworks" class="table-row form-input" />
-                <input value="{{ '"", ""' }}" class="table-row form-input" />
-                <input disabled value="array" class="table-row form-input" />
-
-                <!-- packages -->
-                <input value="packages" class="table-row form-input" />
-                <input value="{{ '"", ""' }}" class="table-row form-input" />
-                <input disabled value="array" class="table-row form-input" />
-                
+                <div class="flex flex-col gap-y-4 gap-x-4 items-start w-full">
+                    <div>
+                        Select a Topic
+                    </div>
+                    
+                    <select wire:model.live='selected_topic' class="form-select w-full">
+                        @foreach ($topics as $topic)
+                        <option value="{{ strtolower($topic) }}">{{ $topic }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <!-- difficulty -->
+                <div class="flex flex-col gap-y-4 gap-x-4 items-start w-full">
+                    <div>
+                        Select a Difficulty
+                    </div>
+                    
+                    <select wire:model.live='selected_difficulty' class="form-select w-full">
+                        @foreach ($difficulties as $difficulty)
+                        <option value="{{ strtolower($difficulty) }}">{{ ucfirst($difficulty) }}</option>
+                        @endforeach
+                    </select>
+                </div>
             </div>
+            
+            
         </x-descr-list>
 
-        <!-- JSON and solution_code separator -->
-        <x-descr-list>
-            <x-slot name="title">
-                <x-spot>JSON</x-spot> and <x-spot>solution_code</x-spot> <x-bold>separator</x-bold>
-            </x-slot>
-            <div>
-                <input wire:model="build_02_json_solution_code_separator" class="form-input w-full font-mono" />
-            </div>
-        </x-descr-list>
+        @foreach ($prompt_parts as $key => $part)
+            @if (json_validate($part))
+            <!-- JSON form table -->
+            <x-descr-list>
+                <div class="py-2 mb-8">
+                    Part {{ $key + 1 }} - 
+                    LLM output response will be in <x-bold>JSON</x-bold> format, with the following <x-spot>key/value</x-spot> pairs. The <x-spot>values</x-spot> represent an example of <x-bold>how the LLM should respond</x-bold>
+                </div>
+                <div class="pb-4 -mt-4">
+                    <x-secondary-button>Add key</x-secondary-button>
+                </div>
+                <div class=" grid grid-cols-3 gap-4">
+                    <div class="table-header">key</div>
+                    <div class="table-header">value</div>
+                    <div class="table-header">type</div>
 
-        <!-- Difficulty level -->
-        <x-descr-list>
-            <x-slot name="title">
-                Difficulty level prompt
-            </x-slot>
-            <div>
-                <textarea wire:model='build_03_difficulty_level' class="form-textarea w-full h-[5rem] font-mono"></textarea>
-            </div>
-        </x-descr-list>
+                    @php
+                        $key_counter = -1;
+                    @endphp
+                    @foreach (json_decode($part, true) as $key => $value)
+                    @php
+                        $key_counter++;
+                    @endphp
+                    <input wire:model.live='json_keys.{{ $key_counter }}' class="table-row form-input" />
+                    <input wire:model.live='json_values.{{ $key_counter }}' class="table-row form-input" />
+                    <input disabled value="{{ gettype($value) }}" class="table-row form-input" />    
+                    @endforeach
 
-        <!-- Solution code area -->
-        <x-descr-list>
-            <x-slot name="title">
-                Solution code area prompt
-            </x-slot>
-            <div>
-                <textarea wire:model='build_04_solution_code' class="form-textarea w-full h-[5rem] font-mono"></textarea>
-            </div>
-        </x-descr-list>
+                </div>
+                <div class="mt-8">
+                    <x-secondary-button>Add key</x-secondary-button>
+                </div>
+            </x-descr-list>
+            @else
+            <x-descr-list>
+                <div class="flex flex-col _lg:flex-row gap-y-4 gap-x-4 items-start">
+                    <div>
+                        Part {{ $key + 1 }}
+                    </div>
+                    <textarea wire:model.live="prompt_parts.{{ $key }}" class="form-textarea w-full h-[7rem] font-mono"></textarea>
+                </div>
+            </x-descr-list>
+            @endif
+        @endforeach
 
-        <!-- How to treat arrays -->
-        <x-descr-list>
-            <x-slot name="title">
-                How to treat arrays
-            </x-slot>
-            <div>
-                <textarea wire:model='build_05_arrays' class="form-textarea w-full h-[5rem] font-mono"></textarea>
-            </div>
-        </x-descr-list>
+        <x-h5>Final generated prompt</x-h5>
 
-        <!-- Append programming languages -->
         <x-descr-list>
-            <x-slot name="title">
-                Append programming languages
-            </x-slot>
-            <div>
-                <textarea wire:model='build_06_languages' class="form-textarea w-full h-[5rem] font-mono"></textarea>
-            </div>
-        </x-descr-list>
-
-        <!-- Random topic prompt -->
-        <x-descr-list>
-            <x-slot name="title">
-                <x-bold>Random topic</x-bold> prompt
-            </x-slot>
-            <div>
-                <textarea wire:model='build_07_random_topic' class="form-textarea w-full h-[5rem] font-mono"></textarea>
-            </div>
-        </x-descr-list>
-
-        <!-- Selected topic prompt -->
-        <x-descr-list>
-            <x-slot name="title">
-                <x-bold>Selected topic</x-bold> prompt
-            </x-slot>
-            <div>
-                <textarea wire:model='build_07_selected_topic' class="form-textarea w-full h-[5rem] font-mono"></textarea>
-            </div>
-        </x-descr-list>
-
-        <!-- Tags prompt -->
-        <x-descr-list>
-            <x-slot name="title">
-                Tags prompt
-            </x-slot>
-            <div>
-                <textarea wire:model='build_08_tags' class="form-textarea w-full h-[5rem] font-mono"></textarea>
-            </div>
-        </x-descr-list>
-
-        <!-- End prompt -->
-        <x-descr-list>
-            <x-slot name="title">
-                End prompt
-            </x-slot>
-            <div>
-                <textarea wire:model='build_09_end_prompt' class="form-textarea w-full h-[5rem] font-mono"></textarea>
+            <div class="flex flex-col gap-y-4 gap-x-4 items-start">
+                <div>
+                    Concatenated <x-bold>prompt</x-bold> with filled wildcards <x-spot>" ??wildcard "</x-spot>
+                </div>
+                <textarea disabled wire:model="prompt" class="form-textarea w-full h-[20rem] font-mono text-sky-600 dark:text-sky-400"></textarea>
             </div>
         </x-descr-list>
         

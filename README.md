@@ -42,3 +42,7 @@ In turn, the burden is also taken off of candidates, they need only create a job
 - [OpenAI Client repo](https://github.com/openai-php/client)
 - [OpenAI for Laravel](https://laravel-news.com/openai-for-laravel)
 - [Laracasts OpenAI](https://laracasts.com/series/fun-with-openai-and-laravel/episodes/1)
+
+## Next task
+
+- Selelct topic and difficulty must be saved in real time and persisted for next use

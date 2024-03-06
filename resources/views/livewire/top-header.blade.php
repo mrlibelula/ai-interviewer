@@ -1,4 +1,4 @@
-<div x-data="{ isContextOpen: false }" class=" relative flex items-center gap-x-4 justify-between py-3 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700/50 w-full -ml-[4rem]">
+<div x-data="{ isContextOpen: false }" class=" relative flex items-center gap-x-4 justify-between py-3 bg-white dark:bg-gray-900 border-b border-gray-200/70 dark:border-gray-700/50 w-full -ml-[4rem]">
     <div class="ml-[5rem] text-lg font-semibold whitespace-nowrap px-2.5 rounded-full bg-gray-200/50 dark:bg-gray-600 text-gray-600 dark:text-gray-400">
         A.I. Interviewer
     </div>
