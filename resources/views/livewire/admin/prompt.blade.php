@@ -1,11 +1,32 @@
 <div>
-    <x-admin.nav currentRoute="{{ $currentRouteName }}" />
+    <x-admin.nav currentRoute="{{ $current_route_name }}" />
     
+    <x-container>
+        <x-breadcrumb>
+            <a href="#jump-prompt-base-text" class="link">
+                Prompt base text
+            </a>
+            <x-dot class="breadcrumb-dot" />
+            <a href="#jump-build-prompt" class="link">
+                Build prompt
+            </a>
+            <x-dot class="breadcrumb-dot" />
+            <a href="#jump-final-blueprint" class="link">
+                Final generated blueprint
+            </a>
+            <x-dot class="breadcrumb-dot" />
+            <a href="#jump-final-prompt" class="link">
+                Final generated prompt
+            </a>
+
+        </x-breadcrumb>
+    </x-container>
+
     <x-container>
         
         <p>Customizable prompts for the LLM, tailor prompts to specific coding concepts, languages, or difficulty levels. LLM output response will be a <x-bold>string</x-bold> with <x-bold>JSON</x-bold> data and <x-bold>solution code</x-bold>.</p>
         
-        <x-h5>Prompt base text</x-h5>
+        <x-h5 id="jump-prompt-base-text">Prompt base text</x-h5>
         
 
         <!-- dot env blueprint -->
@@ -25,15 +46,26 @@
             
         </x-descr-list>
 
-        <x-h5>Build prompt</x-h5>
+        <x-h5 id="jump-build-prompt">Build prompt</x-h5>
 
         <!-- select topic/s and difficulty -->
         <x-descr-list>
             <div class="flex justify-between gap-x-6">
                 <!-- topics -->
                 <div class="flex flex-col gap-y-4 gap-x-4 items-start w-full">
-                    <div>
-                        Select a Topic
+                    <div class=" flex items-center gap-x-6">
+                        <div class="flex items-center gap-x-2">
+                            <input checked type="radio" class="form-radio" id="radio-select-topic" name="radio-topic">
+                            <label for="radio-select-topic">
+                                Select a topic
+                            </label>
+                        </div>
+                        <div class="flex items-center gap-x-2">
+                            <input type="radio" class="form-radio" id="radio-manual-topic" name="radio-topic">
+                            <label for="radio-manual-topic">
+                                Input new topic
+                            </label>
+                        </div>
                     </div>
                     
                     <select wire:model.live='selected_topic' class="form-select w-full">
@@ -69,10 +101,12 @@
                 </div>
                 <div class="pb-4 -mt-4">
                     <x-secondary-button>Add key</x-secondary-button>
+                    <x-secondary-button>Remove key</x-secondary-button>
+                    <x-secondary-button>Remove JSON</x-secondary-button>
                 </div>
                 <div class=" grid grid-cols-3 gap-4">
                     <div class="table-header">key</div>
-                    <div class="table-header">value</div>
+                    <div class="table-header">value (valid JSON)</div>
                     <div class="table-header">type</div>
 
                     @php
@@ -90,6 +124,8 @@
                 </div>
                 <div class="mt-8">
                     <x-secondary-button>Add key</x-secondary-button>
+                    <x-secondary-button>Remove key</x-secondary-button>
+                    <x-secondary-button>Remove JSON</x-secondary-button>
                 </div>
             </x-descr-list>
             @else
@@ -104,7 +140,18 @@
             @endif
         @endforeach
 
-        <x-h5>Final generated prompt</x-h5>
+        <x-h5 id="jump-final-blueprint">Final generated blueprint</x-h5>
+
+        <x-descr-list>
+            <div class="flex flex-col gap-y-4 gap-x-4 items-start">
+                <div>
+                    Raw concatenated <x-spot>blueprint prompt</x-spot>
+                </div>
+                <textarea disabled wire:model="blueprint" class="form-textarea w-full h-[10rem] font-mono"></textarea>
+            </div>
+        </x-descr-list>
+
+        <x-h5 id="jump-final-prompt">Final generated prompt</x-h5>
 
         <x-descr-list>
             <div class="flex flex-col gap-y-4 gap-x-4 items-start">

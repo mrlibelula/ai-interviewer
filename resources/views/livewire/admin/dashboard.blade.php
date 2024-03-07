@@ -1,5 +1,5 @@
 <div>    
-    <x-admin.nav currentRoute="{{ $currentRouteName }}" />
+    <x-admin.nav currentRoute="{{ $current_route_name }}" />
 
     <x-container class=" gap-y-12">
 

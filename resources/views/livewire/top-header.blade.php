@@ -1,5 +1,12 @@
 <div x-data="{ isContextOpen: false }" class=" relative flex items-center gap-x-4 justify-between py-3 bg-white dark:bg-gray-900 border-b border-gray-200/70 dark:border-gray-700/50 w-full -ml-[4rem]">
-    <div class="ml-[5rem] text-lg font-semibold whitespace-nowrap px-2.5 rounded-full bg-gray-200/50 dark:bg-gray-600 text-gray-600 dark:text-gray-400">
+    <!-- back button -->
+    <button @click="window.history.back()" class="ml-[5rem] p-1">
+        <svg class="h-7 w-7 text-gray-900 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-200 smooth-300 cursor-pointer" data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"></path>
+        </svg>
+    </button>
+
+    <div class=" text-lg font-semibold whitespace-nowrap px-2.5 rounded-full bg-gray-200/50 dark:bg-gray-600 text-gray-600 dark:text-gray-400">
         A.I. Interviewer
     </div>
     <div class=" hidden md:flex border-r border-gray-200 dark:border-gray-700">

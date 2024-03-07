@@ -16,7 +16,7 @@
             <x-admin.dashboard-item :active="$currentRoute === 'admin-prompt'" href="/admin/prompt">
                 Setup LLM prompt
             </x-admin.dashboard-item>
-            <x-admin.dashboard-item :active="$currentRoute === 'admin-challenges'">
+            <x-admin.dashboard-item :active="$currentRoute === 'admin-challenges'" href="/admin/challenges">
                 Obtain LLM challenges
             </x-admin.dashboard-item>
             <x-admin.dashboard-item :active="$currentRoute === 'admin-challenge'">

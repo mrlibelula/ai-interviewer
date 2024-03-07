@@ -10,6 +10,7 @@ use App\Models\Language;
 use App\Models\Challenge;
 use App\Models\Framework;
 use App\Models\Difficulty;
+use App\Models\Enviro;
 use App\Models\Visibility;
 use Illuminate\Support\Str;
 use OpenAI\Laravel\Facades\OpenAI;
@@ -314,5 +315,22 @@ class Tool
         } else {
             return Topic::where('name', 'like', '%' . strtolower($topic) . '%')->pluck('name')->toArray();
         }
+    }
+
+    /**
+     * Returns enviro data from DB
+     *
+     * @param string $key
+     * @return array|null
+     */
+    public static function enviro(string $key = 'prompt'): array|null
+    {
+        $enviro = Enviro::first();
+        if ($enviro) {
+            if (isset($enviro->$key)) {
+                return json_decode($enviro->$key, true);
+            }
+        }
+        return null;
     }
 }

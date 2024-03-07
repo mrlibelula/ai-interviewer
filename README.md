@@ -45,4 +45,5 @@ In turn, the burden is also taken off of candidates, they need only create a job
 
 ## Next task
 
-- Selelct topic and difficulty must be saved in real time and persisted for next use
+- Wildcards cutomization in prompt buildChallengePrompt()
+- JSON cutomization in prompt loadBlueprintDataAndStoreToDB(), buildJson(), and also affected buildJsonArrays() that depends on $this->build_json.

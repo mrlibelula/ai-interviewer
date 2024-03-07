@@ -11,7 +11,7 @@ use Livewire\Component;
 
 class Prompt extends Component
 {
-    public string $currentRouteName;
+    public string $current_route_name;
     public array $prompt_parts = [];
     public string $selected_topic = 'all topics';
     public string $selected_difficulty = 'easy';
@@ -21,6 +21,7 @@ class Prompt extends Component
     public array $json_values = [];
     public array $topics = [];
     public array $difficulties = [];
+    public string $blueprint = '';
     public string $prompt = '';
 
     public function buildChallengePrompt()
@@ -28,6 +29,9 @@ class Prompt extends Component
         $this->buildJson();
         $prompt = implode('. ', $this->prompt_parts);
         $prompt = $this->regExCodeSeparatorReplacement($prompt);
+
+        // final blueprint
+        $this->blueprint = $prompt;
 
         $topics = $this->selected_topic != 'all topics'
             ? Tool::getTopics($this->selected_topic) 
@@ -44,13 +48,17 @@ class Prompt extends Component
             $prompt = $this->regExWildcardReplacement($prompt, $key, $wildcard);
         });
 
+        // final prompt
         $this->prompt = $prompt;
 
-        // save data to db
+        // save data to DB
         $enviro = Enviro::first();
         $enviro->prompt = json_encode([
             'parts' => $this->prompt_parts,
             'string' => $this->prompt,
+            'selected_topic' => $this->selected_topic,
+            'selected_difficulty' => $this->selected_difficulty,
+            'blueprint' => $this->blueprint,
         ]);
         $enviro->save();
     }
@@ -150,12 +158,26 @@ class Prompt extends Component
                 $enviro->save();
             }
         }
-        
-        $db_prompt_parts = json_decode($enviro->prompt)->parts;
-        $this->prompt_parts = $db_prompt_parts;
 
         // propagate enviro data into local props
-        $this->build_json = json_validate( $db_prompt_parts[1]) ?  $db_prompt_parts[1] : '{}';
+        $db_prompt = json_decode($enviro->prompt);
+        $this->prompt = $db_prompt->string ?? '';
+        $this->selected_topic = $db_prompt->selected_topic ?? 'all topics';
+        $this->selected_difficulty = $db_prompt->selected_difficulty ?? 'easy';
+        $this->blueprint = $db_prompt->blueprint ?? '';
+        $db_prompt_parts = $db_prompt->parts;
+        $this->prompt_parts = $db_prompt_parts;
+
+
+        // JSON single option (multiple JSONs in the future)
+        foreach ($db_prompt_parts as $part) {
+            if (json_validate($part)) {
+                $this->build_json = $part;
+                break;
+            } else {
+                $this->build_json = '{}';
+            }
+        }
 
         $this->buildJsonArrays();
         $this->buildJson();
@@ -178,7 +200,7 @@ class Prompt extends Component
 
     public function mount()
     {
-        $this->currentRouteName = request()->route()->getName();    // tackles livewire route name problem (livewire.update)
+        $this->current_route_name = request()->route()->getName();    // tackles livewire route name problem (livewire.update)
         $this->getTopLevelTopics();
         $this->getDifficulties();
         $this->loadBlueprintDataAndStoreToDB();
