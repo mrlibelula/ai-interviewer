@@ -25,6 +25,8 @@ return new class extends Migration
             $table->mediumText('options')->default(json_encode(new stdClass));
             $table->mediumText('solution_code')->default('// found no solution code');
             $table->text('chatgpt_prompt')->nullable();
+            $table->string('completion_id')->nullable();
+            $table->string('ai_model')->nullable();
             $table->softDeletes();
             $table->timestamps();
 

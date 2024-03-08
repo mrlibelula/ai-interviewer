@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Enviro;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -17,6 +18,7 @@ class DatabaseSeeder extends Seeder
 
         // seed backbone data (topics, languages, frameworks, etc.)
         $this->call(BackboneSeeder::class);
+
 
     }
 }

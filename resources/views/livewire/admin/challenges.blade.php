@@ -111,13 +111,32 @@
         <x-descr-list>
             <div class="flex items-center gap-x-4">
                 @if ($this->canRequestAI())
-                <x-secondary-button class=" dark:bg-green-700">Request challenge</x-secondary-button>
+                <div class="flex items-center gap-x-8">
+                    <x-secondary-button 
+                        wire:click='requestChallenge'
+                        class=" bg-green-400 dark:bg-green-700"
+                    >
+                        Request challenge
+                    </x-secondary-button>
+                    <div class="flex items-center gap-x-3">
+                        <div class=" text-base"><span class="link">This action may require some tokens</span> 🪙🪙🙉</div>
+                        <x-icon-info class="w-6 h-6 text-gray-500" stroke-width="2" />
+                    </div>
+                </div>
                 @else
                 <a wire:navigate href="/admin/prompt/">
                     <x-danger-button>Not able to request challenge</x-danger-button>
                 </a>
                 @endif
             </div>
+
+            <!-- manual request challenge -->
+            <div x-cloak x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform scale-75" x-transition:enter-end="opacity-100 transform scale-100" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 transform scale-100" x-transition:leave-end="opacity-0 transform scale-75">
+                
+                @livewire('admin.manual-request-challenge')
+
+            </div>
+
         </x-descr-list>
 
         <x-h5 id="jump-import">Import Challenge/s</x-h5>

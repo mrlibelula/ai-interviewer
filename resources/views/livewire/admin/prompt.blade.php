@@ -156,7 +156,7 @@
         <x-descr-list>
             <div class="flex flex-col gap-y-4 gap-x-4 items-start">
                 <div>
-                    Concatenated <x-bold>prompt</x-bold> with filled wildcards <x-spot>" ??wildcard "</x-spot>
+                    Concatenated <x-bold>prompt</x-bold> with fulfilled wildcards <x-spot>" ??wildcard "</x-spot>
                 </div>
                 <textarea disabled wire:model="prompt" class="form-textarea w-full h-[20rem] font-mono text-sky-600 dark:text-sky-400"></textarea>
             </div>

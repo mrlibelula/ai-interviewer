@@ -203,7 +203,7 @@ class BackboneSeeder extends Seeder
         ]);
 
         $topic_web_dev = Topic::firstOrCreate([
-            'name' => 'Web Development', 
+            'name' => 'Web Development (TALL Stack)', 
             'description' => '', 
             'parent_id' => null, 
         ]);

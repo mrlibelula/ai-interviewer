@@ -13,10 +13,16 @@ return new class extends Migration
     {
         $prompt_parts_json = new stdClass;
         $prompt_parts_json->parts = [];
+        $tokens = new stdClass;
 
-        Schema::create('enviros', function (Blueprint $table) use ($prompt_parts_json) {
+        Schema::create('enviros', function (Blueprint $table) use ($prompt_parts_json, $tokens) {
             $table->id();
-            $table->string('prompt')->default(json_encode($prompt_parts_json));
+            $table->mediumText('prompt')->default(json_encode($prompt_parts_json));
+            $table->text('openai')->default(json_encode($tokens->tokens = [
+                'usage' => new stdClass, 
+                'request_limit' => new stdClass, 
+                'token_limit' => new stdClass, 
+            ]));
             $table->timestamps();
         });
     }

@@ -16,6 +16,13 @@ class Challenges extends Component
         'wildcards' => false, 
     ];
 
+    public function requestChallenge()
+    {
+        $prompt = $this->enviro['string'];
+        $challenge_response = Tool::getLLMChallenge($prompt);
+        dd($challenge_response);
+    }
+
     /**
      * Checks if all requirements are set to 'true'
      *

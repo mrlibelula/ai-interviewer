@@ -16,6 +16,7 @@ use Illuminate\Support\Str;
 use OpenAI\Laravel\Facades\OpenAI;
 use Livewire\Component as LivewireComponent;
 use Illuminate\View\Component as ViewComponent;
+use stdClass;
 
 class Tool
 {
@@ -153,20 +154,11 @@ class Tool
      *
      * @param string $difficulty_level
      * @param string $topic
-     * @return Challenge
+     * @return stdClass
      */
-    public static function getLLMChallenge(string $prompt, string $status = 'active', string $visibility = 'public'): Challenge
+    public static function getLLMChallenge(string $prompt, string $status = 'active', string $visibility = 'public'): stdClass
     {
         try {
-            // $first_level_topics = Topic::where('parent_id', '=', null)->pluck('name');
-            // $tags = Tag::all()->pluck('name')->toArray();
-            // $topic_str = 'The topic of the challenge ';
-            // $topic_str .= strtolower($topic) != 'random'
-            //     ? 'is "' . ucfirst($topic) . '"'
-            //     : ' must be contained in this topics list "' . $first_level_topics . '". The challenge must focus on general programming concepts and problem-solving skills';
-
-            // $prompt = 'A code challenge commonly assessed in technical interviews. Give me your response in JSON format, example output format: { "title": "", "challenge": "", "difficulty_level": "easy|medium|hard", "time_limit": "H:i:s", "hints": "", "test_cases": ["", ""], "topics": ["", ""], tags: ["", ""], "languages": ["", ""], "frameworks": ["", ""], "packages": ["", ""] }%%%%%solution_code. The difficulty level must be "' . $difficulty_level . '". The "solution_code" area must contain the code with the latest standard recommendations (es6, psr7, pep8, etc.) and must be after "%%%%%" characters. The "frameworks", "packages", "test_cases" and "languages" props can be empty arrays. Append at least one language to languages array. ' . $topic_str . '. The selected "tags" must be contained in this tags list: "' . json_encode($tags) . '". No line break between json and solution_code. Double check the solution_code';
-
             $messages = [
                 [
                     'role' => 'user', 
@@ -185,7 +177,7 @@ class Tool
             $challenge = json_decode($completion_text_parts[0] ?? 'n/a');
             $solution_code = $completion_text_parts[1] ?? '';
             $challenge_slug = Str::slug($challenge->title ?? '');
-
+            
             $challenge_db = Challenge::firstOrCreate([
                 'title' => $challenge->title,
                 'description' => $challenge->challenge,
@@ -198,6 +190,8 @@ class Tool
                 'visibility_id' => Visibility::select('id')->where('name', '=', $visibility)->first()->id,
                 'solution_code' => $solution_code,
                 'chatgpt_prompt' => $prompt,
+                'completion_id' => $completion->id,
+                'ai_model' => $completion->model,
             ]);
 
             if ($challenge_db->wasRecentlyCreated) {
@@ -264,6 +258,7 @@ class Tool
                 }
             }
 
+            // Challenge::with('difficulty', 'status', 'visibility', 'tags:name', 'languages:name', 'frameworks:name', 'packages:name', 'topics:name')->first()
             $final_challenge = Challenge::with(
                     'difficulty', 
                     'status', 
@@ -277,13 +272,18 @@ class Tool
                 ->whereId($challenge_db->id)
                 ->first();
 
-            info([
-                'prompt' => $prompt, 
-                'completion_text' => $completion_text, 
-                'completion' => $completion, 
-            ]);
+            // info([
+            //     'prompt' => $prompt, 
+            //     'completion_text' => $completion_text, 
+            //     'completion' => $completion, 
+            // ]);
 
-            return $final_challenge;
+            $result_obj = new stdClass;
+            $result_obj->challenge = $final_challenge;
+            $result_obj->completion_text = $completion_text;
+            $result_obj->completion = $completion;
+
+            return $result_obj;
 
             
         } catch (\OpenAI\Exceptions\ErrorException $ee) {
@@ -291,13 +291,13 @@ class Tool
             //     'title' => 'OpenAI Error',
             //     'message' => $ee->getMessage(),
             // ]);
-            info($ee->getMessage());
+            dd($ee->getMessage());
         } catch (\OpenAI\Exceptions\TransporterException $te) {
             // Tool::toastr($this, 'error', [
             //     'title' => 'OpenAI Error',
             //     'message' => $te->getMessage(),
             // ]);
-            info($te->getMessage());
+            dd($te->getMessage());
         }
 
     }
@@ -319,16 +319,20 @@ class Tool
 
     /**
      * Returns enviro data from DB
+     * if key = 'root', returns entire enviro array
+     * Returns 'prompt' key by default
      *
      * @param string $key
-     * @return array|null
+     * @param boolean $associative
+     * @return array|stdClass|null
      */
-    public static function enviro(string $key = 'prompt'): array|null
+    public static function enviro(string $key = 'prompt', bool $associative = true): array|stdClass|null
     {
         $enviro = Enviro::first();
         if ($enviro) {
+            if ($key === 'root') return !$associative ? (object)$enviro->toArray() : $enviro->toArray();
             if (isset($enviro->$key)) {
-                return json_decode($enviro->$key, true);
+                return $associative ? json_decode($enviro->$key, true) : json_decode($enviro->$key);
             }
         }
         return null;
