@@ -9,6 +9,9 @@ class Challenges extends Component
 {
     public string $current_route_name;
     public array|null $enviro = null;
+    public $challenge = null;
+    public bool $is_new = true;
+    public $completion_text = null;
     public array $requirements = [
         'llm_prompt' => false, 
         'selected_topic' => false, 
@@ -19,8 +22,12 @@ class Challenges extends Component
     public function requestChallenge()
     {
         $prompt = $this->enviro['string'];
-        $challenge_response = Tool::getLLMChallenge($prompt);
-        dd($challenge_response);
+        $response = Tool::getLLMChallenge($prompt);
+        $this->is_new = $response->is_new;
+        $this->challenge = $response->challenge;
+        $this->completion_text = $response->completion_text;
+
+        // dd($this->challenge);
     }
 
     /**
@@ -77,7 +84,7 @@ class Challenges extends Component
 
     protected function setEnviro()
     {
-        $this->enviro = Tool::enviro();
+        $this->enviro = Tool::enviro('prompt');
     }
 
     public function mount()

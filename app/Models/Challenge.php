@@ -54,6 +54,11 @@ class Challenge extends Model
         return $this->belongsToMany(Topic::class);
     }
 
+    public function creators()
+    {
+        return $this->belongsToMany(User::class);
+    }
+
     /*
         ACTIONS API
     */
@@ -106,5 +111,15 @@ class Challenge extends Model
     public function removeTopic(Topic $topic): bool
     {
         return $this->topics()->detach($topic);
+    }
+
+    public function addCreator(User $user): User
+    {
+        return $this->creators()->save($user);
+    }
+
+    public function removeCreator(User $user): bool
+    {
+        return $this->creators()->detach($user);
     }
 }

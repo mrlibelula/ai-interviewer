@@ -23,7 +23,7 @@ return new class extends Migration
             $table->unsignedBigInteger('status_id'); // active, inactive, archived
             $table->unsignedBigInteger('visibility_id'); // private, public
             $table->mediumText('options')->default(json_encode(new stdClass));
-            $table->mediumText('solution_code')->default('// found no solution code');
+            $table->mediumText('solution_code')->default('// no solution code');
             $table->text('chatgpt_prompt')->nullable();
             $table->string('completion_id')->nullable();
             $table->string('ai_model')->nullable();

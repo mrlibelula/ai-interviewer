@@ -208,6 +208,12 @@ class BackboneSeeder extends Seeder
             'parent_id' => null, 
         ]);
 
+        $topic_databases = Topic::firstOrCreate([
+            'name' => 'Databases and DBA', 
+            'description' => '', 
+            'parent_id' => null, 
+        ]);
+
         $topic_testing = Topic::firstOrCreate([
             'name' => 'Testing', 
             'description' => '', 

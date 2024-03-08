@@ -131,11 +131,22 @@
             </div>
 
             <!-- manual request challenge -->
-            <div x-cloak x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform scale-75" x-transition:enter-end="opacity-100 transform scale-100" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 transform scale-100" x-transition:leave-end="opacity-0 transform scale-75">
-                
-                @livewire('admin.manual-request-challenge')
+            @if ($challenge)
+            
+            <div>
+                @livewire('admin.manual-request-challenge', [
+                    'challenge' => $challenge,
+                    'is_new' => $is_new,
+                ], key(uniqid()))
+                {{-- @livewire('admin.manual-request-challenge', [
+                    'challenge' => $challenge,
+                    'is_new' => $is_new,
+                ], key(uniqid())) --}}
+
+                {{-- <x-admin.challenge-card :challenge="$challenge" :is_new="$is_new" /> --}}
 
             </div>
+            @endif
 
         </x-descr-list>
 

@@ -12,6 +12,7 @@ use App\Models\Framework;
 use App\Models\Difficulty;
 use App\Models\Enviro;
 use App\Models\Visibility;
+use Exception;
 use Illuminate\Support\Str;
 use OpenAI\Laravel\Facades\OpenAI;
 use Livewire\Component as LivewireComponent;
@@ -177,8 +178,29 @@ class Tool
             $challenge = json_decode($completion_text_parts[0] ?? 'n/a');
             $solution_code = $completion_text_parts[1] ?? '';
             $challenge_slug = Str::slug($challenge->title ?? '');
+
+            // info(['completion' => $completion, 'challenge' => $challenge]);
+
+            // search for similar challenge titles
+            // $same_challenge = Challenge::select('id')->where('title', 'like', '%' . strtolower(addslashes($challenge->title)) . '%')->get();
+            // $same_challenges_nb = $same_challenge ? $same_challenge->count() : 0;
+            // $same_challenges_nb = $same_challenge->count();
             
-            $challenge_db = Challenge::firstOrCreate([
+            // info([strtolower(addslashes($challenge->title)), $same_challenges_nb, $same_challenge]);
+
+            // if ($same_challenges_nb > 0) {
+            //     $result_obj = new stdClass;
+            //     $result_obj->challenge = $same_challenge;
+            //     $result_obj->completion_text = $completion_text;
+            //     $result_obj->completion = $completion;
+            //     $result_obj->is_new = false;
+
+            //     return $result_obj;
+            // }
+
+            if (!$challenge) dd('No challenge returned by A.I.? 🙊', $completion, json_decode($completion_text_parts[0] ?? 'n/a'), $challenge);
+            
+            $challenge_db = Challenge::create([
                 'title' => $challenge->title,
                 'description' => $challenge->challenge,
                 'challenge_slug' => $challenge_slug,
@@ -256,9 +278,13 @@ class Tool
                         if ($tag) $challenge_db->addTag($tag);
                     }
                 }
+
+                // assign creator/s
+                $challenge_db->addCreator(auth()->user());
+
             }
 
-            // Challenge::with('difficulty', 'status', 'visibility', 'tags:name', 'languages:name', 'frameworks:name', 'packages:name', 'topics:name')->first()
+            // Challenge::with('difficulty', 'status', 'visibility', 'tags:name', 'languages:name', 'frameworks:name', 'packages:name', 'topics:name', 'creators')->first()
             $final_challenge = Challenge::with(
                     'difficulty', 
                     'status', 
@@ -267,7 +293,8 @@ class Tool
                     'languages:name', 
                     'frameworks:name', 
                     'packages:name', 
-                    'topics:name'
+                    'topics:name',
+                    'creators'
                 )
                 ->whereId($challenge_db->id)
                 ->first();
@@ -282,6 +309,7 @@ class Tool
             $result_obj->challenge = $final_challenge;
             $result_obj->completion_text = $completion_text;
             $result_obj->completion = $completion;
+            $result_obj->is_new = true;
 
             return $result_obj;
 
@@ -319,14 +347,13 @@ class Tool
 
     /**
      * Returns enviro data from DB
-     * if key = 'root', returns entire enviro array
-     * Returns 'prompt' key by default
+     * if key = 'root', returns entire enviro object
      *
      * @param string $key
      * @param boolean $associative
      * @return array|stdClass|null
      */
-    public static function enviro(string $key = 'prompt', bool $associative = true): array|stdClass|null
+    public static function enviro(string $key = 'root', bool $associative = true): array|stdClass|null
     {
         $enviro = Enviro::first();
         if ($enviro) {
