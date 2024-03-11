@@ -477,7 +477,7 @@ class Tool
             'topics' => json_encode($topics),
             'tags' => json_encode(Tag::select('id', 'name')->pluck('name')->toArray()), 
             'dbchallenges' => $selected_topic !== 'all topics'
-                ? json_encode(Tool::challengesByTopic($selected_topic)->toArray())
+                ? json_encode(self::challengesByTopic($selected_topic)->toArray())
                 : json_encode(Challenge::select('id', 'title')->pluck('title')->toArray()), 
         ]);
 
