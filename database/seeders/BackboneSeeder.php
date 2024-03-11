@@ -67,7 +67,7 @@ class BackboneSeeder extends Seeder
         $tag_block_chain = Tag::firstOrCreate(['name' => 'Block Chain']);
         $tag_bootcamp = Tag::firstOrCreate(['name' => 'Bootcamp']);
         $tag_learning = Tag::firstOrCreate(['name' => 'Learning']);
-        $tag_docs = Tag::firstOrCreate(['name' => 'Docs']);
+        $tag_docs = Tag::firstOrCreate(['name' => 'Documentation']);
         $tag_portfolio = Tag::firstOrCreate(['name' => 'Portfolio']);
         $tag_data_structures = Tag::firstOrCreate(['name' => 'Data Structures']);
         $tag_algorithms = Tag::firstOrCreate(['name' => 'Algorithms']);
@@ -108,6 +108,14 @@ class BackboneSeeder extends Seeder
         $tag_professionalism = Tag::firstOrCreate(['name' => 'Professionalism']);
         $tag_energy = Tag::firstOrCreate(['name' => 'Energy']);
         $tag_communication = Tag::firstOrCreate(['name' => 'Communication']);
+
+        $tag_stats_01 = Tag::firstOrCreate(['name' => 'Probability Theory']);
+        $tag_stats_02 = Tag::firstOrCreate(['name' => 'Statistical Analysis']);
+        $tag_stats_03 = Tag::firstOrCreate(['name' => 'Descriptive Statistics']);
+        $tag_stats_04 = Tag::firstOrCreate(['name' => 'Inferential Statistics']);
+        $tag_stats_05 = Tag::firstOrCreate(['name' => 'Probability Distributions']);
+        $tag_stats_06 = Tag::firstOrCreate(['name' => 'Hypothesis Testing']);
+        $tag_stats_07 = Tag::firstOrCreate(['name' => 'Regression Analysis']);
 
         $tags = [$tag_front_end, $tag_back_end, $tag_full_stack, $tag_dev_ops, $tag_db, $tag_storage, $tag_ecommerce, $tag_design_patterns, $tag_setup, $tag_machine_learning, $tag_block_chain, $tag_bootcamp, $tag_learning, $tag_docs, $tag_portfolio, $tag_data_structures, $tag_interview, $tag_ui, $tag_ux, $tag_dx, $tag_hosting, $tag_debug, $tag_cpanel, $tag_ssh, $tag_git, $tag_terminal, $tag_i18n, $tag_marketing, $tag_recruiting, $tag_linkedin, $tag_ffmpeg, $tag_icons, $tag_auth, $tag_sanctum, $tag_web_console, $tag_toastr, $tag_software_engineering, $tag_ai, $tag_game_dev, $tag_math, $tag_crypto, $tag_backup, $tag_deploy, $tag_slack, $tag_package, $tag_middleware, $tag_localization, $tag_tall_stack, $tag_dependency, $tag_sociability, $tag_professionalism, $tag_energy, $tag_communication, $tag_algorithms, ];
 
@@ -184,6 +192,12 @@ class BackboneSeeder extends Seeder
             'parent_id' => null, 
         ]);
 
+        $topic_probability = Topic::firstOrCreate([
+            'name' => 'Probability and Statistics', 
+            'description' => '', 
+            'parent_id' => null, 
+        ]);
+
         $topic_system_design = Topic::firstOrCreate([
             'name' => 'System Design', 
             'description' => '', 
@@ -204,6 +218,18 @@ class BackboneSeeder extends Seeder
 
         $topic_web_dev = Topic::firstOrCreate([
             'name' => 'Web Development (TALL Stack)', 
+            'description' => '', 
+            'parent_id' => null, 
+        ]);
+
+        $topic_web_deployment = Topic::firstOrCreate([
+            'name' => 'Web Development (deployment)', 
+            'description' => '', 
+            'parent_id' => null, 
+        ]);
+
+        $topic_web_server_setup = Topic::firstOrCreate([
+            'name' => 'Web Server Setup', 
             'description' => '', 
             'parent_id' => null, 
         ]);

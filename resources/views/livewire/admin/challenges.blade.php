@@ -1,4 +1,8 @@
-<div>
+<div 
+    x-data="{ spinnerOn: false }"
+    @spinner-off.window="spinnerOn = false"
+    @spinner-on.window="spinnerOn = true"
+>
     <x-admin.nav currentRoute="{{ $current_route_name }}" />
 
     <x-container>
@@ -19,8 +23,8 @@
                 Manually get LLM challenge/s
             </a>
             <x-dot class="breadcrumb-dot" />
-            <a href="#jump-import" class="link">
-                Import challenge/s
+            <a href="#jump-imported" class="link">
+                Imported challenge/s
             </a>
 
         </x-breadcrumb>
@@ -112,12 +116,22 @@
             <div class="flex items-center gap-x-4">
                 @if ($this->canRequestAI())
                 <div class="flex items-center gap-x-8">
+                    <!-- request button -->
                     <x-secondary-button 
                         wire:click='requestChallenge'
+                        @click="$dispatch('spinner-on')"
                         class=" bg-green-400 dark:bg-green-700"
                     >
-                        Request challenge
+                        <div class="relative flex items-start">
+                            <div :class="{ 'text-transparent': spinnerOn }">Request challenge</div>
+                            <div x-cloak x-show="spinnerOn" class=" absolute w-full flex justify-center">
+                                <x-spinner class="w-6 h-6" />
+                            </div>
+                            
+                            
+                        </div>
                     </x-secondary-button>
+
                     <div class="flex items-center gap-x-3">
                         <div class=" text-base"><span class="link">This action may require some tokens</span> 🪙🪙🙉</div>
                         <x-icon-info class="w-6 h-6 text-gray-500" stroke-width="2" />
@@ -132,31 +146,40 @@
 
             <!-- manual request challenge -->
             @if ($challenge)
-            
-            <div>
-                @livewire('admin.manual-request-challenge', [
-                    'challenge' => $challenge,
-                    'is_new' => $is_new,
-                ], key(uniqid()))
-                {{-- @livewire('admin.manual-request-challenge', [
-                    'challenge' => $challenge,
-                    'is_new' => $is_new,
-                ], key(uniqid())) --}}
-
-                {{-- <x-admin.challenge-card :challenge="$challenge" :is_new="$is_new" /> --}}
-
+            <div class="mt-6 p-6 bg-white dark:bg-gray-700/50 shadow-md rounded-lg">
+                @livewire('challenge-card', ['challenge' => $challenge], key(uniqid()))
             </div>
             @endif
 
         </x-descr-list>
 
-        <x-h5 id="jump-import">Import Challenge/s</x-h5>
-
+        <x-h5 id="jump-imported">Imported Challenge/s</x-h5>
+        
+        @if (count($challenges))
         <x-descr-list>
-            <div class="flex items-center gap-x-4">
-                <x-secondary-button>Import all</x-secondary-button>
-            </div>
+            <x-table class="mt-4">
+                <x-slot name="header">
+                    <th class="py-2 w-10 text-lg">#</th>
+                    <th class="w-full text-left text-lg">Challenge title</th>
+                </x-slot>
+                <div>
+                    @foreach ($challenges as $challenge)
+                    <tr class="hover:bg-gray-100 dark:hover:bg-gray-950 smooth-300">
+                        <td class="py-4 text-center">{{ $loop->iteration }}</td>
+                        <td class=" text-left">
+                            {{ $challenge['title'] }}
+                        </td>
+                    </tr>
+                    @endforeach
+                </div>
+            </x-table>
+
         </x-descr-list>
+        @else
+        <x-descr-list>
+            No A.I. requested challenges yet
+        </x-descr-list>
+        @endif
 
     </x-container>
 </div>

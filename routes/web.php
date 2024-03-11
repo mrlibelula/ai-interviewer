@@ -1,5 +1,6 @@
 <?php
 
+use App\Livewire\Admin\Challenge;
 use App\Livewire\Admin\Challenges;
 use App\Livewire\Admin\Dashboard;
 use App\Livewire\Admin\Prompt;
@@ -40,4 +41,5 @@ Route::middleware([
     Route::get('/admin', Dashboard::class)->name('admin-dashboard');
     Route::get('/admin/prompt', Prompt::class)->name('admin-prompt');
     Route::get('/admin/challenges', Challenges::class)->name('admin-challenges');
+    Route::get('/admin/challenge', Challenge::class)->name('admin-challenge');
 });

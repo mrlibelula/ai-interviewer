@@ -1,3 +1,0 @@
-<pre class="flex flex-col text-xl bg-slate-200/75 dark:bg-slate-600/60 px-1.5 rounded-lg overflow-hidden shadow-md cursor-text"><span class=" text-left px-1 py-1 text-gray-900 dark:text-gray-400">@if (strtolower($language) === 'html'){{ 'component' }}@elseif(strtolower($language) === 'plaintext'){{ 'ssh' }}@else{{ strtolower($language) }}@endif</span>
-    <code class="language-{{ $language ?? 'html' }} mb-2 rounded-lg max-h-96 overflow-auto">{!! $code ?? '...' !!}</code>
-</pre>

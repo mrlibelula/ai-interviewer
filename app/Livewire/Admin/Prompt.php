@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin;
 
+use App\Models\Challenge;
 use App\Models\Difficulty;
 use App\Models\Tag;
 use App\Models\Topic;
@@ -28,28 +29,13 @@ class Prompt extends Component
     {
         $this->buildJson();
         $prompt = implode('. ', $this->prompt_parts);
-        $prompt = $this->regExCodeSeparatorReplacement($prompt);
+        $prompt = Tool::regExCodeSeparatorReplacement($prompt);
 
         // final blueprint
         $this->blueprint = $prompt;
 
-        $topics = $this->selected_topic != 'all topics'
-            ? Tool::getTopics($this->selected_topic) 
-            : Tool::getTopics();
-        
-        $wildcards = collect([
-            'separator' => env('OPENAI_CODE_SEPARATOR'), 
-            'difficulty_level' => $this->selected_difficulty, 
-            'topics' => json_encode($topics),
-            'tags' => json_encode(Tag::pluck('name')->toArray()), 
-        ]);
-
-        $wildcards->each(function ($wildcard, $key) use (&$prompt) {
-            $prompt = $this->regExWildcardReplacement($prompt, $key, $wildcard);
-        });
-
-        // final prompt
-        $this->prompt = $prompt;
+        // replace all wildcards and generate final prompt
+        $this->prompt = Tool::wildcards($this->blueprint, $this->selected_difficulty, $this->selected_topic);
 
         // save data to DB
         $enviro = Enviro::first();
@@ -61,31 +47,6 @@ class Prompt extends Component
             'blueprint' => $this->blueprint,
         ]);
         $enviro->save();
-    }
-
-    /**
-     * code separator replacement
-     *
-     * @param string $prompt
-     * @return string
-     */
-    public function regExCodeSeparatorReplacement(string $prompt): string
-    {
-        return preg_replace('/\. (%+)(?:\.) /', '$1', $prompt);
-    }
-
-    /**
-     * ??wildcard replacement
-     *
-     * @param string $prompt
-     * @param string $wildcard
-     * @param string $replacement
-     * @return string
-     */
-    public function regExWildcardReplacement(string $prompt, string $wildcard, string $replacement): string
-    {
-        $pattern = '/\s\?\?' . strtolower($wildcard) . '\s/';
-        return preg_replace($pattern, $replacement, $prompt);
     }
 
     public function buildJson()
@@ -126,27 +87,11 @@ class Prompt extends Component
     {
         $prototype_prompt_base_text = env('OPENAI_PROMPT_BASE_TEXT');
         $parts = explode('. ', $prototype_prompt_base_text);
-        $final_parts = [];
-
+        
         // search for 'separator/s' and append part/s to the main prompt array of strings
-        collect($parts)->each(function ($string) use(&$final_parts) {
-            $string_parts = explode(env('OPENAI_CODE_SEPARATOR'), $string);
-            if (count($string_parts)) {
-                $counter = 0;
-                foreach ($string_parts as $str) {
-                    $final_parts[] = $str;
-                    $counter++;
-                    count($string_parts) === $counter
-                        ? //last
-                        : $final_parts[] = env('OPENAI_CODE_SEPARATOR');
-                }
-            } else {
-                $final_parts[] = $string;
-            }
-        });
+        $final_parts = Tool::searchSeparatorsAppendParts($parts);
 
         // First or create enviro data
-
         $enviro = Enviro::first();
         if (!$enviro) {
             $enviro = Enviro::firstOrCreate([

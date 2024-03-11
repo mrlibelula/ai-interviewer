@@ -12,11 +12,10 @@ use App\Models\Framework;
 use App\Models\Difficulty;
 use App\Models\Enviro;
 use App\Models\Visibility;
-use Exception;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
-use OpenAI\Laravel\Facades\OpenAI;
 use Livewire\Component as LivewireComponent;
-use Illuminate\View\Component as ViewComponent;
+use OpenAI\Laravel\Facades\OpenAI;
 use stdClass;
 
 class Tool
@@ -151,13 +150,12 @@ class Tool
     }
 
     /**
-     * Gets chatGPT challenge and stores it into DB
+     * Obtains a LLM completion response from given prompt
      *
-     * @param string $difficulty_level
-     * @param string $topic
+     * @param string $prompt
      * @return stdClass
      */
-    public static function getLLMChallenge(string $prompt, string $status = 'active', string $visibility = 'public'): stdClass
+    public static function getLLMChallenge(string $prompt, LivewireComponent $component): stdClass
     {
         try {
             $messages = [
@@ -175,159 +173,203 @@ class Tool
             $completion_text = $completion->choices[0]->message->content;
 
             $completion_text_parts = explode(env('OPENAI_CODE_SEPARATOR'), $completion_text);
+            
+            // for debugging purposes
+            $info_debug_array = [
+                'in_observation' => [
+                    'completion_text_parts' => $completion_text_parts,
+                    'comment' => 'Its still producing bug, null given on [0]. \\App\\Tool::182'
+                ],
+            ];
+
+            $completion_text_parts[0] = Tool::fixJsonString($completion_text_parts[0]);  // try to fix JSON response problems
             $challenge = json_decode($completion_text_parts[0] ?? 'n/a');
-            $solution_code = $completion_text_parts[1] ?? '';
-            $challenge_slug = Str::slug($challenge->title ?? '');
-
-            // info(['completion' => $completion, 'challenge' => $challenge]);
-
-            // search for similar challenge titles
-            // $same_challenge = Challenge::select('id')->where('title', 'like', '%' . strtolower(addslashes($challenge->title)) . '%')->get();
-            // $same_challenges_nb = $same_challenge ? $same_challenge->count() : 0;
-            // $same_challenges_nb = $same_challenge->count();
             
-            // info([strtolower(addslashes($challenge->title)), $same_challenges_nb, $same_challenge]);
-
-            // if ($same_challenges_nb > 0) {
-            //     $result_obj = new stdClass;
-            //     $result_obj->challenge = $same_challenge;
-            //     $result_obj->completion_text = $completion_text;
-            //     $result_obj->completion = $completion;
-            //     $result_obj->is_new = false;
-
-            //     return $result_obj;
-            // }
-
-            if (!$challenge) dd('No challenge returned by A.I.? 🙊', $completion, json_decode($completion_text_parts[0] ?? 'n/a'), $challenge);
-            
-            $challenge_db = Challenge::create([
-                'title' => $challenge->title,
-                'description' => $challenge->challenge,
-                'challenge_slug' => $challenge_slug,
-                'difficulty_id' => Difficulty::select('id')->where('name', '=', $challenge->difficulty_level)->first()->id,
-                'test_cases' => json_encode($challenge->test_cases),
-                'hints' => $challenge->hints,
-                'time_limit' => $challenge->time_limit,
-                'status_id' => Status::select('id')->where('name', '=', $status)->first()->id,
-                'visibility_id' => Visibility::select('id')->where('name', '=', $visibility)->first()->id,
-                'solution_code' => $solution_code,
-                'chatgpt_prompt' => $prompt,
-                'completion_id' => $completion->id,
-                'ai_model' => $completion->model,
-            ]);
-
-            if ($challenge_db->wasRecentlyCreated) {
-                $challenge_id = $challenge_db->id;
-
-                // assign topic/s
-                $topics = [];
-                foreach ($challenge->topics as $challenge_topic) {
-                    $topics[] = Topic::select('id', 'name')->where('name', 'like', '%' . $challenge_topic . '%')->first();
-                }
-                
-                if (count($topics)) {
-                    foreach ($topics as $topic) {
-                        if ($topic) $challenge_db->addTopic($topic);
-                    }
-                }
-        
-                // assign framework/s
-                $frameworks = [];
-                foreach ($challenge->frameworks as $challenge_fw) {
-                    $frameworks[] = Framework::select('id', 'name')->where('name', 'like', '%' . $challenge_fw .'%')->first();
-                }
-        
-                if (count($frameworks)) {
-                    foreach ($frameworks as $framework) {
-                        if ($framework) $challenge_db->addFramework($framework);
-                    }
-                }
-        
-                // assign language/s
-                $languages = [];
-                foreach ($challenge->languages as $challenge_lang) {
-                    $languages[] = Language::select('id', 'name')->where('name', 'like', '%'. $challenge_lang .'%')->first();
-                }
-        
-                if (count($languages)) {
-                    foreach ($languages as $language) {
-                        if ($language) $challenge_db->addLanguage($language);
-                    }
-                }
-        
-                // assign package/s
-                $packages = [];
-                foreach ($challenge->packages as $challenge_package) {
-                    $packages[] = Package::select('id', 'name')->where('name', 'like', '%'. $challenge_package .'%')->first();
-                }
-        
-                if (count($packages)) {
-                    foreach ($packages as $package) {
-                        if ($package) $challenge_db->addPackage($package);
-                    }
-                }
-
-                // assign tags/s
-                $tags = [];
-                foreach ($challenge->tags as $challenge_tag) {
-                    $tags[] = Tag::select('id', 'name')->where('name', 'like', '%'. $challenge_tag .'%')->first();
-                }
-        
-                if (count($tags)) {
-                    foreach ($tags as $tag) {
-                        if ($tag) $challenge_db->addTag($tag);
-                    }
-                }
-
-                // assign creator/s
-                $challenge_db->addCreator(auth()->user());
-
+            // bug
+            if (!$challenge) {
+                $component->dispatch('spinner-off');
+                info($info_debug_array);
+                dump('Something went wrong while decoding challenge completion string. "$challenge" is null. Check app log. 🙊', $completion, $completion_text_parts, $completion_text_parts[0], $completion_text_parts[1], json_validate($completion_text_parts[0] ?? 'NULL'), json_decode($completion_text_parts[0] ?? 'n/a'), $challenge);
             }
 
-            // Challenge::with('difficulty', 'status', 'visibility', 'tags:name', 'languages:name', 'frameworks:name', 'packages:name', 'topics:name', 'creators')->first()
-            $final_challenge = Challenge::with(
-                    'difficulty', 
-                    'status', 
-                    'visibility', 
-                    'tags:name', 
-                    'languages:name', 
-                    'frameworks:name', 
-                    'packages:name', 
-                    'topics:name',
-                    'creators'
-                )
-                ->whereId($challenge_db->id)
-                ->first();
+            // // emulated Challenge Model response property
+            $emulated_challenge_model = new Challenge;
+            $emulated_challenge_model->title = $challenge->title;
+            $emulated_challenge_model->description = $challenge->challenge;
+            $emulated_challenge_model->challenge_slug = Str::slug($challenge->title);
+            $emulated_challenge_model->difficulty_id = Difficulty::where('name', 'like', '%' . $challenge->difficulty_level . '%')->first()->id;
+            $emulated_challenge_model->test_cases = json_encode($challenge->test_cases);
+            $emulated_challenge_model->hints = $challenge->hints;
+            $emulated_challenge_model->time_limit = $challenge->time_limit;
+            $emulated_challenge_model->status_id = Status::where('name', 'like', '%active%')->first()->id;
+            $emulated_challenge_model->visibility_id = Visibility::where('name', 'like', '%public%')->first()->id;
+            $emulated_challenge_model->solution_code = $completion_text_parts[1] ?? '';
+            $emulated_challenge_model->chatgpt_prompt = $prompt;
+            $emulated_challenge_model->completion_id = $completion->id;
+            $emulated_challenge_model->ai_model = $completion->model;
 
-            // info([
-            //     'prompt' => $prompt, 
-            //     'completion_text' => $completion_text, 
-            //     'completion' => $completion, 
-            // ]);
+            $result_llm_challenge = new stdClass;
+            $result_llm_challenge->completion_text = $completion_text;
+            $result_llm_challenge->completion = $completion;
+            $result_llm_challenge->prompt = $prompt;
+            $result_llm_challenge->challenge = $challenge;
+            $result_llm_challenge->emulated_challenge_model = $emulated_challenge_model;
 
-            $result_obj = new stdClass;
-            $result_obj->challenge = $final_challenge;
-            $result_obj->completion_text = $completion_text;
-            $result_obj->completion = $completion;
-            $result_obj->is_new = true;
+            return $result_llm_challenge;
 
-            return $result_obj;
-
-            
         } catch (\OpenAI\Exceptions\ErrorException $ee) {
-            // Tool::toastr($this, 'error', [
-            //     'title' => 'OpenAI Error',
-            //     'message' => $ee->getMessage(),
-            // ]);
             dd($ee->getMessage());
         } catch (\OpenAI\Exceptions\TransporterException $te) {
-            // Tool::toastr($this, 'error', [
-            //     'title' => 'OpenAI Error',
-            //     'message' => $te->getMessage(),
-            // ]);
             dd($te->getMessage());
         }
+    }
 
+    /**
+     * Persists LLM challenge into local DB
+     *
+     * @param stdClass $llm_challenge
+     * @param string $prompt
+     * @param string $status
+     * @param string $visibility
+     * @return stdClass
+     */
+    public static function importAIChallenge(stdClass $llm_challenge, string $status = 'active', $visibility = 'public'): stdClass
+    {
+        $challenge = $llm_challenge->challenge;
+        $completion = $llm_challenge->completion;
+        $prompt = $llm_challenge->prompt;
+        $completion_text = $llm_challenge->completion_text;
+        $solution_code = $llm_challenge->emulated_challenge_model['solution_code'] ?? '';
+        $challenge_slug = Str::slug($challenge->title ?? '');
+
+
+        // search for similar challenge titles
+        // ... in process
+
+        $challenge_db = Challenge::create([
+            'title' => $challenge->title,
+            'description' => $challenge->challenge,
+            'challenge_slug' => $challenge_slug,
+            'difficulty_id' => Difficulty::select('id')->where('name', '=', $challenge->difficulty_level)->first()->id,
+            'test_cases' => json_encode($challenge->test_cases),
+            'hints' => $challenge->hints,
+            'time_limit' => $challenge->time_limit,
+            'status_id' => Status::select('id')->where('name', '=', $status)->first()->id,
+            'visibility_id' => Visibility::select('id')->where('name', '=', $visibility)->first()->id,
+            'solution_code' => $solution_code,
+            'chatgpt_prompt' => $prompt,
+            'completion_id' => $completion->id,
+            'ai_model' => $completion->model,
+        ]);
+
+        if ($challenge_db->wasRecentlyCreated) {
+            $challenge_id = $challenge_db->id;
+
+            // assign topic/s
+            $topics = [];
+            foreach ($challenge->topics as $challenge_topic) {
+                $topics[] = Topic::select('id', 'name')->where('name', 'like', '%' . $challenge_topic . '%')->first();
+            }
+            
+            if (count($topics)) {
+                foreach ($topics as $topic) {
+                    if ($topic) $challenge_db->addTopic($topic);
+                }
+            }
+    
+            // assign framework/s
+            $frameworks = [];
+            foreach ($challenge->frameworks as $challenge_fw) {
+                $frameworks[] = Framework::select('id', 'name')->where('name', 'like', '%' . $challenge_fw .'%')->first();
+            }
+    
+            if (count($frameworks)) {
+                foreach ($frameworks as $framework) {
+                    if ($framework) $challenge_db->addFramework($framework);
+                }
+            }
+    
+            // assign language/s
+            $languages = [];
+            foreach ($challenge->languages as $challenge_lang) {
+                $languages[] = Language::select('id', 'name')->where('name', 'like', '%'. $challenge_lang .'%')->first();
+            }
+    
+            if (count($languages)) {
+                foreach ($languages as $language) {
+                    if ($language) $challenge_db->addLanguage($language);
+                }
+            }
+    
+            // assign package/s
+            $packages = [];
+            foreach ($challenge->packages as $challenge_package) {
+                $packages[] = Package::select('id', 'name')->where('name', 'like', '%'. $challenge_package .'%')->first();
+            }
+    
+            if (count($packages)) {
+                foreach ($packages as $package) {
+                    if ($package) $challenge_db->addPackage($package);
+                }
+            }
+
+            // assign tags/s
+            $tags = [];
+            foreach ($challenge->tags as $challenge_tag) {
+                $tags[] = Tag::select('id', 'name')->where('name', 'like', '%'. $challenge_tag .'%')->first();
+            }
+    
+            if (count($tags)) {
+                foreach ($tags as $tag) {
+                    if ($tag) $challenge_db->addTag($tag);
+                }
+            }
+
+            // assign creator/s
+            $challenge_db->addCreator(auth()->user());
+
+        }
+
+        // Challenge::with('difficulty', 'status', 'visibility', 'tags:name', 'languages:name', 'frameworks:name', 'packages:name', 'topics:name', 'creators')->first()
+        $final_challenge = Challenge::with(
+            'difficulty', 
+            'status', 
+            'visibility', 
+            'tags:name', 
+            'languages:name', 
+            'frameworks:name', 
+            'packages:name', 
+            'topics:name',
+            'creators'
+        )
+            ->whereId($challenge_db->id)
+            ->first();
+
+        // info([
+        //     'prompt' => $prompt, 
+        //     'completion_text' => $completion_text, 
+        //     'completion' => $completion, 
+        // ]);
+
+        $result_obj = new stdClass;
+        $result_obj->challenge = $final_challenge;
+        $result_obj->completion_text = $completion_text;
+        $result_obj->completion = $completion;
+
+        return $result_obj;
+    }
+
+    /**
+     * Returns a collection of Challenges from DB that belongs to some Topic
+     *
+     * @param string $topic
+     * @return Collection
+     */
+    public static function challengesByTopic(string $topic): Collection
+    {
+        return Challenge::select('id', 'title')->whereHas('topics', function ($query) use($topic) {
+            $query->where('name', 'like', '%' . $topic . '%');
+        })->pluck('title');
     }
 
     /**
@@ -363,5 +405,170 @@ class Tool
             }
         }
         return null;
+    }
+
+    /**
+     * Removes trailing commas, and completes non-closed brackets from invalid JSON string
+     * and returns a valid JSON or null if can't be fixed
+     *
+     * @param string $bad_json
+     * @return string|null
+     */
+    public static function fixJsonString(string $bad_json): string|null
+    {
+        // complete non-closed brackets
+        $fixed_json = self::fixJsonBracketsStack($bad_json);
+        // removes trailing commas
+        $fixed_json = preg_replace('/,\s*([\]}])/m', '$1', $fixed_json);
+
+        if (json_validate($fixed_json)) {
+            return $fixed_json;
+        }
+        return null;
+    }
+
+    public static function fixJsonBracketsStack(string $json_string): string
+    {
+        $stack = [];
+        $len = strlen($json_string);
+    
+        // Iterate through each character of the string
+        for ($i = 0; $i < $len; $i++) {
+            $char = $json_string[$i];
+    
+            // If it's an opening bracket, push it onto the stack
+            if ($char === '{' || $char === '[') {
+                array_push($stack, $char);
+            }
+            // If it's a closing bracket, check if it matches the top of the stack
+            elseif ($char === '}' || $char === ']') {
+                // If the stack is empty or the closing bracket doesn't match the top of the stack, insert a missing opening bracket
+                if (empty($stack) || ($char === '}' && end($stack) !== '{') || ($char === ']' && end($stack) !== '[')) {
+                    // Insert missing opening bracket at the current position
+                    $json_string = substr_replace($json_string, ($char === '}' ? '{' : '['), $i, 0);
+                    // Adjust length and index for the inserted character
+                    $len++;
+                    $i++;
+                } else {
+                    // Pop the matching opening bracket from the stack
+                    array_pop($stack);
+                }
+            }
+        }
+    
+        // Add missing closing brackets for any remaining opening brackets on the stack
+        while (!empty($stack)) {
+            $json_string .= (end($stack) === '{' ? '}' : ']');
+            array_pop($stack);
+        }
+    
+        return $json_string;
+    }
+
+    public static function wildcards(string $blueprint, string $selected_difficulty = 'medium', string $selected_topic = 'all topics'): string
+    {
+        $topics = $selected_topic !== 'all topics'
+                ? Tool::getTopics($selected_topic) 
+                : Tool::getTopics();
+
+        $wildcards = collect([
+            'separator' => env('OPENAI_CODE_SEPARATOR'), 
+            'difficulty_level' => $selected_difficulty, 
+            'topics' => json_encode($topics),
+            'tags' => json_encode(Tag::select('id', 'name')->pluck('name')->toArray()), 
+            'dbchallenges' => $selected_topic !== 'all topics'
+                ? json_encode(Tool::challengesByTopic($selected_topic)->toArray())
+                : json_encode(Challenge::select('id', 'title')->pluck('title')->toArray()), 
+        ]);
+
+        $wildcards->each(function ($wildcard, $key) use (&$blueprint) {
+            $blueprint = self::regExWildcardReplacement($blueprint, $key, $wildcard);
+        });
+
+        return $blueprint;
+    }
+    
+    /**
+     * Regular expression " ??wildcard " replacement
+     *
+     * @param string $prompt
+     * @param string $wildcard
+     * @param string $replacement
+     * @return string
+     */
+    public static function regExWildcardReplacement(string $prompt, string $wildcard, string $replacement): string
+    {
+        $pattern = '/\s\?\?' . strtolower($wildcard) . '\s/';
+        return preg_replace($pattern, $replacement, $prompt);
+    }
+
+    /**
+     * Code separator replacement
+     *
+     * @param string $prompt
+     * @return string
+     */
+    public static function regExCodeSeparatorReplacement(string $prompt): string
+    {
+        return preg_replace('/\. (%+)(?:\.) /', '$1', $prompt);
+    }
+
+    /**
+     * Updates 'enviro.prompt.string' with final GPT 'prompt' to be used
+     *
+     * @param string $prompt
+     * @return boolean
+     */
+    public static function updateEnviroPromptString(string $prompt): bool
+    {
+        $enviro = Enviro::first();
+        $enviro_prompt = json_decode($enviro->prompt, true);
+        $enviro->prompt = json_encode([
+            'parts' => self::searchSeparatorsAppendParts(),
+            'string' => $prompt,
+            'selected_topic' => $enviro_prompt['selected_topic'],
+            'selected_difficulty' => $enviro_prompt['selected_difficulty'],
+            'blueprint' => $enviro_prompt['blueprint'],
+        ]);
+
+        return $enviro->save();
+    }
+
+    /**
+     * Search for 'separator/s' and append part/s to the main prompt array of strings
+     * If no parts given, will be obtained from DB enviro prompt blueprint
+     * Returns prompt parts
+     *
+     * @param array|null $parts
+     * @return array
+     */
+    public static function searchSeparatorsAppendParts(array|null $parts = null): array
+    {
+        $final_parts = [];
+
+        if (!$parts) {
+            // obtain from DB
+            $enviro_prompt_config = self::enviro('prompt'); 
+            $prototype_prompt_base_text = $enviro_prompt_config['blueprint'];
+            $parts = explode('. ', $prototype_prompt_base_text);
+        }
+
+        collect($parts)->each(function ($string) use(&$final_parts) {
+            $string_parts = explode(env('OPENAI_CODE_SEPARATOR'), $string);
+            if (count($string_parts)) {
+                $counter = 0;
+                foreach ($string_parts as $str) {
+                    $final_parts[] = $str;
+                    $counter++;
+                    count($string_parts) === $counter
+                        ? //last
+                        : $final_parts[] = env('OPENAI_CODE_SEPARATOR');
+                }
+            } else {
+                $final_parts[] = $string;
+            }
+        });
+
+        return $final_parts;
     }
 }

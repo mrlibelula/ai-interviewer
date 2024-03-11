@@ -1,0 +1,3 @@
+<pre class="flex flex-col text-xl bg-gray-200/75 dark:bg-gray-700/60 px-1.5 rounded-lg overflow-hidden shadow-md cursor-text"><span class=" text-left px-1 py-1 text-gray-900 dark:text-gray-400">@if (strtolower($language) === 'html'){{ 'component' }}@elseif(strtolower($language) === 'plaintext'){{ 'code' }}@else{{ strtolower($language) }}@endif</span>
+    <code class="language-{{ $language ?? 'html' }} mb-2 rounded-lg max-h-96 overflow-auto text-wrap bg-white/75 dark:bg-black/40 p-4">{!! $code ?? '...' !!}</code>
+</pre>
