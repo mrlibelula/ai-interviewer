@@ -4,7 +4,7 @@
         {{ $icon }}
     </div>
     @endisset
-    <div class="group-hover:text-black group-hover:dark:text-gray-100 smooth-300">
+    <div class="group-hover:text-black group-hover:dark:text-gray-100 smooth-300 w-full">
         {{ $slot }}
     </div>
 </a>

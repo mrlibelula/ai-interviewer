@@ -1,4 +1,4 @@
-<form method="POST" action="{{ route('logout') }}" x-data class="flex flex-col items-center h-full overflow-hidden">
+<form method="POST" action="{{ route('logout') }}" x-data class="hidden sm:flex flex-col items-center h-full overflow-hidden">
     @csrf
     <div class="flex flex-col items-center w-16 h-full overflow-hidden text-gray-700 dark:text-gray-500 bg-gray-100 dark:bg-gray-800/30">
         <a wire:navigate class="flex items-center justify-center mt-3" href="/">

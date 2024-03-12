@@ -70,6 +70,21 @@
                     </x-slot>
                 </x-admin.required>
 
+                <x-admin.required :checked="true" id="check-language">
+                    Selected language
+                    <x-slot name="description">
+                        @if ($requirements['selected_language'])
+                            @if(isset($enviro['selected_language']))
+                            <div>{{ ucfirst($enviro['selected_language']) ?? 'n/a' }}</div>
+                            @else
+                            <div>{{ 'Any' }}</div>
+                            @endif
+                        @else
+                        <a class="link" wire:navigate href="/admin/prompt">Setup the LLM prompt</a>
+                        @endif
+                    </x-slot>
+                </x-admin.required>
+
                 <x-admin.required :checked="$requirements['wildcards']" id="check-wildcards">
                     Wildcards
                     <x-slot name="description">

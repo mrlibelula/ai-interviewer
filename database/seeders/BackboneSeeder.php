@@ -35,7 +35,7 @@ class BackboneSeeder extends Seeder
             'description' => '"Hard" difficulty challenges pose significant challenges that demand advanced problem-solving skills, algorithmic thinking, and proficiency in the chosen programming language. These challenges often involve intricate logic, optimization, or creative solutions and are suitable for experienced developers or those seeking a rigorous test of their abilities', 
         ]);
 
-        $difficulties = [$difficulty_easy, $difficulty_medium, $difficulty_hard, ];
+        // $difficulties = [$difficulty_easy, $difficulty_medium, $difficulty_hard, ];
 
         // seed statuses
 
@@ -43,17 +43,18 @@ class BackboneSeeder extends Seeder
         $status_inactive = Status::firstOrCreate(['name' => 'inactive']);
         $status_archived = Status::firstOrCreate(['name' => 'archived']);
 
-        $statuses = [$status_active, $status_inactive, $status_archived, ];
+        // $statuses = [$status_active, $status_inactive, $status_archived, ];
 
         // seed visibilities
 
         $visibility_private = Visibility::firstOrCreate(['name' => 'private']);
         $visibility_public = Visibility::firstOrCreate(['name' => 'public']);
 
-        $visibilities = [$visibility_private, $visibility_public, ];
+        // $visibilities = [$visibility_private, $visibility_public, ];
 
         // seed tags
 
+        // $tag_prompt_engineering = Tag::firstOrCreate(['name' => 'Prompt Engineering']);
         $tag_front_end = Tag::firstOrCreate(['name' => 'Front-End']);
         $tag_back_end = Tag::firstOrCreate(['name' => 'Back-End']);
         $tag_full_stack = Tag::firstOrCreate(['name' => 'Full-Stack']);
@@ -63,6 +64,7 @@ class BackboneSeeder extends Seeder
         $tag_ecommerce = Tag::firstOrCreate(['name' => 'eCommerce']);
         $tag_design_patterns = Tag::firstOrCreate(['name' => 'Design Patterns']);
         $tag_setup = Tag::firstOrCreate(['name' => 'Setup']);
+        $tag_config = Tag::firstOrCreate(['name' => 'Configuration']);
         $tag_machine_learning = Tag::firstOrCreate(['name' => 'Machine Learning']);
         $tag_block_chain = Tag::firstOrCreate(['name' => 'Block Chain']);
         $tag_bootcamp = Tag::firstOrCreate(['name' => 'Bootcamp']);
@@ -78,6 +80,12 @@ class BackboneSeeder extends Seeder
         $tag_hosting = Tag::firstOrCreate(['name' => 'Hosting']);
         $tag_debug = Tag::firstOrCreate(['name' => 'Debug']);
         $tag_cpanel = Tag::firstOrCreate(['name' => 'cPanel']);
+        $tag_ssl = Tag::firstOrCreate(['name' => 'SSL']);
+        $tag_cloud = Tag::firstOrCreate(['name' => 'Cloud']);
+        $tag_aws = Tag::firstOrCreate(['name' => 'AWS']);
+        $tag_LLM = Tag::firstOrCreate(['name' => 'LLM']);
+        $tag_chatGPT = Tag::firstOrCreate(['name' => 'chatGPT']);
+        $tag_openai = Tag::firstOrCreate(['name' => 'OpenAI']);
         $tag_ssh = Tag::firstOrCreate(['name' => 'SSH']);
         $tag_git = Tag::firstOrCreate(['name' => 'Git']);
         $tag_terminal = Tag::firstOrCreate(['name' => 'Terminal']);
@@ -85,12 +93,9 @@ class BackboneSeeder extends Seeder
         $tag_marketing = Tag::firstOrCreate(['name' => 'Marketing']);
         $tag_recruiting = Tag::firstOrCreate(['name' => 'Recruiting']);
         $tag_linkedin = Tag::firstOrCreate(['name' => 'LinkedIn']);
-        $tag_ffmpeg = Tag::firstOrCreate(['name' => 'FFMpeg']);
         $tag_icons = Tag::firstOrCreate(['name' => 'Icons']);
-        $tag_auth = Tag::firstOrCreate(['name' => 'Auth']);
-        $tag_sanctum = Tag::firstOrCreate(['name' => 'Sanctum']);
+        $tag_auth = Tag::firstOrCreate(['name' => 'OAuth']);
         $tag_web_console = Tag::firstOrCreate(['name' => 'Web Console']);
-        $tag_toastr = Tag::firstOrCreate(['name' => 'Toastr']);
         $tag_software_engineering = Tag::firstOrCreate(['name' => 'Software Engineering']);
         $tag_ai = Tag::firstOrCreate(['name' => 'AI']);
         $tag_game_dev = Tag::firstOrCreate(['name' => 'Game Development']);
@@ -102,7 +107,7 @@ class BackboneSeeder extends Seeder
         $tag_package = Tag::firstOrCreate(['name' => 'Package']);
         $tag_middleware = Tag::firstOrCreate(['name' => 'Middleware']);
         $tag_localization = Tag::firstOrCreate(['name' => 'Localization']);
-        $tag_tall_stack = Tag::firstOrCreate(['name' => 'TALL Stack']);
+        $tag_tall_stack = Tag::firstOrCreate(['name' => 'Stack']);
         $tag_dependency = Tag::firstOrCreate(['name' => 'Dependency']);
         $tag_sociability = Tag::firstOrCreate(['name' => 'Sociability']);
         $tag_professionalism = Tag::firstOrCreate(['name' => 'Professionalism']);
@@ -117,7 +122,28 @@ class BackboneSeeder extends Seeder
         $tag_stats_06 = Tag::firstOrCreate(['name' => 'Hypothesis Testing']);
         $tag_stats_07 = Tag::firstOrCreate(['name' => 'Regression Analysis']);
 
-        $tags = [$tag_front_end, $tag_back_end, $tag_full_stack, $tag_dev_ops, $tag_db, $tag_storage, $tag_ecommerce, $tag_design_patterns, $tag_setup, $tag_machine_learning, $tag_block_chain, $tag_bootcamp, $tag_learning, $tag_docs, $tag_portfolio, $tag_data_structures, $tag_interview, $tag_ui, $tag_ux, $tag_dx, $tag_hosting, $tag_debug, $tag_cpanel, $tag_ssh, $tag_git, $tag_terminal, $tag_i18n, $tag_marketing, $tag_recruiting, $tag_linkedin, $tag_ffmpeg, $tag_icons, $tag_auth, $tag_sanctum, $tag_web_console, $tag_toastr, $tag_software_engineering, $tag_ai, $tag_game_dev, $tag_math, $tag_crypto, $tag_backup, $tag_deploy, $tag_slack, $tag_package, $tag_middleware, $tag_localization, $tag_tall_stack, $tag_dependency, $tag_sociability, $tag_professionalism, $tag_energy, $tag_communication, $tag_algorithms, ];
+        $tag_lang_01 = Tag::firstOrCreate(['name' => 'PHP']);
+        $tag_lang_02 = Tag::firstOrCreate(['name' => 'JavaScript']);
+        $tag_lang_03 = Tag::firstOrCreate(['name' => 'Python']);
+        $tag_lang_04 = Tag::firstOrCreate(['name' => 'C#']);
+        $tag_lang_05 = Tag::firstOrCreate(['name' => 'SQL']);
+        $tag_lang_06 = Tag::firstOrCreate(['name' => 'C++']);
+        $tag_lang_07 = Tag::firstOrCreate(['name' => 'Java']);
+        $tag_lang_08 = Tag::firstOrCreate(['name' => 'HTML']);
+        $tag_lang_09 = Tag::firstOrCreate(['name' => 'CSS']);
+
+        $tag_fw_01 = Tag::firstOrCreate(['name' => 'Laravel']);
+        $tag_fw_02 = Tag::firstOrCreate(['name' => 'Vue']);
+        $tag_fw_03 = Tag::firstOrCreate(['name' => 'Tailwind']);
+        $tag_fw_04 = Tag::firstOrCreate(['name' => 'Alpine.js']);
+        $tag_fw_05 = Tag::firstOrCreate(['name' => 'Livewire']);
+        $tag_fw_06 = Tag::firstOrCreate(['name' => 'Nuxt']);
+        $tag_fw_06 = Tag::firstOrCreate(['name' => 'React']);
+        $tag_fw_06 = Tag::firstOrCreate(['name' => 'Next']);
+        $tag_fw_06 = Tag::firstOrCreate(['name' => 'Express']);
+        $tag_fw_06 = Tag::firstOrCreate(['name' => 'Node']);
+
+        // $tags = [$tag_front_end, $tag_back_end, $tag_full_stack, $tag_dev_ops, $tag_db, $tag_storage, $tag_ecommerce, $tag_design_patterns, $tag_setup, $tag_machine_learning, $tag_block_chain, $tag_bootcamp, $tag_learning, $tag_docs, $tag_portfolio, $tag_data_structures, $tag_interview, $tag_ui, $tag_ux, $tag_dx, $tag_hosting, $tag_debug, $tag_cpanel, $tag_ssh, $tag_git, $tag_terminal, $tag_i18n, $tag_marketing, $tag_recruiting, $tag_linkedin, $tag_ffmpeg, $tag_icons, $tag_auth, $tag_sanctum, $tag_web_console, $tag_toastr, $tag_software_engineering, $tag_ai, $tag_game_dev, $tag_math, $tag_crypto, $tag_backup, $tag_deploy, $tag_slack, $tag_package, $tag_middleware, $tag_localization, $tag_tall_stack, $tag_dependency, $tag_sociability, $tag_professionalism, $tag_energy, $tag_communication, $tag_algorithms, ];
 
         // seed languages
 
@@ -130,13 +156,14 @@ class BackboneSeeder extends Seeder
         $lang_html = Language::firstOrCreate(['name' => 'HTML']);
         $lang_css = Language::firstOrCreate(['name' => 'CSS']);
 
-        $langs = [$lang_js, $lang_php, $lang_csharp, $lang_sql, $lang_dart, $lang_py, $lang_html, $lang_css, ];
+        // $langs = [$lang_js, $lang_php, $lang_csharp, $lang_sql, $lang_dart, $lang_py, $lang_html, $lang_css, ];
 
         // seed frameworks
 
         $frame_laravel = Framework::firstOrCreate(['name' => 'Laravel']);
         $frame_vue = Framework::firstOrCreate(['name' => 'Vue']);
         $frame_nuxt = Framework::firstOrCreate(['name' => 'Nuxt']);
+        $frame_next = Framework::firstOrCreate(['name' => 'Next']);
         $frame_react = Framework::firstOrCreate(['name' => 'React']);
         $frame_express = Framework::firstOrCreate(['name' => 'Express']);
         $frame_node = Framework::firstOrCreate(['name' => 'Node']);
@@ -144,23 +171,30 @@ class BackboneSeeder extends Seeder
         $frame_firebase = Framework::firstOrCreate(['name' => 'Firebase']);
         $frame_unity = Framework::firstOrCreate(['name' => 'Unity']);
         $frame_unreal = Framework::firstOrCreate(['name' => 'Unreal']);
-        $frame_docker = Framework::firstOrCreate(['name' => 'Docker']);
         $frame_django = Framework::firstOrCreate(['name' => 'Django']);
+        $frame_docker = Framework::firstOrCreate(['name' => 'Docker']);
 
-        $frameworks = [$frame_laravel, $frame_vue, $frame_nuxt, $frame_react, $frame_express, $frame_node, $frame_flutter, $frame_firebase, $frame_unity, $frame_unreal, $frame_docker, $frame_django,];
+        // $frameworks = [$frame_laravel, $frame_vue, $frame_nuxt, $frame_react, $frame_express, $frame_node, $frame_flutter, $frame_firebase, $frame_unity, $frame_unreal, $frame_docker, $frame_django,];
 
-        // seed packages
+        // seed packages/libraries
 
         $pack_livewire = Package::firstOrCreate(['name' => 'Livewire']);
         $pack_alpine = Package::firstOrCreate(['name' => 'Alpine']);
         $pack_tailwind = Package::firstOrCreate(['name' => 'Tailwind']);
-        $pack_vite = Package::firstOrCreate(['name' => 'Vite']);
+        $pack_carbon = Package::firstOrCreate(['name' => 'Carbon']);
+        $pack_filament = Package::firstOrCreate(['name' => 'Filament']);
 
-        $packages = [$pack_livewire, $pack_alpine, $pack_tailwind, $pack_vite, ];
+        // $packages = [$pack_livewire, $pack_alpine, $pack_tailwind, ];
 
         // seed topics (tree)
         
         // top parent topics 
+
+        // $topic_promtp_engineering = Topic::firstOrCreate([
+        //     'name' => 'Prompt Engineering', 
+        //     'description' => '', 
+        //     'parent_id' => null, 
+        // ]);
 
         $topic_data_structures = Topic::firstOrCreate([
             'name' => 'Data Structures', 
@@ -212,6 +246,12 @@ class BackboneSeeder extends Seeder
 
         $topic_os = Topic::firstOrCreate([
             'name' => 'Operating Systems', 
+            'description' => '', 
+            'parent_id' => null, 
+        ]);
+
+        $topic_eloquent = Topic::firstOrCreate([
+            'name' => 'Laravel Eloquent', 
             'description' => '', 
             'parent_id' => null, 
         ]);
@@ -276,6 +316,18 @@ class BackboneSeeder extends Seeder
             'parent_id' => null, 
         ]);
 
+        $topic_psycho = Topic::firstOrCreate([
+            'name' => 'Psychological aspects of tech interview', 
+            'description' => '', 
+            'parent_id' => null, 
+        ]);
+
+        $topic_portfolio = Topic::firstOrCreate([
+            'name' => 'Portfolio', 
+            'description' => '', 
+            'parent_id' => null, 
+        ]);
+
         $topic_linkedin = Topic::firstOrCreate([
             'name' => 'LinkedIn for Professional Development', 
             'description' => '', 
@@ -318,8 +370,8 @@ class BackboneSeeder extends Seeder
             'parent_id' => null, 
         ]);
 
-        $topic_misc = Topic::firstOrCreate([
-            'name' => 'Miscellaneous', 
+        $topic_crypto_currency = Topic::firstOrCreate([
+            'name' => 'Crypto Currency', 
             'description' => '', 
             'parent_id' => null, 
         ]);
@@ -818,18 +870,6 @@ class BackboneSeeder extends Seeder
             'parent_id' => $topic_oop->id, 
         ]);
 
-        $topic_backtracking = Topic::firstOrCreate([
-            'name' => 'Backtracking', 
-            'description' => '', 
-            'parent_id' => $topic_misc->id, 
-        ]);
-
-        $topic_divide_conquer = Topic::firstOrCreate([
-            'name' => 'Divide and Conquer', 
-            'description' => '', 
-            'parent_id' => $topic_misc->id, 
-        ]);
-
         $topic_creational_patterns = Topic::firstOrCreate([
             'name' => 'Creational Patterns', 
             'description' => '', 
@@ -1238,71 +1278,71 @@ class BackboneSeeder extends Seeder
             'parent_id' => $topic_basic_git_commands->id, 
         ]);
 
-        $topic_intro_to_github = Topic::firstOrCreate([
-            'name' => 'Introduction to GitHub', 
-            'description' => '', 
-            'parent_id' => $topic_github->id, 
-        ]);
+        // $topic_intro_to_github = Topic::firstOrCreate([
+        //     'name' => 'Introduction to GitHub', 
+        //     'description' => '', 
+        //     'parent_id' => $topic_github->id, 
+        // ]);
 
-        $topic_creating_managing_repositories = Topic::firstOrCreate([
-            'name' => 'Creating and Managing Repositories', 
-            'description' => '', 
-            'parent_id' => $topic_github->id, 
-        ]);
+        // $topic_creating_managing_repositories = Topic::firstOrCreate([
+        //     'name' => 'Creating and Managing Repositories', 
+        //     'description' => '', 
+        //     'parent_id' => $topic_github->id, 
+        // ]);
 
-        $topic_collaborating_with_others = Topic::firstOrCreate([
-            'name' => 'Collaborating with Others', 
-            'description' => '', 
-            'parent_id' => $topic_github->id, 
-        ]);
+        // $topic_collaborating_with_others = Topic::firstOrCreate([
+        //     'name' => 'Collaborating with Others', 
+        //     'description' => '', 
+        //     'parent_id' => $topic_github->id, 
+        // ]);
 
-        $topic_issue_tracking_and_management = Topic::firstOrCreate([
-            'name' => 'Issue Tracking and Management', 
-            'description' => '', 
-            'parent_id' => $topic_github->id, 
-        ]);
+        // $topic_issue_tracking_and_management = Topic::firstOrCreate([
+        //     'name' => 'Issue Tracking and Management', 
+        //     'description' => '', 
+        //     'parent_id' => $topic_github->id, 
+        // ]);
 
-        $topic_github_pages = Topic::firstOrCreate([
-            'name' => 'GitHub Pages', 
-            'description' => '', 
-            'parent_id' => $topic_github->id, 
-        ]);
+        // $topic_github_pages = Topic::firstOrCreate([
+        //     'name' => 'GitHub Pages', 
+        //     'description' => '', 
+        //     'parent_id' => $topic_github->id, 
+        // ]);
 
-        $topic_github_actions = Topic::firstOrCreate([
-            'name' => 'GitHub Actions', 
-            'description' => '', 
-            'parent_id' => $topic_github->id, 
-        ]);
+        // $topic_github_actions = Topic::firstOrCreate([
+        //     'name' => 'GitHub Actions', 
+        //     'description' => '', 
+        //     'parent_id' => $topic_github->id, 
+        // ]);
 
-        $topic_github_projects = Topic::firstOrCreate([
-            'name' => 'GitHub Projects', 
-            'description' => '', 
-            'parent_id' => $topic_github->id, 
-        ]);
+        // $topic_github_projects = Topic::firstOrCreate([
+        //     'name' => 'GitHub Projects', 
+        //     'description' => '', 
+        //     'parent_id' => $topic_github->id, 
+        // ]);
 
-        $topic_github_best_practices = Topic::firstOrCreate([
-            'name' => 'GitHub Best Practices', 
-            'description' => '', 
-            'parent_id' => $topic_github->id, 
-        ]);
+        // $topic_github_best_practices = Topic::firstOrCreate([
+        //     'name' => 'GitHub Best Practices', 
+        //     'description' => '', 
+        //     'parent_id' => $topic_github->id, 
+        // ]);
 
-        $topic_forking = Topic::firstOrCreate([
-            'name' => 'Forking', 
-            'description' => '', 
-            'parent_id' => $topic_collaborating_with_others->id, 
-        ]);
+        // $topic_forking = Topic::firstOrCreate([
+        //     'name' => 'Forking', 
+        //     'description' => '', 
+        //     'parent_id' => $topic_collaborating_with_others->id, 
+        // ]);
 
-        $topic_pull_requests = Topic::firstOrCreate([
-            'name' => 'Pull Requests', 
-            'description' => '', 
-            'parent_id' => $topic_collaborating_with_others->id, 
-        ]);
+        // $topic_pull_requests = Topic::firstOrCreate([
+        //     'name' => 'Pull Requests', 
+        //     'description' => '', 
+        //     'parent_id' => $topic_collaborating_with_others->id, 
+        // ]);
         
-        $topic_code_reviews = Topic::firstOrCreate([
-            'name' => 'Code Reviews', 
-            'description' => '', 
-            'parent_id' => $topic_collaborating_with_others->id, 
-        ]);
+        // $topic_code_reviews = Topic::firstOrCreate([
+        //     'name' => 'Code Reviews', 
+        //     'description' => '', 
+        //     'parent_id' => $topic_collaborating_with_others->id, 
+        // ]);
         
         $topic_interview_preparation_strategies = Topic::firstOrCreate([
             'name' => 'Interview Preparation Strategies', 

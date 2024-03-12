@@ -14,6 +14,7 @@ class Challenges extends Component
     public array $requirements = [
         'llm_prompt' => false, 
         'selected_topic' => false, 
+        'selected_language' => true, 
         'selected_difficulty' => false, 
         'wildcards' => false, 
     ];
@@ -22,13 +23,18 @@ class Challenges extends Component
     {
         $this->challenge = null;
         $prompt = Tool::enviro('prompt')['string'];
-        $llm_challenge = Tool::getLLMChallenge($prompt, $this);
+        $llm_challenge = Tool::getLLMChallenge($prompt);
         $imported_challenge_obj = Tool::importAIChallenge($llm_challenge);
         $blueprint = Tool::enviro('prompt')['blueprint'];
         $selected_difficulty = Tool::enviro('prompt')['selected_difficulty'];
         $selected_topic = Tool::enviro('prompt')['selected_topic'];
-        $prompt = Tool::wildcards($blueprint, $selected_difficulty, $selected_topic);
-        // update enviro prompt string with $prompt => contains recently imported "??dbchallenges" for next request on same "import page"
+        $selected_language = Tool::enviro('prompt')['selected_language'];
+        $prompt = Tool::wildcards($blueprint, $selected_difficulty, $selected_topic, $selected_language);
+        /*
+            update enviro.prompt.string with 
+            $prompt that contains recently imported " ??dbchallenges " 
+            for next request, trying to avoid repeated challenges
+        */
         Tool::updateEnviroPromptString($prompt);
 
         if ($imported_challenge_obj->challenge) {

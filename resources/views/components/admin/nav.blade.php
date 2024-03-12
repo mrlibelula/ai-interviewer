@@ -14,16 +14,16 @@
                 Challenges dashboard
             </x-admin.dashboard-item>
             <x-admin.dashboard-item :active="$currentRoute === 'admin-prompt'" href="/admin/prompt">
-                Setup LLM prompt
+                Build LLM Prompt
             </x-admin.dashboard-item>
             <x-admin.dashboard-item :active="$currentRoute === 'admin-challenges'" href="/admin/challenges">
-                Import LLM challenges
+                Import LLM Challenges
             </x-admin.dashboard-item>
             <x-admin.dashboard-item :active="$currentRoute === 'admin-challenge'" href="/admin/challenge">
                 Challenge options
             </x-admin.dashboard-item>
             <x-admin.dashboard-item :active="$currentRoute === 'admin-topics'">
-                Manage topics
+                Manage Topics
             </x-admin.dashboard-item>
         </div>
     </x-container>

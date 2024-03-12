@@ -7,6 +7,7 @@ use App\Models\Difficulty;
 use App\Models\Tag;
 use App\Models\Topic;
 use App\Models\Enviro;
+use App\Models\Language;
 use App\Tool;
 use Livewire\Component;
 
@@ -16,12 +17,14 @@ class Prompt extends Component
     public array $prompt_parts = [];
     public string $selected_topic = 'all topics';
     public string $selected_difficulty = 'easy';
+    public $selected_language;
     public string $build_json = '';
     public array $json_array = [];
     public array $json_keys = [];
     public array $json_values = [];
     public array $topics = [];
     public array $difficulties = [];
+    public array $languages = [];
     public string $blueprint = '';
     public string $prompt = '';
 
@@ -35,7 +38,7 @@ class Prompt extends Component
         $this->blueprint = $prompt;
 
         // replace all wildcards and generate final prompt
-        $this->prompt = Tool::wildcards($this->blueprint, $this->selected_difficulty, $this->selected_topic);
+        $this->prompt = Tool::wildcards($this->blueprint, $this->selected_difficulty, $this->selected_topic, $this->selected_language);
 
         // save data to DB
         $enviro = Enviro::first();
@@ -44,6 +47,7 @@ class Prompt extends Component
             'string' => $this->prompt,
             'selected_topic' => $this->selected_topic,
             'selected_difficulty' => $this->selected_difficulty,
+            'selected_language' => $this->selected_language,
             'blueprint' => $this->blueprint,
         ]);
         $enviro->save();
@@ -109,6 +113,7 @@ class Prompt extends Component
         $this->prompt = $db_prompt->string ?? '';
         $this->selected_topic = $db_prompt->selected_topic ?? 'all topics';
         $this->selected_difficulty = $db_prompt->selected_difficulty ?? 'easy';
+        $this->selected_language = $db_prompt->selected_language ?? 'any';
         $this->blueprint = $db_prompt->blueprint ?? '';
         $db_prompt_parts = $db_prompt->parts;
         $this->prompt_parts = $db_prompt_parts;
@@ -135,6 +140,12 @@ class Prompt extends Component
         $this->difficulties = Difficulty::all()->pluck('name')->toArray();
     }
 
+    public function getLanguages()
+    {
+        $this->languages = [];
+        $this->languages = Language::all()->pluck('name')->toArray();
+    }
+
     public function getTopLevelTopics()
     {
         $this->topics = [];
@@ -148,6 +159,7 @@ class Prompt extends Component
         $this->current_route_name = request()->route()->getName();    // tackles livewire route name problem (livewire.update)
         $this->getTopLevelTopics();
         $this->getDifficulties();
+        $this->getLanguages();
         $this->loadBlueprintDataAndStoreToDB();
     }
 

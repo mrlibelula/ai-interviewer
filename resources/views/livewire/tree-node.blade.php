@@ -8,7 +8,7 @@
             <div class="ml-[0.48rem] text-gray-400 dark:text-gray-500" >•&nbsp;&nbsp;</div>
             @endif
             <div class=" group-hover:text-orange-600 group-hover:dark:text-orange-400 smooth-300">
-                {{ $topic->name }}
+                {{ $topic->name }}&nbsp;@if($topic->challenges_count)<span class=" font-semibold text-lime-700 dark:text-lime-500">{{ '(' . $topic->challenges_count . ')' }}</span>@else @endif
             </div>
         </div>
         @if($topic->children->isNotEmpty())

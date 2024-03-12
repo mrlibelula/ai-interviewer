@@ -3,8 +3,8 @@
     
     <x-container>
         <x-breadcrumb>
-            <a href="#jump-prompt-base-text" class="link">
-                Prompt base text
+            <a href="#jump-prompt-blueprint" class="link">
+                Prompt blueprint
             </a>
             <x-dot class="breadcrumb-dot" />
             <a href="#jump-build-prompt" class="link">
@@ -24,16 +24,16 @@
 
     <x-container>
         
-        <p>Customizable prompts for the LLM, tailor prompts to specific coding concepts, languages, or difficulty levels. LLM output response will be a <x-bold>string</x-bold> with <x-bold>JSON</x-bold> data and <x-bold>solution code</x-bold>.</p>
+        <p>This feature enables users to finely <x-bold>tune prompts</x-bold> according to specific coding concepts, languages, or difficulty levels. By leveraging this functionality, developers can craft queries tailored to their exact needs, <x-bold>optimizing learning</x-bold> and <x-bold>problem-solving</x-bold> efficiency.</p>
         
-        <x-h5 id="jump-prompt-base-text">Prompt base text</x-h5>
+        <x-h5 id="jump-prompt-blueprint">Prompt Blueprint (base text)</x-h5>
         
 
         <!-- dot env blueprint -->
         <x-descr-list>
             <div class="flex flex-col gap-y-4 gap-x-4 items-start">
                 <div>
-                    Full blueprint prompt from "<x-bold>.env</x-bold>" <x-spot>"OPENAI_PROMPT_BASE_TEXT"</x-spot> key
+                    Full blueprint prompt
                 </div>
                 <textarea disabled class="form-textarea w-full h-[7rem] font-mono">{{ env('OPENAI_PROMPT_BASE_TEXT') ?? 'n/a' }}</textarea>
             </div>
@@ -50,7 +50,7 @@
 
         <!-- select topic/s and difficulty -->
         <x-descr-list>
-            <div class="flex justify-between gap-x-6">
+            <div class="flex flex-col xl:flex-row gap-y-6 xl:gap-y-0 justify-between xl:gap-x-6">
                 <!-- topics -->
                 <div class="flex flex-col gap-y-4 gap-x-4 items-start w-full">
                     <div class=" flex items-center gap-x-6">
@@ -83,6 +83,19 @@
                     <select wire:model.live='selected_difficulty' class="form-select w-full">
                         @foreach ($difficulties as $difficulty)
                         <option value="{{ strtolower($difficulty) }}">{{ ucfirst($difficulty) }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <!-- language -->
+                <div class="flex flex-col gap-y-4 gap-x-4 items-start w-full">
+                    <div>
+                        Select a Language
+                    </div>
+                    
+                    <select wire:model.live='selected_language' class="form-select w-full">
+                        <option value="any">Any language</option>
+                        @foreach ($languages as $language)
+                        <option value="{{ strtolower($language) }}">{{ ucfirst($language) }}</option>
                         @endforeach
                     </select>
                 </div>

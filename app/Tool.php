@@ -14,7 +14,6 @@ use App\Models\Enviro;
 use App\Models\Visibility;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
-use Livewire\Component as LivewireComponent;
 use OpenAI\Laravel\Facades\OpenAI;
 use stdClass;
 
@@ -155,7 +154,7 @@ class Tool
      * @param string $prompt
      * @return stdClass
      */
-    public static function getLLMChallenge(string $prompt, LivewireComponent $component): stdClass
+    public static function getLLMChallenge(string $prompt): stdClass
     {
         try {
             $messages = [
@@ -178,16 +177,16 @@ class Tool
             $info_debug_array = [
                 'in_observation' => [
                     'completion_text_parts' => $completion_text_parts,
-                    'comment' => 'Its still producing bug, null given on [0]. \\App\\Tool::182'
+                    'comment' => 'It\'s still producing bug, null given on [0]. \\App\\Tool::173, log at \\App\\Tool::191'
                 ],
             ];
 
             $completion_text_parts[0] = Tool::fixJsonString($completion_text_parts[0]);  // try to fix JSON response problems
             $challenge = json_decode($completion_text_parts[0] ?? 'n/a');
             
-            // bug
+            // expected bug (usually openai timeout connections)
             if (!$challenge) {
-                $component->dispatch('spinner-off');
+                // $component->dispatch('spinner-off');
                 info($info_debug_array);
                 dump('Something went wrong while decoding challenge completion string. "$challenge" is null. Check app log. 🙊', $completion, $completion_text_parts, $completion_text_parts[0], $completion_text_parts[1], json_validate($completion_text_parts[0] ?? 'NULL'), json_decode($completion_text_parts[0] ?? 'n/a'), $challenge);
             }
@@ -218,9 +217,9 @@ class Tool
             return $result_llm_challenge;
 
         } catch (\OpenAI\Exceptions\ErrorException $ee) {
-            dd($ee->getMessage());
+            dump($ee->getMessage());
         } catch (\OpenAI\Exceptions\TransporterException $te) {
-            dd($te->getMessage());
+            dump($te->getMessage());
         }
     }
 
@@ -330,7 +329,7 @@ class Tool
 
         }
 
-        // Challenge::with('difficulty', 'status', 'visibility', 'tags:name', 'languages:name', 'frameworks:name', 'packages:name', 'topics:name', 'creators')->first()
+        // Challenge::with('difficulty:id,name', 'status:id,name', 'visibility:id,name', 'tags:id,name', 'languages:id,name', 'frameworks:id,name', 'packages:id,name', 'topics:id,name', 'creators:id,name')->first()
         $final_challenge = Challenge::with(
             'difficulty', 
             'status', 
@@ -384,6 +383,21 @@ class Tool
             return Topic::where('parent_id', '=', null)->pluck('name')->toArray();
         } else {
             return Topic::where('name', 'like', '%' . strtolower($topic) . '%')->pluck('name')->toArray();
+        }
+    }
+
+    /**
+     * Get 'amy' language or a specific one
+     *
+     * @param string $language
+     * @return array
+     */
+    public static function getLanguages(string $language = 'any'): array
+    {
+        if (strtolower($language) === 'any') {
+            return Language::select('id', 'name')->pluck('name')->toArray();
+        } else {
+            return Language::where('name', 'like', '%' . strtolower($language) . '%')->pluck('name')->toArray();
         }
     }
 
@@ -465,16 +479,21 @@ class Tool
         return $json_string;
     }
 
-    public static function wildcards(string $blueprint, string $selected_difficulty = 'medium', string $selected_topic = 'all topics'): string
+    public static function wildcards(string $blueprint, string $selected_difficulty = 'medium', string $selected_topic = 'all topics', string $selected_language = 'any'): string
     {
         $topics = $selected_topic !== 'all topics'
-                ? Tool::getTopics($selected_topic) 
-                : Tool::getTopics();
+            ? self::getTopics($selected_topic) 
+            : self::getTopics();
+
+        $languages = $selected_language !== 'any'
+            ? self::getLanguages($selected_language)
+            : self::getLanguages();
 
         $wildcards = collect([
             'separator' => env('OPENAI_CODE_SEPARATOR'), 
             'difficulty_level' => $selected_difficulty, 
             'topics' => json_encode($topics),
+            'languages' => json_encode($languages),
             'tags' => json_encode(Tag::select('id', 'name')->pluck('name')->toArray()), 
             'dbchallenges' => $selected_topic !== 'all topics'
                 ? json_encode(self::challengesByTopic($selected_topic)->toArray())
@@ -528,6 +547,7 @@ class Tool
             'string' => $prompt,
             'selected_topic' => $enviro_prompt['selected_topic'],
             'selected_difficulty' => $enviro_prompt['selected_difficulty'],
+            'selected_language' => $enviro_prompt['selected_language'],
             'blueprint' => $enviro_prompt['blueprint'],
         ]);
 
