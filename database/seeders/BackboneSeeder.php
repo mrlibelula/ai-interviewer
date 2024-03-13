@@ -73,6 +73,7 @@ class BackboneSeeder extends Seeder
         $tag_portfolio = Tag::firstOrCreate(['name' => 'Portfolio']);
         $tag_data_structures = Tag::firstOrCreate(['name' => 'Data Structures']);
         $tag_algorithms = Tag::firstOrCreate(['name' => 'Algorithms']);
+        $tag_recursive = Tag::firstOrCreate(['name' => 'Recursive']);
         $tag_interview = Tag::firstOrCreate(['name' => 'Interview']);
         $tag_ui = Tag::firstOrCreate(['name' => 'UI']);
         $tag_ux = Tag::firstOrCreate(['name' => 'UX']);
@@ -378,137 +379,137 @@ class BackboneSeeder extends Seeder
         
         // child topics
         
-        $topic_sorting_algorithms = Topic::firstOrCreate([
-            'name' => 'Sorting Algorithms', 
-            'description' => '', 
-            'parent_id' => $topic_algorithms->id, 
-        ]);
+        // $topic_sorting_algorithms = Topic::firstOrCreate([
+        //     'name' => 'Sorting Algorithms', 
+        //     'description' => '', 
+        //     'parent_id' => $topic_algorithms->id, 
+        // ]);
         
-        $topic_searching_algorithms = Topic::firstOrCreate([
-            'name' => 'Searching Algorithms', 
-            'description' => '', 
-            'parent_id' => $topic_algorithms->id, 
-        ]);
+        // $topic_searching_algorithms = Topic::firstOrCreate([
+        //     'name' => 'Searching Algorithms', 
+        //     'description' => '', 
+        //     'parent_id' => $topic_algorithms->id, 
+        // ]);
 
-        $topic_graph_algorithms = Topic::firstOrCreate([
-            'name' => 'Graph Algorithms', 
-            'description' => '', 
-            'parent_id' => $topic_algorithms->id, 
-        ]);
+        // $topic_graph_algorithms = Topic::firstOrCreate([
+        //     'name' => 'Graph Algorithms', 
+        //     'description' => '', 
+        //     'parent_id' => $topic_algorithms->id, 
+        // ]);
 
-        $topic_bubble_sort = Topic::firstOrCreate([
-            'name' => 'Bubble Sort', 
-            'description' => '', 
-            'parent_id' => $topic_sorting_algorithms->id, 
-        ]);
+        // $topic_bubble_sort = Topic::firstOrCreate([
+        //     'name' => 'Bubble Sort', 
+        //     'description' => '', 
+        //     'parent_id' => $topic_sorting_algorithms->id, 
+        // ]);
 
-        $topic_selection_sort = Topic::firstOrCreate([
-            'name' => 'Selection Sort', 
-            'description' => '', 
-            'parent_id' => $topic_sorting_algorithms->id, 
-        ]);
+        // $topic_selection_sort = Topic::firstOrCreate([
+        //     'name' => 'Selection Sort', 
+        //     'description' => '', 
+        //     'parent_id' => $topic_sorting_algorithms->id, 
+        // ]);
 
-        $topic_insertion_sort = Topic::firstOrCreate([
-            'name' => 'Insertion Sort', 
-            'description' => '', 
-            'parent_id' => $topic_sorting_algorithms->id, 
-        ]);
+        // $topic_insertion_sort = Topic::firstOrCreate([
+        //     'name' => 'Insertion Sort', 
+        //     'description' => '', 
+        //     'parent_id' => $topic_sorting_algorithms->id, 
+        // ]);
 
-        $topic_merge_sort = Topic::firstOrCreate([
-            'name' => 'Merge Sort', 
-            'description' => '', 
-            'parent_id' => $topic_sorting_algorithms->id, 
-        ]);
+        // $topic_merge_sort = Topic::firstOrCreate([
+        //     'name' => 'Merge Sort', 
+        //     'description' => '', 
+        //     'parent_id' => $topic_sorting_algorithms->id, 
+        // ]);
 
-        $topic_quick_sort = Topic::firstOrCreate([
-            'name' => 'Quick Sort', 
-            'description' => '', 
-            'parent_id' => $topic_sorting_algorithms->id, 
-        ]);
+        // $topic_quick_sort = Topic::firstOrCreate([
+        //     'name' => 'Quick Sort', 
+        //     'description' => '', 
+        //     'parent_id' => $topic_sorting_algorithms->id, 
+        // ]);
 
-        $topic_linear_search = Topic::firstOrCreate([
-            'name' => 'Linear Search', 
-            'description' => '', 
-            'parent_id' => $topic_searching_algorithms->id, 
-        ]);
+        // $topic_linear_search = Topic::firstOrCreate([
+        //     'name' => 'Linear Search', 
+        //     'description' => '', 
+        //     'parent_id' => $topic_searching_algorithms->id, 
+        // ]);
 
-        $topic_binary_search = Topic::firstOrCreate([
-            'name' => 'Binary Search', 
-            'description' => '', 
-            'parent_id' => $topic_searching_algorithms->id, 
-        ]);
+        // $topic_binary_search = Topic::firstOrCreate([
+        //     'name' => 'Binary Search', 
+        //     'description' => '', 
+        //     'parent_id' => $topic_searching_algorithms->id, 
+        // ]);
 
-        $topic_bfs = Topic::firstOrCreate([
-            'name' => 'Breadth-First Search (BFS)', 
-            'description' => '', 
-            'parent_id' => $topic_graph_algorithms->id, 
-        ]);
+        // $topic_bfs = Topic::firstOrCreate([
+        //     'name' => 'Breadth-First Search (BFS)', 
+        //     'description' => '', 
+        //     'parent_id' => $topic_graph_algorithms->id, 
+        // ]);
 
-        $topic_dfs = Topic::firstOrCreate([
-            'name' => 'Depth-First Search (DFS)', 
-            'description' => '', 
-            'parent_id' => $topic_graph_algorithms->id, 
-        ]);
+        // $topic_dfs = Topic::firstOrCreate([
+        //     'name' => 'Depth-First Search (DFS)', 
+        //     'description' => '', 
+        //     'parent_id' => $topic_graph_algorithms->id, 
+        // ]);
 
-        $topic_dijkstras = Topic::firstOrCreate([
-            'name' => 'Dijkstra\'s Algorithm', 
-            'description' => '', 
-            'parent_id' => $topic_graph_algorithms->id, 
-        ]);
+        // $topic_dijkstras = Topic::firstOrCreate([
+        //     'name' => 'Dijkstra\'s Algorithm', 
+        //     'description' => '', 
+        //     'parent_id' => $topic_graph_algorithms->id, 
+        // ]);
 
-        $topic_bellman = Topic::firstOrCreate([
-            'name' => 'Bellman-Ford Algorithm', 
-            'description' => '', 
-            'parent_id' => $topic_graph_algorithms->id, 
-        ]);
+        // $topic_bellman = Topic::firstOrCreate([
+        //     'name' => 'Bellman-Ford Algorithm', 
+        //     'description' => '', 
+        //     'parent_id' => $topic_graph_algorithms->id, 
+        // ]);
 
-        $topic_kruskals = Topic::firstOrCreate([
-            'name' => 'Kruskal\'s Algorithm', 
-            'description' => '', 
-            'parent_id' => $topic_graph_algorithms->id, 
-        ]);
+        // $topic_kruskals = Topic::firstOrCreate([
+        //     'name' => 'Kruskal\'s Algorithm', 
+        //     'description' => '', 
+        //     'parent_id' => $topic_graph_algorithms->id, 
+        // ]);
 
-        $topic_prims = Topic::firstOrCreate([
-            'name' => 'Prim\'s Algorithm', 
-            'description' => '', 
-            'parent_id' => $topic_graph_algorithms->id, 
-        ]);
+        // $topic_prims = Topic::firstOrCreate([
+        //     'name' => 'Prim\'s Algorithm', 
+        //     'description' => '', 
+        //     'parent_id' => $topic_graph_algorithms->id, 
+        // ]);
 
-        $topic_greedy = Topic::firstOrCreate([
-            'name' => 'Greedy Algorithms', 
-            'description' => '', 
-            'parent_id' => $topic_algorithms->id, 
-        ]);
+        // $topic_greedy = Topic::firstOrCreate([
+        //     'name' => 'Greedy Algorithms', 
+        //     'description' => '', 
+        //     'parent_id' => $topic_algorithms->id, 
+        // ]);
 
-        $topic_time_complexity = Topic::firstOrCreate([
-            'name' => 'Time Complexity', 
-            'description' => '', 
-            'parent_id' => $topic_algorithms->id, 
-        ]);
+        // $topic_time_complexity = Topic::firstOrCreate([
+        //     'name' => 'Time Complexity', 
+        //     'description' => '', 
+        //     'parent_id' => $topic_algorithms->id, 
+        // ]);
 
-        $topic_space_complexity = Topic::firstOrCreate([
-            'name' => 'Space Complexity', 
-            'description' => '', 
-            'parent_id' => $topic_algorithms->id, 
-        ]);
+        // $topic_space_complexity = Topic::firstOrCreate([
+        //     'name' => 'Space Complexity', 
+        //     'description' => '', 
+        //     'parent_id' => $topic_algorithms->id, 
+        // ]);
 
-        $topic_big_O_notation = Topic::firstOrCreate([
-            'name' => 'Big O Notation', 
-            'description' => '', 
-            'parent_id' => $topic_algorithms->id, 
-        ]);
+        // $topic_big_O_notation = Topic::firstOrCreate([
+        //     'name' => 'Big O Notation', 
+        //     'description' => '', 
+        //     'parent_id' => $topic_algorithms->id, 
+        // ]);
 
-        $topic_Analyzing_the_time_complexity_of_algorithms_in_different_scenarios = Topic::firstOrCreate([
-            'name' => 'Analyzing the time complexity of algorithms in different scenarios', 
-            'description' => '', 
-            'parent_id' => $topic_algorithms->id, 
-        ]);
+        // $topic_Analyzing_the_time_complexity_of_algorithms_in_different_scenarios = Topic::firstOrCreate([
+        //     'name' => 'Analyzing the time complexity of algorithms in different scenarios', 
+        //     'description' => '', 
+        //     'parent_id' => $topic_algorithms->id, 
+        // ]);
 
-        $topic_common_time_complexities = Topic::firstOrCreate([
-            'name' => 'Common Time Complexities', 
-            'description' => '', 
-            'parent_id' => $topic_algorithms->id, 
-        ]);
+        // $topic_common_time_complexities = Topic::firstOrCreate([
+        //     'name' => 'Common Time Complexities', 
+        //     'description' => '', 
+        //     'parent_id' => $topic_algorithms->id, 
+        // ]);
 
         $topic_arrays = Topic::firstOrCreate([
             'name' => 'Arrays', 
@@ -1524,11 +1525,11 @@ class BackboneSeeder extends Seeder
             'parent_id' => $topic_psychological_aspects->id, 
         ]);
 
-        $topic_understanding_bias_and_fairness_in_algorithms = Topic::firstOrCreate([
-            'name' => 'Understanding Bias and Fairness in Algorithms', 
-            'description' => '', 
-            'parent_id' => $topic_ethical_considerations_in_software_development->id, 
-        ]);
+        // $topic_understanding_bias_and_fairness_in_algorithms = Topic::firstOrCreate([
+        //     'name' => 'Understanding Bias and Fairness in Algorithms', 
+        //     'description' => '', 
+        //     'parent_id' => $topic_ethical_considerations_in_software_development->id, 
+        // ]);
 
         $topic_privacy_and_data_protection_in_software_applications = Topic::firstOrCreate([
             'name' => 'Privacy and Data Protection in Software Applications', 

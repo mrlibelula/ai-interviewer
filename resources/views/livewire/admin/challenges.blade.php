@@ -20,7 +20,7 @@
             </a>
             <x-dot class="breadcrumb-dot" />
             <a href="#jump-manually" class="link">
-                Manually get LLM challenge/s
+                Manually get LLM challenge/s completion
             </a>
             <x-dot class="breadcrumb-dot" />
             <a href="#jump-imported" class="link">
@@ -125,7 +125,7 @@
             </div>
         </x-descr-list>
 
-        <x-h5 id="jump-manually">Manually Get LLM Challenge/s</x-h5>
+        <x-h5 id="jump-manually">Manually Get LLM Challenge/s completion</x-h5>
 
         <x-descr-list>
             <div class="flex items-center gap-x-4">

@@ -9,7 +9,7 @@
     </x-slot>
 
     <x-container class="mb-12 gap-y-12">
-        <div class="flex flex-col lg:flex-row items-center justify-between_ gap-2">
+        <div class="flex flex-col lg:flex-row items-center justify-between gap-2">
             <x-admin.dashboard-item :active="$currentRoute === 'admin-dashboard'" href="/admin">
                 Challenges dashboard
             </x-admin.dashboard-item>
@@ -20,7 +20,7 @@
                 Import LLM Challenges
             </x-admin.dashboard-item>
             <x-admin.dashboard-item :active="$currentRoute === 'admin-challenge'" href="/admin/challenge">
-                Challenge options
+                Challenge settings
             </x-admin.dashboard-item>
             <x-admin.dashboard-item :active="$currentRoute === 'admin-topics'">
                 Manage Topics

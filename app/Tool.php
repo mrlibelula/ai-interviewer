@@ -387,7 +387,7 @@ class Tool
     }
 
     /**
-     * Get 'amy' language or a specific one
+     * Get 'any' language or a specific one
      *
      * @param string $language
      * @return array
@@ -590,5 +590,28 @@ class Tool
         });
 
         return $final_parts;
+    }
+
+    /**
+     * Returns a Challenge Model
+     *
+     * @param integer $challenge_id
+     * @return Challenge
+     */
+    public static function fetchChallenge(int $challenge_id): Challenge
+    {
+        return Challenge::with(
+            'difficulty', 
+            'status', 
+            'visibility', 
+            'tags', 
+            'languages', 
+            'frameworks', 
+            'packages', 
+            'topics',
+            'creators'
+        )
+            ->whereId($challenge_id)
+            ->first();
     }
 }
