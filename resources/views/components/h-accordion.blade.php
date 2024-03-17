@@ -1,6 +1,6 @@
 @props(['title' => 'n/a'])
 <div {{ $attributes->merge(['class' => 'flex flex-col gap-y-4']) }}>
-    <x-h6 @click="isOpen = !isOpen" class="flex items-center gap-x-2 cursor-pointer">
+    <button @click="isOpen = !isOpen" class="flex items-center gap-x-2 cursor-pointer font-semibold dark:text-gray-300">
         <div>
             {{ $title }}
         </div>
@@ -8,8 +8,8 @@
             <i x-cloak x-show="!isOpen" class="caret right icon "></i>
             <i x-cloak x-show="isOpen" class="caret down icon "></i>
         </div>
-    </x-h6>
-    <div x-cloak x-show="isOpen"
+    </button>
+    <div x-cloak x-show="isOpen" class=" text-left"
         x-transition:enter="transition ease-out duration-200"
         x-transition:enter-start="transform opacity-0 scale-95"
         x-transition:enter-end="transform opacity-100 scale-100"

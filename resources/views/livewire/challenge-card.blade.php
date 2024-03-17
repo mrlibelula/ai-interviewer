@@ -1,4 +1,4 @@
-<div class="flex flex-col gap-y-4">
+<div class="flex flex-col gap-y-4 overflow-hidden">
 
     <template x-if="darkMode">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" integrity="sha512-rO+olRTkcf304DQBxSWxln8JXCzTHlKnIdnMUwYvQa9/Jd4cQaNkItIUj6Z4nvW1dqK0SKXLbn9h4KwZTNtAyw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -45,7 +45,7 @@
     </div>
 
     @if (count($challenge->tags))
-        <div class="-mt-1 flex items-center gap-x-3 text-base font-semibold text-sky-500 dark:text-sky-400">
+        <div class="-mt-1 gap-x-3 text-base text-wrap font-semibold text-sky-500 dark:text-sky-400">
         @foreach ($challenge->tags as $tag)
             <span>#{{ ucfirst(Str::camel($tag->name)) }}</span>
         @endforeach

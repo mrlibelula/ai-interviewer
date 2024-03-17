@@ -126,7 +126,7 @@ class BackboneSeeder extends Seeder
         $tag_lang_01 = Tag::firstOrCreate(['name' => 'PHP']);
         $tag_lang_02 = Tag::firstOrCreate(['name' => 'JavaScript']);
         $tag_lang_03 = Tag::firstOrCreate(['name' => 'Python']);
-        $tag_lang_04 = Tag::firstOrCreate(['name' => 'C#']);
+        $tag_lang_04 = Tag::firstOrCreate(['name' => 'CSharp']);
         $tag_lang_05 = Tag::firstOrCreate(['name' => 'SQL']);
         $tag_lang_06 = Tag::firstOrCreate(['name' => 'C++']);
         $tag_lang_07 = Tag::firstOrCreate(['name' => 'Java']);

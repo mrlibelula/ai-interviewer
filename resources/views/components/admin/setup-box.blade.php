@@ -1,11 +1,11 @@
-@props(['title' => '---', 'fixed' => false])
-<div class="flex flex-col gap-y-0.5 bg-gray-300/50 dark:bg-gray-700/50 py-1 px-2.5 shadow rounded-md">
+@props(['title' => '', 'fixed' => false])
+<div class="flex flex-col gap-y-0.5 bg-gray-300/50 dark:bg-gray-700/50 py-1 px-3.5 shadow rounded-md">
     <x-bold class="text-base py-1">{{ $title }}</x-bold>
 
     <div class="border-b border-dotted border-gray-700 dark:border-gray-400"></div>
 
     <!-- multiple choice component -->
-    <div class="{{ $fixed ? 'h-[7.8rem]' : '' }} overflow-hidden overflow-y-auto py-2">
+    <div class="{{ $fixed ? 'h-[8.5rem]' : '' }} overflow-hidden overflow-y-auto py-2 px-1">
         
         {{ $slot }}
         
