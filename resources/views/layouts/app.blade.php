@@ -38,6 +38,7 @@
         class="font-sans antialiased cursor-default dark:text-gray-400 text-xl bg-white dark:bg-gray-900 h-screen"
         {{-- :class="{ 'pattern-color-dark': darkMode, 'pattern-squares-light': !darkMode }" --}}
         style="background-attachment: fixed;"
+        :style="'scrollbar-width: auto; ' + (darkMode ? 'scrollbar-color: #838a97 #161e2e;' : 'scrollbar-color: #374151 #ffffff;')"
     >
         <x-banner />
         <div class="flex">
