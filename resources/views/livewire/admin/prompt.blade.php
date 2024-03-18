@@ -24,7 +24,7 @@
 
     <x-container>
         
-        <p>This feature enables users to finely <x-bold>tune prompts</x-bold> according to specific coding concepts, languages, or difficulty levels. By leveraging this functionality, developers can craft queries tailored to their exact needs, <x-bold>optimizing learning</x-bold> and <x-bold>problem-solving</x-bold> efficiency.</p>
+        <p>This feature enables admin users to finely <x-bold>tune prompts</x-bold> according to specific coding concepts, languages, or difficulty levels. By leveraging this functionality, admin users can craft queries tailored to their exact needs, <x-bold>optimizing learning</x-bold> and <x-bold>problem-solving</x-bold> efficiency.</p>
         
         <x-h5 id="jump-prompt-blueprint">Prompt Blueprint (base text)</x-h5>
         
@@ -50,57 +50,65 @@
 
         <!-- select topic/s and difficulty -->
         <x-descr-list>
-            <div class="flex flex-col xl:flex-row gap-y-6 xl:gap-y-0 justify-between xl:gap-x-6">
-                <!-- topics -->
-                <div class="flex flex-col gap-y-4 gap-x-4 items-start w-full">
-                    <div class=" flex items-center gap-x-6">
-                        <div class="flex items-center gap-x-2">
-                            <input checked type="radio" class="form-radio" id="radio-select-topic" name="radio-topic">
-                            <label for="radio-select-topic">
-                                Select a topic
-                            </label>
+            <div class="flex flex-col gap-y-6">
+                <div class="flex flex-col xl:flex-row gap-y-6 xl:gap-y-0 justify-between xl:gap-x-6">
+                    <!-- topics -->
+                    <div class="flex flex-col gap-y-4 gap-x-4 items-start w-full">
+                        <div class=" flex items-center gap-x-6">
+                            <div class="flex items-center gap-x-2">
+                                <input checked type="radio" class="form-radio" id="radio-select-topic" name="radio-topic">
+                                <label for="radio-select-topic">
+                                    Select a Topic
+                                </label>
+                            </div>
+                            <div class="flex items-center gap-x-2">
+                                <input type="radio" class="form-radio" id="radio-manual-topic" name="radio-topic">
+                                <label for="radio-manual-topic">
+                                    Input new Topic
+                                </label>
+                            </div>
                         </div>
-                        <div class="flex items-center gap-x-2">
-                            <input type="radio" class="form-radio" id="radio-manual-topic" name="radio-topic">
-                            <label for="radio-manual-topic">
-                                Input new topic
-                            </label>
+                        
+                        <select wire:model.live='selected_topic' class="form-select w-full">
+                            @foreach ($topics as $topic)
+                            <option value="{{ strtolower($topic) }}">{{ $topic }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <!-- difficulty -->
+                    <div class="flex flex-col gap-y-4 gap-x-4 items-start w-full">
+                        <div>
+                            Select a Difficulty
                         </div>
+                        
+                        <select wire:model.live='selected_difficulty' class="form-select w-full">
+                            @foreach ($difficulties as $difficulty)
+                            <option value="{{ strtolower($difficulty) }}">{{ ucfirst($difficulty) }}</option>
+                            @endforeach
+                        </select>
                     </div>
-                    
-                    <select wire:model.live='selected_topic' class="form-select w-full">
-                        @foreach ($topics as $topic)
-                        <option value="{{ strtolower($topic) }}">{{ $topic }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <!-- difficulty -->
-                <div class="flex flex-col gap-y-4 gap-x-4 items-start w-full">
-                    <div>
-                        Select a Difficulty
+                    <!-- language -->
+                    <div class="flex flex-col gap-y-4 gap-x-4 items-start w-full">
+                        <div>
+                            Select a Language
+                        </div>
+                        
+                        <select wire:model.live='selected_language' class="form-select w-full">
+                            <option value="any">Any language</option>
+                            @foreach ($languages as $language)
+                            <option value="{{ strtolower($language) }}">{{ ucfirst($language) }}</option>
+                            @endforeach
+                        </select>
                     </div>
-                    
-                    <select wire:model.live='selected_difficulty' class="form-select w-full">
-                        @foreach ($difficulties as $difficulty)
-                        <option value="{{ strtolower($difficulty) }}">{{ ucfirst($difficulty) }}</option>
-                        @endforeach
-                    </select>
                 </div>
-                <!-- language -->
-                <div class="flex flex-col gap-y-4 gap-x-4 items-start w-full">
-                    <div>
-                        Select a Language
-                    </div>
-                    
-                    <select wire:model.live='selected_language' class="form-select w-full">
-                        <option value="any">Any language</option>
-                        @foreach ($languages as $language)
-                        <option value="{{ strtolower($language) }}">{{ ucfirst($language) }}</option>
-                        @endforeach
-                    </select>
+                
+                {{-- <div>
+                    Level of Creativity
                 </div>
+                <select _wire:model.live='selected_creativity' class="form-select w-full">
+                    <option value="any">Any</option>
+                </select> --}}
             </div>
-            
             
         </x-descr-list>
 

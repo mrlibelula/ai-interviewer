@@ -112,7 +112,6 @@ class Challenges extends Component
 
     public function render()
     {
-        return view('livewire.admin.challenges')
-            ->layout('layouts.app');
+        return view('livewire.admin.challenges');
     }
 }

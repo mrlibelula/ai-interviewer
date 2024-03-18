@@ -52,7 +52,6 @@ class Dashboard extends Component
     {
         $this->current_route_name = request()->route()->getName();
 
-        return view('livewire.admin.dashboard')
-            ->layout('layouts.app');
+        return view('livewire.admin.dashboard');
     }
 }

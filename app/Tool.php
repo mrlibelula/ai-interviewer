@@ -359,16 +359,21 @@ class Tool
     }
 
     /**
-     * Returns a collection of Challenges from DB that belongs to some Topic
+     * Returns an array of Challenge 'titles' from DB that belongs to some Topic
      *
      * @param string $topic
-     * @return Collection
+     * @return array
      */
-    public static function challengesByTopic(string $topic): Collection
+    public static function challengeTitlesByTopic(string $topic = 'all topics'): array
     {
-        return Challenge::select('id', 'title')->whereHas('topics', function ($query) use($topic) {
-            $query->where('name', 'like', '%' . $topic . '%');
-        })->pluck('title');
+        $builder = $topic !== 'all topics'
+            ? Challenge::select('id', 'title')
+                ->whereHas('topics', function ($query) use($topic) {
+                    $query->where('name', 'like', '%' . $topic . '%');
+                })
+            : Challenge::select('id', 'title');
+
+        return $builder->pluck('title')->toArray();
     }
 
     /**
@@ -479,6 +484,15 @@ class Tool
         return $json_string;
     }
 
+    /**
+     * Repalces wildcards with provided data
+     *
+     * @param string $blueprint
+     * @param string $selected_difficulty
+     * @param string $selected_topic
+     * @param string $selected_language
+     * @return string
+     */
     public static function wildcards(string $blueprint, string $selected_difficulty = 'medium', string $selected_topic = 'all topics', string $selected_language = 'any'): string
     {
         $topics = $selected_topic !== 'all topics'
@@ -495,9 +509,7 @@ class Tool
             'topics' => json_encode($topics),
             'languages' => json_encode($languages),
             'tags' => json_encode(Tag::select('id', 'name')->pluck('name')->toArray()), 
-            'dbchallenges' => $selected_topic !== 'all topics'
-                ? json_encode(self::challengesByTopic($selected_topic)->toArray())
-                : json_encode(Challenge::select('id', 'title')->pluck('title')->toArray()), 
+            'dbchallenges' => json_encode(self::challengeTitlesByTopic($selected_topic)),
         ]);
 
         $wildcards->each(function ($wildcard, $key) use (&$blueprint) {

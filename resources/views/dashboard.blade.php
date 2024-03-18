@@ -2,12 +2,9 @@
     <x-slot name="header">
         <x-heading-content title="Dashboard" subtitle="Welcome to your A.I. interview training platform">
             <x-slot name="right">
-                <div 
-                    {{-- @click="$dispatch('askGPT')"  --}}
-                    class="flex items-center gap-x-6"
-                >
+                <a wire:navigate href="{{ route('interview') }}" class="flex items-center gap-x-6">
                     <x-button type="button">Start A.I. Interview</x-button>
-                </div>
+                </a>
             </x-slot>
         </x-heading-content>
     </x-slot>

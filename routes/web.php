@@ -4,6 +4,7 @@ use App\Livewire\Admin\Challenge;
 use App\Livewire\Admin\Challenges;
 use App\Livewire\Admin\Dashboard;
 use App\Livewire\Admin\Prompt;
+use App\Livewire\Interview;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -30,6 +31,7 @@ Route::middleware([
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard');
+    Route::get('/interview', Interview::class)->name('interview');
 });
 
 Route::middleware([

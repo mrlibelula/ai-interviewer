@@ -124,7 +124,7 @@
     @if (count($challenge->creators))
     <x-h-accordion x-data="{ isOpen: true }">
         <x-slot name="title">
-            Creator/s
+            Creator{{ count($challenge->creators) === 1 ? '' : 's' }}
         </x-slot>
         <div class="flex items-center gap-x-3">
         @foreach ($challenge->creators as $creator)

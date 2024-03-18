@@ -1,4 +1,4 @@
-<li class="ml-6">
+<li class="@if ($topic->parent_id) ml-6 @endif">
     <div x-data="{ open: false }">
         <div @click="open = !open" class="group flex cursor-pointer py-2">
             @if ($topic->children->count())

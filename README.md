@@ -50,12 +50,9 @@ In turn, the burden is also taken off of candidates, they need only create a job
 
 ## Next task
 
-- Add "language" as a variable for prompting new challenges, along with topics and difficulty.
 - How can we determine if a text is code (any language) or just a string.
-- When placing the wildcard for topic/s, include also the selected topic subtree.
-- Check for same challenges before inserting into db.
+- [ok?] When placing the wildcard for topic/s, include also the selected topic subtree.
 - Incase of response error, search for another challange.
-- The process shall be: get completion, analyze it/them, then import it/them to DB via importer section. Should also be able to select status and visibility before importing.
 - Wildcards cutomization in prompt buildChallengePrompt().
 - JSON cutomization in prompt loadBlueprintDataAndStoreToDB(), buildJson(), and also affected buildJsonArrays() that depends on $this->build_json.
 - Code component word-wrap toggle feature.
