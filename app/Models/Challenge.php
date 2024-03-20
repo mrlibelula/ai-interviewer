@@ -2,9 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Challenge extends Model
 {
@@ -121,5 +122,30 @@ class Challenge extends Model
     public function removeCreator(User $user): bool
     {
         return $this->creators()->detach($user);
+    }
+
+    /*
+        Static methods
+    */
+
+    public static function byDifficulty(string $selected_difficulty, bool $ordered = true): Collection
+    {
+        $difficulty_id = Difficulty::select('id', 'name')->where('name', '=', strtolower($selected_difficulty))->first()->id;
+        $builder = static::select('id', 'title')
+            ->where('difficulty_id', '=', $difficulty_id);
+        return $ordered ? $builder->orderBy('title', 'asc')->get() : $builder->get();
+    }
+
+    public static function byDifficultyAndTopic(string $selected_difficulty, int $topic_id, bool $ordered = true): Collection
+    {
+        $difficulty_id = Difficulty::select('id', 'name')->where('name', '=', strtolower($selected_difficulty))->first()->id;
+        $builder = static::select('id', 'title')
+            ->whereHas('difficulty', function ($q) use ($difficulty_id) {
+                $q->whereId($difficulty_id);
+            })
+            ->whereHas('topics', function ($q) use ($topic_id) {
+                $q->whereIn('topic_id', [$topic_id]);
+            });
+        return $ordered ? $builder->orderBy('title', 'asc')->get() : $builder->get();
     }
 }

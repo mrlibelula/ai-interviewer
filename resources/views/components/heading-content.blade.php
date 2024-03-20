@@ -1,5 +1,5 @@
 @props(['title' => 'libe.dev', 'subtitle'])
-<div class="flex flex-col md:flex-row items-start md:items-end gap-y-4 md:gap-x-8">
+<div class="flex flex-col md:flex-row items-start md:items-end gap-y-4 md:gap-x-8 py-12">
     <div class="flex flex-col text-center xl:text-left w-full">
         <h2 class="text-3xl sm:text-4xl font-semibold text-gray-800 dark:text-gray-300 leading-tight">
             {{ __($title) }}

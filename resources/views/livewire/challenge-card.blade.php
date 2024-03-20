@@ -109,7 +109,7 @@
     @endif
 
 
-    <x-h-accordion x-data="{ isOpen: false }">
+    <x-h-accordion x-data="{ isOpen: true }">
         <x-slot name="title">
             Solution/Answer
         </x-slot>

@@ -67,6 +67,7 @@
                     
                     
                 </div>
+                @if (!request()->routeIs('landing'))
                 <footer class="p-page-x flex flex-col gap-y-2 justify-center items-center pt-14 lg:pt-20 pb-8">
                     <a href="https://libe.dev" target="_other_LIBEDEV" class="flex items-center">
                         <x-libe-dev-logo class=" scale-[.55]" />
@@ -75,6 +76,7 @@
                         </div>
                     </a>
                 </footer>
+                @endif
             </div>
 
         </div>

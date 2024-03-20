@@ -5,6 +5,7 @@ use App\Livewire\Admin\Challenges;
 use App\Livewire\Admin\Dashboard;
 use App\Livewire\Admin\Prompt;
 use App\Livewire\Interview;
+use App\Livewire\Landing;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -20,7 +21,6 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return redirect()->route('login');
-    // return view('welcome');
 });
 
 Route::middleware([
@@ -28,6 +28,7 @@ Route::middleware([
     config('jetstream.auth_session'),
     'verified',
 ])->group(function () {
+    Route::get('/landing', Landing::class)->name('landing');
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard');
