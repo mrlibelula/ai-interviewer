@@ -1,4 +1,4 @@
-<div class="overflow-hidden rounded-md shadow">
+<div class="overflow-hidden rounded-lg shadow">
     <table {{ $attributes->merge(['class' => 'table-fixed w-full bg-gray-200/50 dark:bg-gray-700/70']) }}>
         @isset($header)
         <thead>

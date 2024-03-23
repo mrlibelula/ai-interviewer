@@ -11,12 +11,23 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // $xp = [
+        //     [
+        //         'id' => uniqid(),
+        //         'created_at' => date('Y-m-d H:i:s'),
+        //         'challenge_id' => 1,
+        //         'base_xp' => 200,
+        //         'bonus_xp' => 0,
+        //         'observations' => '',
+        //     ],
+        // ];
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            // $table->mediumText('xp')->default(json_encode(new stdClass));
             $table->rememberToken();
             $table->foreignId('current_team_id')->nullable();
             $table->string('profile_photo_path', 2048)->nullable();

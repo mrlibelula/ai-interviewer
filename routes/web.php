@@ -6,6 +6,7 @@ use App\Livewire\Admin\Dashboard;
 use App\Livewire\Admin\Prompt;
 use App\Livewire\Interview;
 use App\Livewire\Landing;
+use App\Livewire\Start;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -33,6 +34,7 @@ Route::middleware([
         return view('dashboard');
     })->name('dashboard');
     Route::get('/interview', Interview::class)->name('interview');
+    Route::get('/interview/start/{enc_selected_difficulty}/{enc_selected_topic_id}/{enc_challenge_id?}/{challenge_slug?}', Start::class)->name('interview-start');
 });
 
 Route::middleware([

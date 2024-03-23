@@ -38,6 +38,25 @@ class Challenge extends Component
     public $original_challenge; // a copy of the challenge for 'reset' purposes
     public bool $challenge_changed = false;
 
+    protected $listeners = ['destroyChallenge', 'deleteChallenge'];
+
+    // it's forceDeleting, but produces a bug (404) when selecting again another challenge from the challenges list
+    // public function destroyChallenge()
+    // {
+    //     $this->challenge->forceDelete();
+    //     $this->challenge = null;
+    //     $this->getChallenges();
+    //     $this->challenge_id = -1;
+    // }
+
+    public function deleteChallenge()
+    {
+        $this->challenge->delete();
+        $this->challenge = null;
+        $this->getChallenges();
+        $this->challenge_id = -1;
+    }
+
     public function updatedDifficultyId()
     {
         $this->challenge_changed = true;

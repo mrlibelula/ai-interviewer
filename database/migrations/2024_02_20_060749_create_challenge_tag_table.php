@@ -21,11 +21,13 @@ return new class extends Migration
 
             $table->foreign('challenge_id')
                 ->references('id')
-                ->on('challenges');
+                ->on('challenges')
+                ->onDelete('cascade');
 
             $table->foreign('tag_id')
                 ->references('id')
-                ->on('tags');
+                ->on('tags')
+                ->onDelete('cascade');
         });
     }
 

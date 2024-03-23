@@ -177,7 +177,7 @@ class Tool
             $info_debug_array = [
                 'in_observation' => [
                     'completion_text_parts' => $completion_text_parts,
-                    'comment' => 'It\'s still producing bug, null given on [0]. \\App\\Tool::173, log at \\App\\Tool::191'
+                    'comment' => 'It\'s still producing bug, null given on [0]. \\App\\Tool::177, log at \\App\\Tool::191'
                 ],
             ];
 
@@ -608,22 +608,25 @@ class Tool
      * Returns a Challenge Model
      *
      * @param integer $challenge_id
-     * @return Challenge
+     * @param array $select
+     * @param array $with
+     * @return Challenge|null
      */
-    public static function fetchChallenge(int $challenge_id): Challenge
+    public static function fetchChallenge(int $challenge_id, array $select = ['*'], array $with = [
+        'difficulty', 
+        'status', 
+        'visibility', 
+        'tags', 
+        'languages', 
+        'frameworks', 
+        'packages', 
+        'topics',
+        'creators'
+    ]): Challenge|null
     {
-        return Challenge::with(
-            'difficulty', 
-            'status', 
-            'visibility', 
-            'tags', 
-            'languages', 
-            'frameworks', 
-            'packages', 
-            'topics',
-            'creators'
-        )
+        return Challenge::select(...$select)
             ->whereId($challenge_id)
+            ->with(count($with) ? [...$with] : [])
             ->first();
     }
 }

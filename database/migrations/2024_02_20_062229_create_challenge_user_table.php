@@ -11,22 +11,27 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // challenge creator/s
+        // challenge creator/s or challenge resolver/s
         Schema::create('challenge_user', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('challenge_id');
             $table->unsignedBigInteger('user_id');
+            $table->integer('base_xp')->default(0);
+            $table->integer('bonus_xp')->default(0);
+            $table->string('observations')->nullable();
             $table->timestamps();
 
             $table->unique(['challenge_id', 'user_id']);
 
             $table->foreign('challenge_id')
                 ->references('id')
-                ->on('challenges');
+                ->on('challenges')
+                ->onDelete('cascade');
 
             $table->foreign('user_id')
                 ->references('id')
-                ->on('users');
+                ->on('users')
+                ->onDelete('cascade');
         });
     }
 

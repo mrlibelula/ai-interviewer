@@ -64,9 +64,9 @@ class Challenge extends Model
         ACTIONS API
     */
 
-    public function addTag(Tag $tag): Tag
+    public function addTag(Tag $tag)
     {
-        return $this->tags()->save($tag);
+        return $this->tags()->attach($tag);
     }
 
     public function removeTag(Tag $tag): bool
@@ -74,9 +74,9 @@ class Challenge extends Model
         return $this->tags()->detach($tag);
     }
 
-    public function addLanguage(Language $lang): Language
+    public function addLanguage(Language $lang)
     {
-        return $this->languages()->save($lang);
+        return $this->languages()->attach($lang);
     }
 
     public function removeLanguage(Language $lang): bool
@@ -84,9 +84,9 @@ class Challenge extends Model
         return $this->languages()->detach($lang);
     }
 
-    public function addFramework(Framework $frame): Framework
+    public function addFramework(Framework $frame)
     {
-        return $this->frameworks()->save($frame);
+        return $this->frameworks()->attach($frame);
     }
 
     public function removeFramework(Framework $frame): bool
@@ -94,9 +94,9 @@ class Challenge extends Model
         return $this->frameworks()->detach($frame);
     }
 
-    public function addPackage(Package $package): Package
+    public function addPackage(Package $package)
     {
-        return $this->packages()->save($package);
+        return $this->packages()->attach($package);
     }
 
     public function removePackage(Package $package): bool
@@ -104,9 +104,9 @@ class Challenge extends Model
         return $this->packages()->detach($package);
     }
 
-    public function addTopic(Topic $topic): Topic
+    public function addTopic(Topic $topic)
     {
-        return $this->topics()->save($topic);
+        return $this->topics()->attach($topic);
     }
 
     public function removeTopic(Topic $topic): bool
@@ -114,9 +114,9 @@ class Challenge extends Model
         return $this->topics()->detach($topic);
     }
 
-    public function addCreator(User $user): User
+    public function addCreator(User $user)
     {
-        return $this->creators()->save($user);
+        return $this->creators()->attach($user);
     }
 
     public function removeCreator(User $user): bool
@@ -136,16 +136,16 @@ class Challenge extends Model
         return $ordered ? $builder->orderBy('title', 'asc')->get() : $builder->get();
     }
 
-    public static function byDifficultyAndTopic(string $selected_difficulty, int $topic_id, bool $ordered = true): Collection
+    public static function byDifficultyAndTopic(string $selected_difficulty, int $topic_id, array $return_cols = ['id', 'title'], bool $ordered = true, string $order_by = 'title', string $order = 'asc'): Collection
     {
         $difficulty_id = Difficulty::select('id', 'name')->where('name', '=', strtolower($selected_difficulty))->first()->id;
-        $builder = static::select('id', 'title')
+        $builder = static::select(...$return_cols)
             ->whereHas('difficulty', function ($q) use ($difficulty_id) {
                 $q->whereId($difficulty_id);
             })
             ->whereHas('topics', function ($q) use ($topic_id) {
                 $q->whereIn('topic_id', [$topic_id]);
             });
-        return $ordered ? $builder->orderBy('title', 'asc')->get() : $builder->get();
+        return $ordered ? $builder->orderBy($order_by, $order)->get() : $builder->get();
     }
 }

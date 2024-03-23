@@ -61,4 +61,37 @@ class User extends Authenticatable
     protected $appends = [
         'profile_photo_url',
     ];
+
+    /**
+     * Many-to-many relationship with Challenge
+     */
+    public function challenges()
+    {
+        return $this->belongsToMany(Challenge::class, 'challenge_solver')
+            ->withPivot('solved', 'solution_code', 'base_xp', 'bonus_xp', 'openai_chat_history', 'observations')
+            ->withTimestamps();
+    }
+
+    /**
+     * Attaches Challenge to User
+     *
+     * @param Challenge $challenge
+     * @param array $attributes
+     * @return void
+     */
+    public function attachChallenge(Challenge $challenge, array $attributes = [])
+    {
+        return $this->challenges()->attach($challenge, $attributes);
+    }
+
+    /**
+     * Detaches Challenge from User
+     *
+     * @param Challenge $challenge
+     * @return void
+     */
+    public function detachChallenge(Challenge $challenge)
+    {
+        return $this->challenges()->detach($challenge);
+    }
 }

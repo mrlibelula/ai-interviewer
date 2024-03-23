@@ -6,9 +6,11 @@
         Choose your Learning Path
         <x-slot name="right">
             @if ($selected_topic_id && $selected_topic_id !== -1)
-            <x-button class="flex justify-center">
-                <div class="text-xl px-8 w-full whitespace-nowrap">Start all</div>
-            </x-button>
+            <a wire:navigate href="{{ route('interview-start', [\App\Tool::encode($selected_difficulty), \App\Tool::encode($selected_topic_id)]) }}">
+                <x-button class="flex justify-center">
+                    <div class="text-xl px-8 w-full whitespace-nowrap">Start all</div>
+                </x-button>
+            </a>
             @else
             <x-secondary-button disabled class="flex justify-center">
                 <div class="text-xl px-8 w-full whitespace-nowrap">Start all</div>
@@ -80,11 +82,18 @@
                                 </div>
                             </td>
                             <td class="py-6 px-2 w-32 font-mono text-base text-left group-hover:text-gray-950 group-hover:dark:text-gray-100 smooth-300">
-                                <x-secondary-button>
-                                    <div class=" text-sm">
-                                        Start
-                                    </div>
-                                </x-secondary-button>
+                                <a wire:navigate href="{{ route('interview-start', [
+                                    \App\Tool::encode($selected_difficulty), 
+                                    \App\Tool::encode($selected_topic_id), 
+                                    \App\Tool::encode($challenge->id), 
+                                    $challenge->challenge_slug, 
+                                ]) }}">
+                                    <x-secondary-button>
+                                        <div class=" text-sm">
+                                            Start
+                                        </div>
+                                    </x-secondary-button>
+                                </a>
                             </td>                            
                         </tr>
                         @endforeach

@@ -25,14 +25,17 @@ class BackboneSeeder extends Seeder
         $difficulty_easy = Difficulty::firstOrCreate([
             'name' => 'easy', 
             'description' => 'Coding challenges categorized as "easy" typically involve straightforward problems that require basic programming concepts and minimal problem-solving skills. These challenges are suitable for beginners and serve as a gentle introduction to coding exercises', 
+            'base_xp' => 50,
         ]);
         $difficulty_medium = Difficulty::firstOrCreate([
             'name' => 'medium', 
             'description' => 'Challenges classified as "medium" difficulty present more complex problems that require a deeper understanding of programming principles and problem-solving techniques. They may involve multiple steps or require applying several concepts in combination', 
+            'base_xp' => 100,
         ]);
         $difficulty_hard = Difficulty::firstOrCreate([
             'name' => 'hard', 
             'description' => '"Hard" difficulty challenges pose significant challenges that demand advanced problem-solving skills, algorithmic thinking, and proficiency in the chosen programming language. These challenges often involve intricate logic, optimization, or creative solutions and are suitable for experienced developers or those seeking a rigorous test of their abilities', 
+            'base_xp' => 200,
         ]);
 
         // $difficulties = [$difficulty_easy, $difficulty_medium, $difficulty_hard, ];

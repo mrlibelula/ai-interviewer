@@ -11,6 +11,7 @@
     <script>hljs.highlightAll();</script>
     
     <!-- challenge bullets -->
+    @if ($header)
     <div class="flex items-center justify-between gap-x-4">
         <div class="flex flex-col lg:flex-row gap-y-4 lg:gap-y-0 items-center gap-x-2">
             @isset($challenge->topics)
@@ -39,11 +40,12 @@
             <x-pill-light><x-bold>{{ $this->timeLimit($challenge->time_limit) }}</x-bold></x-pill-light>
         </div>
     </div>
+    @endif
 
-    <div class="mt-2 text-3xl md:text-4xl font-semibold text-gray-900 dark:text-gray-300">
-        {{ $challenge->title }}
+    @if ($title)
+    <div class="mt-2 text-[1.5rem] md:text-[1.7rem] font-semibold text-gray-900 dark:text-gray-300">
+        {{ $challenge->title ?? 'n/a' }}
     </div>
-
     @if (count($challenge->tags))
         <div class="-mt-1 gap-x-3 text-base text-wrap font-semibold text-sky-500 dark:text-sky-400">
         @foreach ($challenge->tags as $tag)
@@ -51,8 +53,11 @@
         @endforeach
         </div>
     @endif
+    @endif
 
-    <div class="text-xl md:text-2xl">
+
+    {{-- <div class="text-xl_ md:text-2xl_"> --}}
+    <div class="text-xl md:text-2xl {{ !$title ? '' : 'py-4' }}">
         {{ $challenge->description }}
     </div>
 

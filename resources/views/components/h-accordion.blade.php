@@ -9,7 +9,7 @@
             <i x-cloak x-show="isOpen" class="caret down icon "></i>
         </div>
     </button>
-    <div x-cloak x-show="isOpen" class=" text-left"
+    <div x-cloak x-show="isOpen" class=" text-left py-2"
         x-transition:enter="transition ease-out duration-200"
         x-transition:enter-start="transform opacity-0 scale-95"
         x-transition:enter-end="transform opacity-100 scale-100"

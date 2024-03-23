@@ -8,6 +8,8 @@ use Livewire\Component;
 class ChallengeCard extends Component
 {
     public $challenge;
+    public bool $header = true;
+    public bool $title = true;
     
     /**
      * Returns time_limit for humans

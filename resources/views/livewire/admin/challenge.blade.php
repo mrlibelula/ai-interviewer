@@ -190,18 +190,18 @@
                         </x-admin.setup-box>
 
                         <div>
-                            <x-secondary-button class="w-full">
+                            <x-danger-button @click="$dispatch('deleteChallenge')" class="w-full">
                                 <div class="w-full flex items-center justify-center gap-x-4">
                                     <div>
                                         <x-icon-trash class="w-6 h-6" />
                                     </div>
                                     Move to Trash
                                 </div>
-                            </x-secondary-button>
+                            </x-danger-button>
                         </div>
                         <div>
                             <!-- <x-danger-button :disabled="!$challenge_changed">Reset</x-danger-button> -->
-                            <x-danger-button class="w-full">Delete challenge</x-danger-button>
+                            {{-- <x-danger-button @click="$dispatch('destroyChallenge')" class="w-full">Delete challenge</x-danger-button> --}}
                         </div>
                     </div>
                 </div>

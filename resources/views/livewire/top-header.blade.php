@@ -13,9 +13,9 @@
         </svg>
     </button>
 
-    <div class=" text-lg font-semibold whitespace-nowrap px-2.5 rounded-full bg-gray-200/50 dark:bg-gray-600 text-gray-600 dark:text-gray-400">
+    <a wire:navigate href="{{ route('interview') }}" class=" text-lg font-semibold whitespace-nowrap px-2.5 rounded-full bg-gray-200/50 dark:bg-gray-600 text-gray-600 dark:text-gray-400">
         A.I. Interviewer
-    </div>
+    </a>
     <div class=" hidden md:flex border-r border-gray-200 dark:border-gray-700">
         &nbsp;
     </div>
@@ -26,7 +26,7 @@
         &nbsp;
     </div>
     <div class="hidden sm:block w-full px-3">
-        <input placeholder="Search challenges" class="form-input h-[2.25rem] w-full text-sm placeholder-gray-500 placeholder:text-sm " />
+        <input placeholder="Search challenges" class="form-input dark:bg-gray-800 h-[2.25rem] w-full text-sm placeholder-gray-500 placeholder:text-sm " />
     </div>
     <div class=" hidden md:flex border-r border-gray-200 dark:border-gray-700">
         &nbsp;
