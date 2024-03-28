@@ -191,7 +191,7 @@ class Tool
                 dump('Something went wrong while decoding challenge completion string. "$challenge" is null. Check app log. 🙊', $completion, $completion_text_parts, $completion_text_parts[0], $completion_text_parts[1], json_validate($completion_text_parts[0] ?? 'NULL'), json_decode($completion_text_parts[0] ?? 'n/a'), $challenge);
             }
 
-            // // emulated Challenge Model response property
+            // emulated Challenge Model response property
             $emulated_challenge_model = new Challenge;
             $emulated_challenge_model->title = $challenge->title;
             $emulated_challenge_model->description = $challenge->challenge;
@@ -240,10 +240,6 @@ class Tool
         $completion_text = $llm_challenge->completion_text;
         $solution_code = $llm_challenge->emulated_challenge_model['solution_code'] ?? '';
         $challenge_slug = Str::slug($challenge->title ?? '');
-
-
-        // search for similar challenge titles
-        // ... in process
 
         $challenge_db = Challenge::create([
             'title' => $challenge->title,
@@ -605,11 +601,12 @@ class Tool
     }
 
     /**
-     * Returns a Challenge Model
+     * Returns a Challenge Model without 'solution code'
      *
      * @param integer $challenge_id
      * @param array $select
      * @param array $with
+     * @param boolean $append_ai_solution
      * @return Challenge|null
      */
     public static function fetchChallenge(int $challenge_id, array $select = ['*'], array $with = [
@@ -622,11 +619,13 @@ class Tool
         'packages', 
         'topics',
         'creators'
-    ]): Challenge|null
+    ], bool $append_ai_solution = false): Challenge|null
     {
-        return Challenge::select(...$select)
+        $challenge = Challenge::select(...$select)
             ->whereId($challenge_id)
             ->with(count($with) ? [...$with] : [])
             ->first();
+        if (!$append_ai_solution) { if ($challenge) unset($challenge->solution_code); }
+        return $challenge;
     }
 }

@@ -1,12 +1,13 @@
 <?php
 
-use App\Livewire\Admin\Challenge;
-use App\Livewire\Admin\Challenges;
-use App\Livewire\Admin\Dashboard;
-use App\Livewire\Admin\Prompt;
-use App\Livewire\Interview;
-use App\Livewire\Landing;
 use App\Livewire\Start;
+use App\Livewire\Landing;
+use App\Livewire\Interview;
+use App\Livewire\Admin\Prompt;
+use App\Livewire\Admin\Challenge;
+use App\Livewire\Admin\Dashboard;
+use App\Livewire\Admin\Challenges;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -48,3 +49,8 @@ Route::middleware([
     Route::get('/admin/challenges', Challenges::class)->name('admin-challenges');
     Route::get('/admin/challenge', Challenge::class)->name('admin-challenge');
 });
+
+Route::get('/embed-editor', function () {
+    $response = Http::get('https://libe.dev/code/editor.html');
+    return response($response->body())->header('Content-Type', 'text/html');
+})->name('embed-editor');

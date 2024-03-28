@@ -117,7 +117,7 @@
             <!-- JSON form table -->
             <x-descr-list>
                 <div class="py-2 mb-8">
-                    Part {{ $key + 1 }} - 
+                    Chunk {{ $key + 1 }} - 
                     LLM output response will be in <x-bold>JSON</x-bold> format, with the following <x-spot>key/value</x-spot> pairs. The <x-spot>values</x-spot> represent an example of <x-bold>how the LLM should respond</x-bold>
                 </div>
                 <div class="pb-4 -mt-4">
@@ -153,7 +153,7 @@
             <x-descr-list>
                 <div class="flex flex-col _lg:flex-row gap-y-4 gap-x-4 items-start">
                     <div>
-                        Part {{ $key + 1 }}
+                        Chunk {{ $key + 1 }}
                     </div>
                     <textarea wire:model.live="prompt_parts.{{ $key }}" class="form-textarea w-full h-[7rem] font-mono"></textarea>
                 </div>

@@ -35,7 +35,6 @@ class Challenge extends Component
     
     public int $challenge_id;
     public $challenge;
-    public $original_challenge; // a copy of the challenge for 'reset' purposes
     public bool $challenge_changed = false;
 
     protected $listeners = ['destroyChallenge', 'deleteChallenge'];
@@ -158,8 +157,9 @@ class Challenge extends Component
 
     public function loadChallenge()
     {
-        $this->challenge = Tool::fetchChallenge($this->challenge_id);
-        $this->original_challenge = $this->challenge;   // for 'reset' purposes
+        $this->challenge = auth()->user()->hasRole('admin') || auth()->user()->hasRole('recruiter')
+            ? Tool::fetchChallenge(challenge_id: $this->challenge_id, append_ai_solution: true)
+            : Tool::fetchChallenge($this->challenge_id);
     }
 
     public function toggleTopic(Topic $topic)

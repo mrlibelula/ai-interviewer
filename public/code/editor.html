@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monaco Editor</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
+
+    <script async="async" type="text/javascript" src="https://cdn.jsdelivr.net/npm/monaco-editor/min/vs/editor/editor.main.js"></script><link rel="stylesheet" type="text/css" data-name="vs/editor/editor.main" href="https://cdn.jsdelivr.net/npm/monaco-editor/min/vs/editor/editor.main.css"><script async="async" type="text/javascript" src="https://cdn.jsdelivr.net/npm/monaco-editor/min/vs/editor/editor.main.nls.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/alpinejs/2.3.0/alpine.js" integrity="sha512-nIwdJlD5/vHj23CbO2iHCXtsqzdTTx3e3uAmpTm4x2Y8xCIFyWu4cSIV8GaGe2UNVq86/1h9EgUZy7tn243qdA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <style>
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+        }
+        
+        .wrapper {
+            display: flex;
+            min-height: 95vh;
+            flex-direction: column;
+            align-items: center;
+            justify-content: start;
+        }
+        
+        .editor {
+            width: 100%;
+            /*max-width: 900px;*/
+            margin: 50px auto 40px;
+            height: 500px;
+            display: flex;
+            flex-direction: column;
+            /*box-shadow: 0 7px 7px rgba(0, 0, 0, .1), 0 -2px 3px rgba(0, 0, 0, .125);*/
+        }
+        
+        .editor__code {
+            position: relative;
+            border: none;
+            /*flex-basis: 70%;*/
+            flex-basis: 100%;
+        }
+        
+        .editor__preview {
+            position: relative;
+            /*flex-basis: 30%;*/
+            flex-basis: 100%;
+        }
+        
+        .editor__code > *,
+        .editor__preview > * {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .buttons {
+            text-align: right;
+        }
+        
+        .button {
+            background: #f5df1b;
+            color: #000000;
+            width: 10em;
+            padding: 0.6em 2.3em 0.7em;
+            border-radius: 4px;
+            font-weight: 400;
+            border: none;
+            cursor: pointer;
+            font-family: sans-serif;
+            font-size: 15px;
+            box-shadow: inset 0 -1px 1px rgba(0, 0, 0, 0.1);
+            transition: background-color .1s ease;
+        }
+        
+        .button:hover {
+            background: #ffed4e;
+        }
+        
+        .button:active {
+            background: #e6d329;
+            padding: 0.7em 2.3em 0.6em;
+            box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.3);
+        }
+        
+        .button:disabled {
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- upload this file via ftp.libe.dev, so it can be embeded by external iframes -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/monaco-editor/min/vs/loader.js"></script>
+    <div class="wrapper">
+        <div class="editor">
+            <div class="editor__code">
+                <div id="editorCode"></div>
+            </div>
+
+            <div class="editor__preview">
+                <iframe id="editorPreview" frameborder="0"></iframe>
+            </div>
+
+            <div id="editorJsResult" class=" bg-gray-300 p-2 rounded-md">
+
+            </div>
+        </div>
+
+        <div class="buttons">
+            <button class="button" id="editorCopyClipboard">Run code</button>
+        </div>
+    </div>
+
+    <script>
+        // Initial data
+        const HTML_CODE_BACK =
+`
+<div class="flex flex-col gap-y-4 w-60 p-4 m-4 bg-gray-200 rounded-xl border-2 border-gray-300 shadow-md">
+    <div class="bg-green-500 text-gray-100 text-center p-2 rounded-md" role="alert">
+        Tailwind CSS injected
+    </div>
+
+    <h5 class="text-xl font-semibold">Special title treatment</h5>
+    <p>With supporting text below as a natural lead-in to additional content.</p>
+    <button class="bg-indigo-600 text-gray-200 px-4 py-2 rounded-md hover:bg-indigo-500 transition duration-300 ease-in-out cursor-pointer font-mono uppercase">
+        Go somewhere
+    </button>
+    </div>
+</div>
+`;
+
+        const HTML_CODE = `
+const maxSubarraySum = (nums) => {
+    if(nums.length === 0) return 0;
+    
+    let maxSum = nums[0];
+    let currentSum = nums[0];
+    
+    for(let i = 1; i < nums.length; i++) {
+        currentSum = Math.max(nums[i], currentSum + nums[i]);
+        maxSum = Math.max(maxSum, currentSum);
+    }
+    
+    return maxSum;
+};
+
+// Test case
+maxSubarraySum([-2, 1, -3, 4, -1, 2, 1, -5, 4])  // outputs 6
+`
+
+        // const CSS_LINKS = [`https://cdn.jsdelivr.net/npm/bootstrap/dist/css/bootstrap.min.css`];
+        const CSS_LINKS = [`https://cdn.jsdelivr.net/npm/tailwindcss@2.0.3/dist/tailwind.min.css`];
+
+        // Elements
+        const editorCode = document.getElementById("editorCode");
+        const editorPreview = document.getElementById('editorPreview').contentWindow.document;
+        const editorCopyButton = document.getElementById('editorCopyClipboard');
+        const editorJsResult = document.getElementById('editorJsResult');
+
+        let isDarkMode = parent.document.querySelector('#codeIframe').getAttribute('dark-mode');
+        let theme = isDarkMode ? 'vs-dark' : 'vs-light'
+
+        window.addEventListener("message", function(event) {
+            if (event.data.type === "data") {
+                // isDarkMode = event.data.data
+                // theme = isDarkMode ? 'vs-dark' : 'vs-light'
+                // Monaco init
+                //editor = null
+                //createEditor(editorCode)
+                // Monaco init
+                //require(["vs/editor/editor.main"], function () {
+                //    createEditor(editorCode)
+                //})
+            }
+        });
+        
+        // <iframe> inject CSS
+        /*
+        CSS_LINKS.forEach(linkURL => {
+            const link = document.createElement('link')
+            link.href = linkURL
+            link.rel = "stylesheet"
+            editorPreview.head.appendChild(link)
+        })
+        */
+        
+        // Monaco loader
+        require.config({
+            paths: { vs: "https://cdn.jsdelivr.net/npm/monaco-editor/min/vs" } });
+        
+        
+        window.MonacoEnvironment = {
+            getWorkerUrl: function (workerId, label) {
+            return `data:text/javascript;charset=utf-8,${encodeURIComponent(`
+                self.MonacoEnvironment = {
+                    baseUrl: 'https://cdn.jsdelivr.net/npm/monaco-editor/min/'
+                };
+                importScripts('https://cdn.jsdelivr.net/npm/monaco-editor/min/vs/base/worker/workerMain.js');`, { type: 'text/javascript' })}`;
+            } };
+        
+        
+        // Monaco init
+        require(["vs/editor/editor.main"], function () {
+            createEditor(editorCode);
+        });
+        
+        function createEditor(editorContainer) {
+            let editor = monaco.editor.create(editorContainer, {
+                value: HTML_CODE,
+                language: "javascript",
+                theme: theme,
+                minimap: { enabled: false },
+                automaticLayout: true,
+                contextmenu: true,
+                fontSize: 14,
+                scrollbar: {
+                    useShadows: true,
+                    vertical: "visible",
+                    horizontal: "visible",
+                    horizontalScrollbarSize: 12,
+                    verticalScrollbarSize: 12 
+                } 
+            })
+
+            //console.log('EDITOR', editor._themeService.onDidColorThemeChange(() => {}))
+            editor._themeService.onDidColorThemeChange(() => {
+                console.log('theme changed')
+            })
+        
+            editorPreview.body.innerHTML = HTML_CODE;
+        
+            editor.onDidChangeModelContent(() => {
+                editorPreview.body.innerHTML = editor.getValue();
+            });
+        
+            /*
+            editorCopyButton.onclick = () => {
+                copyToClipboard(editor.getValue());
+                const editorCopyButtonText = editorCopyButton.innerHTML;
+                editorCopyButton.innerHTML = "Copied!";
+                editorCopyButton.disabled = true;
+                setTimeout(() => {
+                    editorCopyButton.disabled = false;
+                    editorCopyButton.innerHTML = editorCopyButtonText;
+                }, 500);
+            };
+            */
+            editorCopyButton.onclick = () => {
+                runJsCode(editor)
+            }
+        }
+        
+        function copyToClipboard(str) {
+            const el = document.createElement("textarea");
+            el.value = str;
+            document.body.appendChild(el);
+            el.select();
+            document.execCommand("copy");
+            document.body.removeChild(el);
+        }
+
+        function runJsCode(editor) {
+            var code = editor.getValue()
+            try {
+                var result = eval(code)
+                //editorPreview.body.innerHTML = result
+                editorJsResult.innerHTML = result
+            } catch (error) {
+                console.error(error)
+            }
+        }
+    </script>
+
+</body>
+</html>

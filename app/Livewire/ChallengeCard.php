@@ -10,6 +10,8 @@ class ChallengeCard extends Component
     public $challenge;
     public bool $header = true;
     public bool $title = true;
+    public bool $footer = true;
+    public bool $creators = true;
     
     /**
      * Returns time_limit for humans

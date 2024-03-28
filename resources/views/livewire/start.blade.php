@@ -8,11 +8,11 @@
                 </div>
             </x-slot>
             <x-slot name="subtitle">
-                <div class="flex items-center gap-x-4 pt-4">
-                    <x-pill class="text-gray-800 dark:text-gray-950 uppercase tracking-widest font-semibold bg-sky-300/70 dark:bg-sky-400/80">
+                <div class="flex flex-col xl:flex-row items-start xl:items-center gap-x-4 gap-y-2 pt-4">
+                    <x-pill class="w-fit xl:w-[12%] text-gray-800 dark:text-gray-300 uppercase tracking-widest font-semibold bg-gradient-to-br from-gray-400 via-white to-gray-950/30 dark:from-gray-500 dark:via-black dark:to-gray-950/50 border-2 border-gray-300 dark:border-black">
                         {{ $challenge->difficulty->name }}
                     </x-pill>
-                    <div class=" font-mono text-base">
+                    <div class=" font-mono w-fit xl:w-[88%] text-left text-base">
                         @foreach ($challenge->topics as $topic)
                         {{ $topic->name }}{{ !$loop->last ? ', ' : '' }}
                         @endforeach
@@ -59,19 +59,20 @@
             <div class="w-[70%]">
                 <div class="flex flex-col gap-y-8">
                     
-                        @livewire('challenge-card', [
-                            'challenge' => $challenge, 
-                            'header' => false,
-                            'title' => false
-                        ], key(uniqid()))
+                    @livewire('challenge-card', [
+                        'challenge' => $challenge, 
+                        'header' => false,
+                        'title' => false,
+                        'footer' => false, 
+                        'creators' => false, 
+                    ], key(uniqid()))
                     
-                    <div>
-                        editor
-                    </div>
-                    <div>
-                        view solution
-                    </div>
+                    <x-h5>Try a solution</x-h5>
+
+                    <!-- code editor-->
+                    <x-code-editor />
                 </div>
+
             </div>
 
             <!-- right panel -->
@@ -88,37 +89,32 @@
                         <x-pill2 label="Total" value="1024 XP" />                        
                     </div>
 
-                    <x-h6>Chatbot feedback</x-h6>
+                    {{-- <x-h6>Chatbot feedback</x-h6> --}}
 
-                    <div class="flex flex-col-reverse gap-y-4 h-[20rem] bg-white dark:bg-black rounded-md py-1.5 px-2.5 text-base shadow overflow-hidden overflow-y-auto border-2 border-gray-300 dark:border-gray-700">
-                        <div class="flex flex-col items-start gap-x-2">
-                            <div class=" text-yellow-700 dark:text-yellow-400">
-                                <span class="mr-2 dark:text-yellow-700">2024-03-21 12:45:21</span>Bot: 
-                            </div>
-                            Lorem ipsum dolor sit amet consectetur adipisicing elit. Eius nesciunt qui quod voluptatem consectetur sit obcaecati ea ipsa minima illo nam dolor earum porro, aspernatur itaque, doloremque possimus, natus nemo illum autem? Provident praesentium eum, omnis vitae voluptatum voluptatibus atque.
+                    <div class=" bg-gray-300/60 dark:bg-gray-800/80 flex justify-between items-center gap-x-4 w-full -mb-4 rounded-t-lg px-4 py-2 text-base">
+                        <div class="flex items-center gap-x-2 dark:text-green-400">
+                            <x-circle color="green" />
+                            Feedback chatbot 
                         </div>
-                        <div class="flex flex-col items-start gap-x-2">
-                            <div class=" text-yellow-700 dark:text-yellow-400">
-                                <span class="mr-2 dark:text-yellow-700">2024-03-21 12:45:21</span>Libe: 
-                            </div>
-                            Lorem ipsum dolor sit amet consectetur adipisicing elit. Ut nobis at sed, aspernatur inventore labore? Magnam natus eveniet labore distinctio?
-                        </div>
-                        <div class="flex flex-col items-start gap-x-2">
-                            <div class=" text-yellow-700 dark:text-yellow-400">
-                                <span class="mr-2 dark:text-yellow-700">2024-03-21 12:45:21</span>Bot: 
-                            </div>
-                            Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eveniet voluptate in a excepturi alias porro rerum officia suscipit nostrum sed quam voluptas quaerat culpa autem mollitia magnam, nesciunt ipsa pariatur.
+                        <div>
+                            <x-icon-speaker-off class=" w-6 h-6 text-black dark:text-gray-300" />
                         </div>
                     </div>
-                    
-
-                    {{-- <x-pill2 class="w-full text-[1.15rem]">
-                        <x-slot name="label">
-                            <div class="py-2 bg-black w-full text-left">
-                                Chatbot feedback
+                    <div class="flex flex-col-reverse gap-y-4 h-[20rem] bg-white dark:bg-black rounded-b-lg py-3 px-4 text-base shadow overflow-hidden overflow-y-auto w-full leading-tight smooth-300">
+                        <div class="flex flex-col items-start gap-x-2">
+                            
+                            <span class="text-sky-700 dark:text-sky-400 font-semibold">🤖 Chatbot:</span>
+                            <div id="chat" x-init="slowTextDisplay('{{ $chat_welcome }}', 50)">
+                                <!-- chat messages -->
                             </div>
-                        </x-slot>
-                    </x-pill2> --}}
+
+                        </div>
+                        <div class=" font-semibold">
+                            Welcome to our Code Interview Challenge Chatbot!
+                        </div>
+                    </div>
+
+                    <textarea wire:model='chat_message' wire:keydown.enter="sendMessage" id="chat-textarea" class="form-textarea w-full" placeholder="Message ChatGPT"></textarea>
                     
                     <div>
                         options
@@ -145,5 +141,48 @@
         </x-descr-list>
     </x-container>
     @endif
+
+    <script>
+        function slowTextDisplay(text, delay = 100) {
+            const parts = text.split(/(\s+)/);
+            let index = 0;
+
+            const intervalId = setInterval(function() {
+                if (index < parts.length) {
+                    var part = parts[index];
+                    const chatElement = document.getElementById("chat");
+                    part = decodeHTML(part);
+                    //part.replace(/\\n/g, "\n")
+                    console.log(part)
+                    if (part === "\n") {
+                        chatElement.appendChild(document.createElement("br"));
+                    } else {
+                        chatElement.appendChild(document.createTextNode(part));
+                    }
+                    index++;
+                } else {
+                    clearInterval(intervalId); // Clear the interval once all parts are displayed
+                }
+            }, delay);
+        }
+
+        function decodeHTML(html) {
+            var txt = document.createElement("textarea");
+            txt.innerHTML = html;
+            return txt.value;
+        }
+
+        document.getElementById("chat-textarea").addEventListener("keydown", function(event) {
+            if (event.key === "Enter") event.preventDefault()
+        })
+
+        /*
+        window.addEventListener('DOMContentLoaded', (event) => {
+            // Call slowTextDisplay function after DOM is loaded
+            console.log('started!!!')
+            slowTextDisplay("{{ $chat_welcome }}", 50);
+        });
+        */
+    </script>
     
 </div>

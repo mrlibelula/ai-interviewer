@@ -1,5 +1,6 @@
 <div class="flex flex-col gap-y-4 overflow-hidden">
 
+    <!-- code highlight theme selection -->
     <template x-if="darkMode">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" integrity="sha512-rO+olRTkcf304DQBxSWxln8JXCzTHlKnIdnMUwYvQa9/Jd4cQaNkItIUj6Z4nvW1dqK0SKXLbn9h4KwZTNtAyw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     </template>
@@ -7,8 +8,6 @@
     <template x-if="!darkMode">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css" integrity="sha512-hasIneQUHlh06VNBe7f6ZcHmeRTLIaQWFd43YriJ0UND19bvYRauxthDg8E4eVNPm9bRUhr5JGeqH7FRFXQu5g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     </template>
-
-    <script>hljs.highlightAll();</script>
     
     <!-- challenge bullets -->
     @if ($header)
@@ -43,38 +42,36 @@
     @endif
 
     @if ($title)
-    <div class="mt-2 text-[1.5rem] md:text-[1.7rem] font-semibold text-gray-900 dark:text-gray-300">
-        {{ $challenge->title ?? 'n/a' }}
-    </div>
-    @if (count($challenge->tags))
-        <div class="-mt-1 gap-x-3 text-base text-wrap font-semibold text-sky-500 dark:text-sky-400">
-        @foreach ($challenge->tags as $tag)
-            <span>#{{ ucfirst(Str::camel($tag->name)) }}</span>
-        @endforeach
+        <div class="mt-2 text-[1.5rem] md:text-[1.7rem] font-semibold text-gray-900 dark:text-gray-300">
+            {{ $challenge->title ?? 'n/a' }}
         </div>
-    @endif
+        @if (count($challenge->tags))
+            <div class="-mt-1 gap-x-3 text-base text-wrap font-semibold text-sky-500 dark:text-sky-400">
+            @foreach ($challenge->tags as $tag)
+                <span>#{{ ucfirst(Str::camel($tag->name)) }}</span>
+            @endforeach
+            </div>
+        @endif
     @endif
 
-
-    {{-- <div class="text-xl_ md:text-2xl_"> --}}
     <div class="text-xl md:text-2xl {{ !$title ? '' : 'py-4' }}">
         {{ $challenge->description }}
     </div>
 
     
     @if (count(json_decode($challenge->test_cases, true)))
-        <x-h-accordion x-data="{ isOpen: true }">
-            <x-slot name="title">
-                Test cases
-            </x-slot>
-            <div class="flex flex-col">
-                @foreach (json_decode($challenge->test_cases, true) as $case)
-                <div>
-                    {{ $case }}
-                </div>
-                @endforeach
+    <x-h-accordion x-data="{ isOpen: true }">
+        <x-slot name="title">
+            Test cases
+        </x-slot>
+        <div class="flex flex-col">
+            @foreach (json_decode($challenge->test_cases, true) as $case)
+            <div>
+                {{ $case }}
             </div>
-        </x-h-accordion>
+            @endforeach
+        </div>
+    </x-h-accordion>
     @endif
 
     @if ($challenge->hints)
@@ -114,41 +111,47 @@
     @endif
 
 
-    <x-h-accordion x-data="{ isOpen: true }">
+    @if ($challenge->solution_code)
+    <x-h-accordion x-data="{ isOpen: false }">
         <x-slot name="title">
             Solution/Answer
         </x-slot>
         <div>
             @livewire('code', [
-                'language' => $challenge->languages->first()->name ?? 'plaintext', 
+                'language' => $challenge->languages->first()->name ?? 'code', 
                 'code' => $challenge->solution_code, 
             ], key(uniqid()))
         </div>
     </x-h-accordion>
+    @endif
 
-    @if (count($challenge->creators))
-    <x-h-accordion x-data="{ isOpen: true }">
-        <x-slot name="title">
-            Creator{{ count($challenge->creators) === 1 ? '' : 's' }}
-        </x-slot>
-        <div class="flex items-center gap-x-3">
-        @foreach ($challenge->creators as $creator)
+    @if ($creators)
+        @if (count($challenge->creators))
+        <x-h-accordion x-data="{ isOpen: true }">
+            <x-slot name="title">
+                Creator{{ count($challenge->creators) === 1 ? '' : 's' }}
+            </x-slot>
             <div class="flex items-center gap-x-3">
-                <div class="w-7 h-7 overflow-hidden rounded-full shadow">
-                    <img class="w-full h-full" src="{{ $creator->profile_photo_url }}">
+            @foreach ($challenge->creators as $creator)
+                <div class="flex items-center gap-x-3">
+                    <div class="w-7 h-7 overflow-hidden rounded-full shadow">
+                        <img class="w-full h-full" src="{{ $creator->profile_photo_url }}">
+                    </div>
+                    <span>{{ ucfirst(Str::camel($creator->name)) }}</span>
                 </div>
-                <span>{{ ucfirst(Str::camel($creator->name)) }}</span>
+            @endforeach
             </div>
-        @endforeach
-        </div>
-    </x-h-accordion>
+        </x-h-accordion>
+        @endif
     @endif
 
     <div class=" border-b border-gray-700 dark:border-gray-500 border-dotted py-2"></div>
 
+    @if ($footer)
     <div class="text-xs md:text-sm flex flex-col md:flex-row gap-y-1 md:gap-y-0 items-center justify-center md:justify-between text-gray-500 dark:text-gray-500 font-mono">
         <div>{{ $challenge->completion_id }}</div>
         <div>{{ $challenge->ai_model }}</div>
     </div>
+    @endif
 
 </div>

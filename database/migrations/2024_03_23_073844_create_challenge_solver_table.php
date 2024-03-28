@@ -15,11 +15,12 @@ return new class extends Migration
             $table->unsignedBigInteger('challenge_id');
             $table->unsignedBigInteger('user_id');
             $table->boolean('solved')->default(false);
+            $table->string('current_time_limit')->default('00:00:00');
             $table->string('solution_code')->default('');
             $table->integer('base_xp')->default(0);
             $table->integer('bonus_xp')->default(0);
             $table->mediumText('openai_chat_history')->default(json_encode([]));
-            $table->string('observations')->default('');
+            $table->string('observations')->default(json_encode([]));
             $table->timestamps();
 
             $table->foreign('challenge_id')->references('id')->on('challenges')->onDelete('cascade');

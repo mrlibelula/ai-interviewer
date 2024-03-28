@@ -56,3 +56,4 @@ In turn, the burden is also taken off of candidates, they need only create a job
 - Wildcards cutomization in prompt buildChallengePrompt().
 - JSON cutomization in prompt loadBlueprintDataAndStoreToDB(), buildJson(), and also affected buildJsonArrays() that depends on $this->build_json.
 - Code component word-wrap toggle feature.
+- Will consider implementing Sparkle with RAG (retrieval augmented generation) features for getting up-to-date challenges by augmenting LLM knowledge with additional data.
