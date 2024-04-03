@@ -1,5 +1,6 @@
 # git rm -r --cached storage/database
 storage/database/*
+/public/code/editor.html
 
 /.phpunit.cache
 /node_modules

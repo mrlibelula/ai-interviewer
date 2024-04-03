@@ -1,5 +1,5 @@
 @props(['title' => 'libe.dev', 'subtitle', 'top'])
-<div class="flex flex-col md:flex-row items-start md:items-end gap-y-4 md:gap-x-8 py-12">
+<div {{ $attributes->merge(['class' => 'flex flex-col md:flex-row items-start md:items-end gap-y-4 md:gap-x-8 py-12']) }}>
     <div class="flex flex-col text-center xl:text-left w-full">
         @isset($top)
         {{ $top }}

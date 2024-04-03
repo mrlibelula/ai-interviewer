@@ -3,7 +3,14 @@
     <div class="flex flex-col items-center w-16 h-full overflow-hidden text-gray-700 dark:text-gray-500 bg-gray-100 dark:bg-gray-800/30">
         <a wire:navigate class="flex items-center justify-center mt-3" href="/">
             {{-- <div class="material-icons my-auto text-3xl text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-rose-500 to-sky-400"> headset_mic </div> --}}
-            <img class="w-9" src="https://cdn-icons-png.flaticon.com/512/4600/4600333.png" alt="">
+            {{-- <img class="w-9" src="https://cdn-icons-png.flaticon.com/512/4600/4600333.png" alt=""> --}}
+            {{-- <img class="w-7" src="https://www.favicon.cc/logo3d/807099.png" alt=""> --}}
+            {{-- <img class="w-9" src="https://www.pngkey.com/png/full/164-1649200_view-favicon-on-t-shirt-pixel-mario.png" alt=""> --}}
+
+            {{-- <img class="w-8 py-[0.195rem] opacity-75 hover:opacity-100 smooth-300 invert hover:invert-0 animate-pulse" src="https://www.onlygfx.com/wp-content/uploads/2022/04/brain-icon-3.png" alt=""> --}}
+            <img class="w-8 h-9 py-0.5 opacity-75 hover:opacity-100 smooth-300 invert hover:invert-0 animate-pulse" src="https://www.onlygfx.com/wp-content/uploads/2022/04/brain-icon-1.png" alt="">
+            {{-- <img class="w-8 py-[0.125rem] opacity-75 hover:opacity-100 smooth-300 invert hover:invert-0" src="https://cdn-icons-png.freepik.com/512/6969/6969728.png" alt=""> --}}
+            
         </a>
         <div class="flex flex-col items-center mt-3 border-t border-gray-300 dark:border-gray-700">
             <a wire:navigate href="{{ route('dashboard') }}" class="flex items-center justify-center w-12 h-12 mt-2 rounded hover:bg-gray-300 dark:hover:bg-gray-700">

@@ -1,0 +1,56 @@
+@props(['divId' => 'chat-01', 'avatar' => '🤖', 'user' => 'Chatbot', 'color' => 'sky', 'text' => '', 'speed' => 50])
+@php
+    $tw_colors = [
+        'sky' => 'text-sky-700 dark:text-sky-400',
+        'rose' => 'text-rose-700 dark:text-rose-400',
+        'orange' => 'text-orange-700 dark:text-orange-400',
+        'fuchsia' => 'text-fuchsia-700 dark:text-fuchsia-400',
+        'green' => 'text-green-700 dark:text-green-400',
+    ];
+    $tw_color = $tw_colors[$color] ?? $tw_colors['green'];
+@endphp
+<div class="flex flex-col gap-y-1">
+    <span class="{{ $tw_color }} font-semibold">{{ $avatar }} {{ $user }}:</span>
+    <div id="{{ $divId }}" 
+        x-init="slowTextDisplay('{{ $text }}', {{ (int)$speed }}, '{{ $divId }}')"
+    ></div>
+
+    <script>
+        let intervalId
+
+        function slowTextDisplay(text, delay = 100, elementId = 'chat') {
+            const originalText = text
+            const parts = text.split(/(\s+)/);
+            let index = 0;
+
+            intervalId = setInterval(function() {
+                if (index < parts.length) {
+                    var part = parts[index];
+                    const chatElement = document.getElementById(elementId);
+                    part = decodeHTML(part);
+                    var splits = part.split('??')
+                    if (splits.length > 1) {
+                        chatElement.appendChild(document.createTextNode(splits[0]));
+                        chatElement.appendChild(document.createElement("br"));
+                        chatElement.appendChild(document.createElement("br"));
+                        chatElement.appendChild(document.createTextNode(splits[1]));
+                    } else {
+                        chatElement.appendChild(document.createTextNode(splits[0]));
+                    }
+                    index++;
+                } else {
+                    clearInterval(intervalId); // Clear the interval once all parts are displayed
+                }
+            }, delay);
+
+            return originalText
+        }
+
+        function decodeHTML(html) {
+            var txt = document.createElement("textarea");
+            txt.innerHTML = html;
+            return txt.value;
+        }
+        
+    </script>
+</div>

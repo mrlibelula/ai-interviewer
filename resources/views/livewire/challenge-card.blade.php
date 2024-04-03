@@ -145,9 +145,9 @@
         @endif
     @endif
 
-    <div class=" border-b border-gray-700 dark:border-gray-500 border-dotted py-2"></div>
-
+    
     @if ($footer)
+    <div class=" border-b border-gray-700 dark:border-gray-500 border-dotted py-2"></div>
     <div class="text-xs md:text-sm flex flex-col md:flex-row gap-y-1 md:gap-y-0 items-center justify-center md:justify-between text-gray-500 dark:text-gray-500 font-mono">
         <div>{{ $challenge->completion_id }}</div>
         <div>{{ $challenge->ai_model }}</div>
