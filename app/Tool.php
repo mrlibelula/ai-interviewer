@@ -628,4 +628,26 @@ class Tool
         if (!$append_ai_solution) { if ($challenge) unset($challenge->solution_code); }
         return $challenge;
     }
+
+    /**
+     * Returns calculated bonus XP points based on
+     * completion time and time threshold range
+     *
+     * @param integer $completion_time_seconds
+     * @param integer $high_threshold_seconds
+     * @param integer $medium_threshold_seconds
+     * @return integer
+     */
+    public static function calculateBonusXP(int $completion_time_seconds, int $high_threshold_seconds = 300, int $medium_threshold_seconds = 600): int
+    {
+        $bonus_xp = 0;
+        if ($completion_time_seconds < $high_threshold_seconds) {
+            $bonus_xp = 20;
+        } elseif ($completion_time_seconds < $medium_threshold_seconds) {
+            $bonus_xp = 10;
+        } else {
+            $bonus_xp = 0;
+        }
+        return $bonus_xp;
+    }
 }

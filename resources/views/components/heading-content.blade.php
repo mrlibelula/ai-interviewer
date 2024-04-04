@@ -1,5 +1,24 @@
-@props(['title' => 'libe.dev', 'subtitle', 'top'])
-<div {{ $attributes->merge(['class' => 'flex flex-col md:flex-row items-start md:items-end gap-y-4 md:gap-x-8 py-12']) }}>
+@props(['title' => 'libe.dev', 'subtitle', 'top', 'right_vertical_position' => 'start'])
+@php
+    switch ($right_vertical_position) {
+        case 'center':
+            $r_position = 'md:items-center';
+            break;
+
+        case 'start':
+            $r_position = 'md:items-start';
+            break;
+        
+        case 'end':
+            $r_position = 'md:items-end';
+            break;
+        
+        default:
+            $r_position = 'md:items-center';
+            break;
+    }
+@endphp
+<div {{ $attributes->merge(['class' => 'flex flex-col md:flex-row items-start ' . $r_position . ' gap-y-4 md:gap-x-8 py-12']) }}>
     <div class="flex flex-col text-center xl:text-left w-full">
         @isset($top)
         {{ $top }}

@@ -36,9 +36,9 @@
                         <x-admin.setup-box>
                             <x-slot name="title">Time limit</x-slot>
                             <div class="flex items-center gap-x-1">
-                                <x-input wire:model.live='hours' type="number" min="0" class="form-input w-full" />:
-                                <x-input wire:model.live='minutes' type="number" min="0" class="form-input w-full" />:
-                                <x-input wire:model.live='seconds' type="number" min="0" class="form-input w-full" />
+                                <x-input wire:model.live='hours' type="number" min="0" max="23" class="form-input w-full" />:
+                                <x-input wire:model.live='minutes' type="number" min="0" max="59" class="form-input w-full" />:
+                                <x-input wire:model.live='seconds' type="number" min="0" max="59" class="form-input w-full" />
                             </div>
                         </x-admin.setup-box>
                         

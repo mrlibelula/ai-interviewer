@@ -16,10 +16,18 @@ class Start extends Component
     public string|null $challenge_slug;
     public array $challenge_ids = [];
     public bool $random = false;
+    public bool $time_limit_end = false;
     public array $challenge_attributes = [];
     public string $chat_welcome = "I'm thrilled to have you here, ready to tackle some coding questions and challenges. Whether you're here to refine your coding skills, seek advice, or simply looking for a friendly coding companion, you're in the right place!.??Feel free to ask any questions, I'm eager to assist you and provide constructive feedback to help you grow as a coder. Let's dive into the world of algorithms and problem-solving together!.??Ready to embark on this coding adventure? Just type away, and let's get started!.";
+    public int $bonux_xp = 0;
 
-    protected $listeners = ['getChallenge', 'sendMessage'];
+    protected $listeners = ['getChallenge', 'sendMessage', 'timeLimitEnded'];
+
+    public function timeLimitEnded()
+    {
+        $this->time_limit_end = true;
+        $this->bonux_xp = 0;
+    }
 
     public function sendMessage($chat_message)
     {
@@ -98,11 +106,7 @@ class Start extends Component
 
     public function removeSolutionCode()
     {
-        if (auth()->user()->hasRole('admin') || auth()->user()->hasRole('recruiter')) {
-            // 
-        } else {
-            if (isset($this->challenge->solution_code)) unset($this->challenge->solution_code);
-        }
+        if (isset($this->challenge->solution_code)) unset($this->challenge->solution_code);
     }
 
     public function render()

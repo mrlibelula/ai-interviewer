@@ -1,7 +1,7 @@
 <div class="flex flex-col gap-y-8">
-    <x-heading class="-mb-12">
+    <x-heading class="-mb-8">
         @if ($challenge)
-        <x-heading-content>
+        <x-heading-content right_vertical_position="start">
             <x-slot name="title">
                 <div class="text-left">
                     {{ $challenge->title ?? 'n/a' }}
@@ -22,18 +22,16 @@
             <x-slot name="top">
                 <div class="w-fit pb-2 flex items-center gap-x-2">
                     @foreach ($challenge->languages as $language)
-                    <div class=" text-emerald-600 dark:text-emerald-500 text-base font-semibold">#{{ $language->name }}</div>
+                    <div class=" text-emerald-500 dark:text-emerald-500 text-base font-semibold">#{{ $language->name }}</div>
                     @endforeach
                 </div>
             </x-slot>
             {{-- <x-slot name="right">
-                <div class="flex items-center gap-x-3">
-                    <a wire:navigate href="{{ route('interview') }}">
-                        <x-secondary-button class=" whitespace-nowrap">Topics list</x-secondary-button>
-                    </a>
+                <div class="flex items-center gap-x-4">
                     @if ($challenge)
-                    <x-button @click="$dispatch('getChallenge')" class=" whitespace-nowrap">
-                        Next challenge
+                    <!-- <x-button @click="$dispatch('getChallenge')" class=" whitespace-nowrap"> -->
+                    <x-button class=" whitespace-nowrap">
+                        Finish
                     </x-button>
                     @endif
                 </div>
@@ -56,10 +54,10 @@
     
     <x-container>
         @if ($challenge)
-        <div class="flex w-full items-start gap-x-10">
+        <div class="flex flex-col gap-y-20 xl:gap-y-0 xl:flex-row w-full items-start gap-x-10">
             <!-- challenge -->
-            <div class="w-[70%] pr-10 border-r_ border-dotted border-gray-800 dark:border-gray-500">
-                <div class="flex flex-col gap-y-8">
+            <div class="flex flex-col gap-y-12 xl:w-[70%] w-full xl:pr-[2.5rem] border-r border-dotted border-gray-500 dark:border-gray-600">
+                <div class="flex flex-col gap-y-4">
                     
                     @livewire('challenge-card', [
                         'challenge' => $challenge, 
@@ -69,58 +67,49 @@
                         'creators' => false, 
                     ], key(uniqid()))
                     
-                    <x-h5>Try a solution</x-h5>
+                    <x-h-accordion x-data="{ isOpen: true }" title="Try a solution">
+                        <div class="mt-2">
+                            <!-- code editor-->
+                            <x-code-editor />
+                        </div>
+                    </x-h-accordion>
 
-                    <!-- code editor-->
-                    <x-code-editor />
                 </div>
+
+                @if ($challenge)
+                <x-descr-list>
+                    <div class="flex items-center gap-x-3 justify-between">
+                        <div>
+                            Select another Topic
+                        </div>
+                        <div>
+                            Next challenge
+                        </div>
+                    </div>
+                </x-descr-list>
+                @endif
 
             </div>
 
             <!-- right panel -->
-            <div class="w-[30%]">
+            <div class="xl:w-[30%] w-full">
                 <div class="flex flex-col items-center gap-y-10 ">
                     
-                    <div class=" w-full text-center text-gray-950 dark:text-gray-100">
-                        @livewire('timer', ['time_limit' => $challenge->time_limit], key(uniqid()))
-                    </div>
+                    <!-- countdown timer -->
+                    <x-countdown-timer time_limit="{{ $challenge->time_limit }}" class="text-[1.5rem] text-gray-950 dark:text-gray-300 tracking-widest font-mono text-center w-full" />
+                    {{-- <x-countdown-timer time_limit="00:00:03" class="text-[1.5rem] text-gray-950 dark:text-gray-300 tracking-widest font-mono text-center w-full" /> --}}
 
+                    <!-- XP panel -->
                     <div class="grid grid-cols-2 items-center gap-1 justify-between w-full text-gray-950 dark:text-gray-400 bg-gray-200 dark:bg-gray-800 p-1 rounded-lg shadow">
-                        <div class="flex items-center gap-x-3 text-base justify-between bg-white dark:bg-gray-900 px-3 py-1.5 rounded-md w-full">
-                            <div>Challenge XP</div>
-                            <div class=" text-emerald-600 dark:text-emerald-400 font-semibold">
-                                +{{ $challenge->difficulty->base_xp }}
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-x-3 text-base justify-between bg-white dark:bg-gray-900 px-3 py-1.5 rounded-md w-full">
-                            <div>Bonus XP</div>
-                            <div class=" text-emerald-600 dark:text-emerald-400 font-semibold">
-                                +{{ '30' }}
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-x-3 text-base justify-between bg-white dark:bg-gray-900 px-3 py-1.5 rounded-md w-full">
-                            <div>Solved</div>
-                            <div class=" text-emerald-600 dark:text-emerald-400 font-semibold">
-                                {{ '6/45' }}
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-x-3 text-base justify-between bg-white dark:bg-gray-900 px-3 py-1.5 rounded-md w-full">
-                            <div>Tokens</div>
-                            <div class=" text-emerald-600 dark:text-emerald-400 font-semibold">
-                                {{ '130' }}
-                            </div>
-                        </div>
-                        <div class="flex col-span-2 items-center gap-x-3 text-base justify-between bg-white dark:bg-gray-900 px-3 py-1.5 rounded-md w-full">
-                            <div class=" text-gray-950 dark:text-gray-300 font-semibold">Total XP</div>
-                            <div class=" text-emerald-600 dark:text-emerald-400 font-semibold">
-                                {{ '130' }}
-                            </div>
-                        </div>
-                        
+                        <x-pill-xp label="Challenge XP">+{{ $challenge->difficulty->base_xp }}</x-pill-xp>
+                        <x-pill-xp label="Bonus XP">+{{ '30' }}</x-pill-xp>
+                        <x-pill-xp label="Solved">{{ '6/45' }}</x-pill-xp>
+                        <x-pill-xp label="Attempts">{{ '4' }}</x-pill-xp>
+                        <x-pill-xp label="Total XP" class="col-span-2">{{ '130' }}</x-pill-xp>
                     </div>
 
+                    <!-- A.I. chatbot panel -->
                     @livewire('chatbot', ['chat_welcome' => $chat_welcome])
-                    
                     
                 </div>
             </div>
@@ -130,19 +119,4 @@
         @endif
     </x-container>
 
-    @if ($challenge)
-    <x-container>
-        <x-descr-list>
-            <div class="flex items-center gap-x-3 justify-between">
-                <div>
-                    Previous challenge
-                </div>
-                <div>
-                    Next challenge
-                </div>
-            </div>
-        </x-descr-list>
-    </x-container>
-    @endif
-    
 </div>
