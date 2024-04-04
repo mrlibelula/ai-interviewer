@@ -11,7 +11,7 @@
 }
 
 .link {
-    @apply border-b border-dotted border-orange-700 dark:border-orange-300 decoration-0 cursor-pointer text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-gray-300 smooth-300;
+    @apply border-b border-dotted border-emerald-700 dark:border-emerald-300 decoration-0 cursor-pointer text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-gray-300 smooth-300;
 }
 
 .form-radio {

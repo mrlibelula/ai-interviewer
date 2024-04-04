@@ -1,4 +1,4 @@
-@props(['color' => '#f97316', 'value' => 0, 'symbol' => '%'])
+@props(['color' => '#2fd399', 'value' => 0, 'symbol' => '%'])
 <div>
     <div class="flex items-center justify-center w-[5rem] h-[5rem] rounded-full shadow-lg border-[2px] border-gray-200 dark:border-gray-700" 
         style="background: conic-gradient({{ $color }} {{ $value }}%, transparent {{ $value !== 0 ? 3 : $value }}%);"

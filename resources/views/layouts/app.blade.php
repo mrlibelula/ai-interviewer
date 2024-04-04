@@ -37,11 +37,20 @@
     </head>
 
     <body 
-        class="font-sans antialiased cursor-default dark:text-gray-400 text-xl bg-white dark:bg-gray-900 h-screen"
+        class="font-sans antialiased relative cursor-default dark:text-gray-400 text-xl bg-white dark:bg-gray-900 h-screen"
         {{-- :class="{ 'pattern-color-dark': darkMode, 'pattern-squares-light': !darkMode }" --}}
         style="background-attachment: fixed;"
         :style="'scrollbar-width: auto; ' + (darkMode ? 'scrollbar-color: #838a97 #161e2e;' : 'scrollbar-color: #374151 #ffffff;')"
     >
+        <svg viewBox="0 0 1024 1024" class="absolute left-1/2_ -top-[5rem] xl:-top-[30rem] top-[40%]_ _top-2/3 -z-10 h-[75rem]_ w-[75rem] -translate-y-1/2 [mask-image:radial-gradient(closest-side,white,transparent)] sm:left-full_ sm:-ml-80 _xl:left-1/2 left-1/4 xl:ml-0 xl:-translate-x-1/2 xl:translate-y-0" aria-hidden="true">
+            <circle cx="512" cy="512" r="512" fill="url(#759c1415-0410-454c-8f7c-9a820de03641)" fill-opacity="0.7" />
+            <defs>
+                <radialGradient id="759c1415-0410-454c-8f7c-9a820de03641">
+                    <stop :stop-color="darkMode ? '#434c5b' : '#e1e4e8'" />
+                    <stop offset="1" :stop-color="darkMode ? '#434c5b' : '#e1e4e8'" />
+                </radialGradient>
+            </defs>
+        </svg>
         <x-banner />
         <div class="flex">
             <!-- sidebar -->
@@ -64,7 +73,9 @@
                     @endif
                     <!-- content -->
                     <main class="w-full">
+                        
                         {{ $slot }}
+                        
                     </main>
                     
                     
