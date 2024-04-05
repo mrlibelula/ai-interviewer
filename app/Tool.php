@@ -650,4 +650,26 @@ class Tool
         }
         return $bonus_xp;
     }
+
+    /**
+     * Returns the number of challenges within a difficulty level
+     *
+     * @param string $difficulty_level
+     * @return integer|null
+     */
+    public static function challengesCountByDifficultyLevel(string $difficulty_level = 'easy'): int|null
+    {
+        return Difficulty::withCount('challenges')->where('name', strtolower($difficulty_level))->first()->challenges_count ?? 0;
+    }
+
+    /**
+     * Returns all Challenges count
+     *
+     * @return integer
+     */
+    public static function challengesCount(): int
+    {
+        return Challenge::select('id')->count();
+    }
+
 }

@@ -16,7 +16,7 @@ return new class extends Migration
             $table->unsignedBigInteger('challenge_id');
             $table->unsignedBigInteger('user_id');
             $table->string('current_time_limit')->default('00:00:00');
-            $table->integer('tries')->default(0);
+            $table->integer('attempts')->default(0);
             $table->integer('bonus_xp')->default(0);
             $table->text('solution_code')->default('');
             $table->mediumText('openai_chat_history')->default(json_encode([]));

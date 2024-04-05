@@ -64,11 +64,12 @@ class User extends Authenticatable
 
     /**
      * Many-to-many relationship with Challenge
+     * Challenges that the User attempted or solved
      */
     public function challenges()
     {
         return $this->belongsToMany(Challenge::class, 'challenge_solver')
-            ->withPivot('solved_at', 'current_time_limit', 'solution_code', 'tries', 'bonus_xp', 'openai_chat_history', 'observations')
+            ->withPivot('solved_at', 'current_time_limit', 'solution_code', 'attempts', 'bonus_xp', 'openai_chat_history', 'observations')
             ->withTimestamps();
     }
 

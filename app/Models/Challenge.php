@@ -130,11 +130,19 @@ class Challenge extends Model
 
     public static function byDifficulty(string $selected_difficulty, bool $ordered = true): Collection
     {
-        $difficulty_id = Difficulty::select('id', 'name')->where('name', '=', strtolower($selected_difficulty))->first()->id;
-        $builder = static::select('id', 'title')
-            ->where('difficulty_id', '=', $difficulty_id);
+        $builder = static::whereHas('difficulty', function($query) use($selected_difficulty) {
+            $query->where('name', $selected_difficulty);
+        });
         return $ordered ? $builder->orderBy('title', 'asc')->get() : $builder->get();
     }
+
+    // public static function byDifficulty(string $selected_difficulty, bool $ordered = true): Collection
+    // {
+    //     $difficulty_id = Difficulty::select('id', 'name')->where('name', '=', strtolower($selected_difficulty))->first()->id;
+    //     $builder = static::select('id', 'title')
+    //         ->where('difficulty_id', '=', $difficulty_id);
+    //     return $ordered ? $builder->orderBy('title', 'asc')->get() : $builder->get();
+    // }
 
     public static function byDifficultyAndTopic(string $selected_difficulty, int $topic_id, array $return_cols = ['id', 'title'], bool $ordered = true, string $order_by = 'title', string $order = 'asc'): Collection
     {

@@ -37,7 +37,7 @@
                             <x-h5>Difficulty level</x-h5>
                             <select wire:model.live='selected_difficulty' class="form-select w-full md:text-2xl">
                                 @foreach ($difficulties as $difficulty)
-                                <option value="{{ strtolower($difficulty->name) }}">{{ ucfirst($difficulty->name) }}</option>
+                                <option value="{{ strtolower($difficulty->name) }}">{{ ucfirst($difficulty->name) }} {{ ($nb = \App\Tool::challengesCountByDifficultyLevel($difficulty->name)) !== 0 ? '(' . $nb . ')' : '' }}</option>
                                 @endforeach
                             </select>
                         </div>

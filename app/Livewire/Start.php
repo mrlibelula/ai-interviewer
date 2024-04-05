@@ -20,6 +20,8 @@ class Start extends Component
     public array $challenge_attributes = [];
     public string $chat_welcome = "I'm thrilled to have you here, ready to tackle some coding questions and challenges. Whether you're here to refine your coding skills, seek advice, or simply looking for a friendly coding companion, you're in the right place!.??Feel free to ask any questions, I'm eager to assist you and provide constructive feedback to help you grow as a coder. Let's dive into the world of algorithms and problem-solving together!.??Ready to embark on this coding adventure? Just type away, and let's get started!.";
     public int $bonux_xp = 0;
+    public int $attempts = 0;
+    public int $total_challenges_count = 0;
 
     protected $listeners = ['getChallenge', 'sendMessage', 'timeLimitEnded'];
 
@@ -52,30 +54,45 @@ class Start extends Component
             ? Tool::fetchChallenge(array_shift($this->challenge_ids))
             : null;
 
-        // set challenge attributes for pivot table
+        // set Challenge attributes for pivot table
         if ($this->challenge) {
-            // attach challenge to current user
-            try {
-                $this->challenge_attributes = [
-                    'current_time_limit' => $this->challenge->time_limit, 
-                    'tries' => 0, 
-                    'bonus_xp' => 0, 
-                    'openai_chat_history' => json_encode([]), 
-                    'observations' => json_encode([]),
-                ];
+            // verify if Challenge is already attached to a User (solver)
+            $attempted_challenge = auth()->user()->challenges->where('id', '=', $this->challenge->id)->first();
 
-                auth()->user()->attachChallenge($this->challenge, $this->challenge_attributes);
-
-            } catch (UniqueConstraintViolationException $e) {
-                // challenge already attached to User, use current DB data instead
-                $this->challenge_attributes = auth()
-                    ->user()
-                    ->challenges
-                    ->where('id', '=', $this->challenge->id)
-                    ->first()
-                    ->pivot
-                    ->toArray();
+            // increment attempts
+            if ($attempted_challenge) {
+                // already attached
+                $challenge_attributes = $attempted_challenge->pivot;
+                $this->attempts = $challenge_attributes->attempts + 1;
+                $challenge_attributes->attempts = $this->attempts;
+                $challenge_attributes->save();
+                $this->challenge_attributes = $challenge_attributes->toArray();
+            } else {
+                // attach Challenge to current User (solver)
+                $this->attempts++;
+                try {
+                    $this->challenge_attributes = [
+                        'current_time_limit' => $this->challenge->time_limit, 
+                        'attempts' => $this->attempts, 
+                        'bonus_xp' => 0, 
+                        'openai_chat_history' => json_encode([]), 
+                        'observations' => json_encode([]),
+                    ];
+    
+                    auth()->user()->attachChallenge($this->challenge, $this->challenge_attributes);
+    
+                } catch (UniqueConstraintViolationException $e) {
+                    // challenge already attached to User, use current DB data instead
+                    $this->challenge_attributes = auth()
+                        ->user()
+                        ->challenges
+                        ->where('id', '=', $this->challenge->id)
+                        ->first()
+                        ->pivot
+                        ->toArray();
+                }
             }
+            
         }
         
     }
@@ -91,6 +108,7 @@ class Start extends Component
             });
         }
         if ($this->random) shuffle($this->challenge_ids);
+        $this->total_challenges_count = Tool::challengesCount();
     }
 
     public function mount(string $enc_selected_difficulty, string $enc_selected_topic_id, string|null $enc_challenge_id = null, string|null $challenge_slug = null)
@@ -102,6 +120,7 @@ class Start extends Component
         $this->challenge_slug = $challenge_slug;
         $this->getChallenges();
         $this->getChallenge();
+        $this->removeSolutionCode();
     }
 
     public function removeSolutionCode()
