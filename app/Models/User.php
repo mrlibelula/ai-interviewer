@@ -69,7 +69,7 @@ class User extends Authenticatable
     public function challenges()
     {
         return $this->belongsToMany(Challenge::class, 'challenge_solver')
-            ->withPivot('solved_at', 'current_time_limit', 'solution_code', 'attempts', 'bonus_xp', 'openai_chat_history', 'observations')
+            ->withPivot('solved_at', 'current_time_limit', 'solution_code', 'attempts', 'bonus_xp', 'openai_chat_settings', 'observations')
             ->withTimestamps();
     }
 
@@ -80,10 +80,10 @@ class User extends Authenticatable
      * @param array $attributes
      * @return void
      */
-    public function attachChallenge(Challenge $challenge, array $attributes = [])
-    {
-        return $this->challenges()->attach($challenge, $attributes);
-    }
+        public function attachChallenge(Challenge $challenge, array $attributes = [])
+        {
+            return $this->challenges()->attach($challenge, $attributes);
+        }
 
     /**
      * Detaches Challenge from User
@@ -94,5 +94,16 @@ class User extends Authenticatable
     public function detachChallenge(Challenge $challenge)
     {
         return $this->challenges()->detach($challenge);
+    }
+
+    /**
+     * Updates the "Solver" pivot table extra attributes 
+     *
+     * @param Challenge $challenge
+     * @return integer
+     */
+    public function updateChallenge(Challenge $challenge, array $attributes): int
+    {
+        return $this->challenges()->updateExistingPivot($challenge, $attributes);
     }
 }

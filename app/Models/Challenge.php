@@ -15,6 +15,13 @@ class Challenge extends Model
     protected $guarded = [];
     protected $dates = ['deleted_at'];
 
+    public function users()
+    {
+        return $this->belongsToMany(User::class, 'challenge_solver')
+            ->withPivot('solved_at', 'current_time_limit', 'solution_code', 'attempts', 'bonus_xp', 'openai_chat_settings', 'observations')
+            ->withTimestamps();
+    }
+
     public function difficulty()
     {
         return $this->belongsTo(Difficulty::class, 'difficulty_id');

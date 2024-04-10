@@ -149,6 +149,31 @@ class Tool
     }
 
     /**
+     * Prompts OpenAI and obtains array of completion messages
+     *
+     * @param array $messages
+     * @return \OpenAI\Responses\Chat\CreateResponse
+     */
+    public static function getLLMCompletion(array $messages = ['role' => 'user', 'content' => 'hi']): \OpenAI\Responses\Chat\CreateResponse
+    {
+        $result = [];
+        try {
+            $completion = OpenAI::chat()->create([
+                'model' => env('OPENAI_MODEL'), 
+                'messages' => $messages, 
+            ]);
+            // info($messages);
+            return $completion;
+        } catch (\OpenAI\Exceptions\ErrorException $ee) {
+            dump($ee->getMessage());
+        } catch (\OpenAI\Exceptions\TransporterException $te) {
+            dump($te->getMessage());
+        }
+
+        return $result;
+    }
+
+    /**
      * Obtains a LLM completion response from given prompt
      *
      * @param string $prompt
@@ -193,9 +218,9 @@ class Tool
 
             // emulated Challenge Model response property
             $emulated_challenge_model = new Challenge;
-            $emulated_challenge_model->title = $challenge->title;
-            $emulated_challenge_model->description = $challenge->challenge;
-            $emulated_challenge_model->challenge_slug = Str::slug($challenge->title);
+            $emulated_challenge_model->title = $challenge->title ?? 'n/a';
+            $emulated_challenge_model->description = $challenge->challenge ?? 'n/a';
+            $emulated_challenge_model->challenge_slug = Str::slug($challenge->title ?? 'n/a');
             $emulated_challenge_model->difficulty_id = Difficulty::where('name', 'like', '%' . $challenge->difficulty_level . '%')->first()->id;
             $emulated_challenge_model->test_cases = json_encode($challenge->test_cases);
             $emulated_challenge_model->hints = $challenge->hints;
@@ -514,6 +539,22 @@ class Tool
 
         return $blueprint;
     }
+
+    /**
+     * Replace wildcards on a blueprint prompt
+     *
+     * @param string $blueprint
+     * @param Collection $wildcards
+     * @return void
+     */
+    public static function replaceWildcards(string $blueprint, Collection $wildcards)
+    {
+        $wildcards->each(function ($wildcard, $key) use (&$blueprint) {
+            $blueprint = self::regExWildcardReplacement($blueprint, $key, $wildcard);
+        });
+
+        return $blueprint;
+    }
     
     /**
      * Regular expression " ??wildcard " replacement
@@ -601,7 +642,7 @@ class Tool
     }
 
     /**
-     * Returns a Challenge Model without 'solution code'
+     * Returns a Challenge Model
      *
      * @param integer $challenge_id
      * @param array $select
@@ -618,7 +659,8 @@ class Tool
         'frameworks', 
         'packages', 
         'topics',
-        'creators'
+        'creators',
+        'users',
     ], bool $append_ai_solution = false): Challenge|null
     {
         $challenge = Challenge::select(...$select)
@@ -671,5 +713,30 @@ class Tool
     {
         return Challenge::select('id')->count();
     }
+    
+    /**
+     * Validate string time format "H:i:s"
+     *
+     * @param string $time_limit
+     * @return boolean
+     */
+    public static function validateTimeLimitString(string $time_limit): bool
+    {
+        $pattern = '/^(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d$/';
+        return preg_match($pattern, $time_limit);
+    }
 
+    /**
+     * Removes line breaks "\n" and replaces them with "<br>"
+     * and also removes triple tick code block
+     *
+     * @param string $completion
+     * @return string
+     */
+    public static function prepareAiAnswerString(string $completion): string
+    {
+        $completion = preg_replace('/\n/', '??', $completion);
+        $completion = preg_replace('/```(javascript)?/', '', $completion);
+        return $completion;
+    }
 }

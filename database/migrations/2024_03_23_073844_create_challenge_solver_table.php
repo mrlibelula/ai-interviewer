@@ -12,14 +12,19 @@ return new class extends Migration
     public function up(): void
     {
         // challenge solver
-        Schema::create('challenge_solver', function (Blueprint $table) {
+
+        $openai_chat_settings = [
+            'messages' => [],
+        ];
+
+        Schema::create('challenge_solver', function (Blueprint $table) use ($openai_chat_settings) {
             $table->unsignedBigInteger('challenge_id');
             $table->unsignedBigInteger('user_id');
             $table->string('current_time_limit')->default('00:00:00');
             $table->integer('attempts')->default(0);
             $table->integer('bonus_xp')->default(0);
             $table->text('solution_code')->default('');
-            $table->mediumText('openai_chat_history')->default(json_encode([]));
+            $table->mediumText('openai_chat_settings')->default(json_encode($openai_chat_settings));
             $table->dateTime('solved_at')->nullable();
             $table->timestamps();
             $table->text('observations')->default(json_encode([]));

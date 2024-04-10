@@ -20,12 +20,16 @@
         <div @click.prevent="$dispatch('sendMessage', { chat_message })" class="absolute right-[1rem] top-[1rem] p-1 group cursor-pointer">
             <x-icon-paper-plane class="w-6 h-6 text-gray-600 dark:text-indigo-500 group-hover:text-black group-hover:dark:text-gray-400 smooth-300" stroke-width="2" />
         </div>
+        <script>
+            document.getElementById('chat-textarea').addEventListener('keydown', function(event) {
+                if (event.key === 'Enter') event.preventDefault()
+            })
+
+            document.addEventListener('appended-chat-message', function(event) {
+                document.getElementById('chat-textarea').value = ''
+            })
+        </script>
     </div>
 
-    <script>
-        document.getElementById('chat-textarea').addEventListener('keydown', function(event) {
-            if (event.key === 'Enter') event.preventDefault()
-        })
-    </script>
 
 </div>

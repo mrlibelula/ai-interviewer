@@ -1,4 +1,4 @@
-@props(['divId' => 'chat-01', 'avatar' => '🤖', 'user' => 'Chatbot', 'color' => 'sky', 'text' => '', 'speed' => 50])
+@props(['divId' => 'chat-01', 'avatar' => '🤖', 'user' => 'Chatbot', 'color' => 'sky', 'role' => '', 'content' => '', 'speed' => 50, 'animate' => true])
 @php
     $tw_colors = [
         'sky' => 'text-sky-700 dark:text-sky-400',
@@ -11,12 +11,42 @@
 @endphp
 <div class="flex flex-col gap-y-1">
     <span class="{{ $tw_color }} font-semibold">{{ $avatar }} {{ $user }}:</span>
-    <div id="{{ $divId }}" 
-        x-init="slowTextDisplay('{{ $text }}', {{ (int)$speed }}, '{{ $divId }}')"
-    ></div>
+    <code id="{{ $divId }}" 
+    @if ($animate)
+    x-init="slowTextDisplay('{{ \App\Tool::prepareAiAnswerString($content) }}', {{ (int)$speed }}, '{{ $divId }}')"
+    @else
+    x-init="textDisplay('{{ \App\Tool::prepareAiAnswerString($content) }}', '{{ $divId }}')"
+    @endif
+    ></code>
 
     <script>
         let intervalId
+
+        function textDisplay(text, divId) {
+            const originalText = text
+            const parts = text.split(/(\s+)/);
+            let index = 0;
+
+            parts.forEach(part => {
+                if (index < parts.length) {
+                    // var part = parts[index];
+                    const chatElement = document.getElementById(divId);
+                    part = decodeHTML(part);
+                    var splits = part.split('??')
+                    if (splits.length > 1) {
+                        chatElement.appendChild(document.createTextNode(splits[0]));
+                        chatElement.appendChild(document.createElement("br"));
+                        chatElement.appendChild(document.createElement("br"));
+                        chatElement.appendChild(document.createTextNode(splits[1]));
+                    } else {
+                        chatElement.appendChild(document.createTextNode(splits[0]));
+                    }
+                    index++;
+                }
+            })
+
+            return originalText
+        }
 
         function slowTextDisplay(text, delay = 100, elementId = 'chat') {
             const originalText = text

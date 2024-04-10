@@ -31,7 +31,18 @@
             }
         }
 
+        function sendEventToIframe() {
+            var message = 'Hello from parent!'
+            iframe.contentWindow.postMessage(message, '*')
+        }
+
         // Add click event listener to the iframe
         fullscreenIcon.addEventListener('click', toggleFullScreen);
+
+        // listen for messages from the iframe
+        document.addEventListener('iframe-message', event => {
+            console.log('recieved from iframe', event.data)
+        })
+        
     </script>
 </div>

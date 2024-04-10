@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Tool;
 use Carbon\CarbonInterval;
 use Livewire\Component;
 
@@ -21,7 +22,9 @@ class ChallengeCard extends Component
      */
     public function timeLimit(string $time_limit): string
     {
-        $time = CarbonInterval::createFromFormat('H:i:s', $time_limit);
+        $time = Tool::validateTimeLimitString($time_limit) 
+            ? CarbonInterval::createFromFormat('H:i:s', $time_limit)
+            : CarbonInterval::createFromFormat('H:i:s', '00:00:00');
         return $time->forHumans();
     }
 

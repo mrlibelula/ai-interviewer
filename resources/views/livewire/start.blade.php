@@ -102,14 +102,18 @@
                     <!-- XP panel -->
                     <div class="grid grid-cols-2 items-center gap-1 justify-between w-full text-gray-950 dark:text-gray-400 bg-gray-200 dark:bg-gray-800 p-1 rounded-lg shadow">
                         <x-pill-xp label="Challenge XP">+{{ $challenge->difficulty->base_xp }}</x-pill-xp>
-                        <x-pill-xp label="Bonus XP">+{{ '0' }}</x-pill-xp>
+                        <x-pill-xp label="Bonus XP">+{{ $this->bonus_xp }}</x-pill-xp>
                         <x-pill-xp label="Solved">{{ '0/' . $total_challenges_count }}</x-pill-xp>
                         <x-pill-xp label="Attempts">{{ $attempts }}</x-pill-xp>
                         <x-pill-xp label="Total XP" class="col-span-2">{{ '0' }}</x-pill-xp>
                     </div>
 
                     <!-- A.I. chatbot panel -->
-                    @livewire('chatbot', ['chat_welcome' => $chat_welcome])
+                    @livewire('chatbot', [
+                        'challenge' => $challenge,
+                        'chat_welcome' => $chat_welcome,
+                        'openai_chat_settings' => $openai_chat_settings,
+                    ])
                     
                 </div>
             </div>
