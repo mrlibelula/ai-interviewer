@@ -31,18 +31,35 @@
             }
         }
 
-        function sendEventToIframe() {
-            var message = 'Hello from parent!'
+        function sendEventToIframe(message = { getCode: false, runCode: false }) {
             iframe.contentWindow.postMessage(message, '*')
         }
 
         // Add click event listener to the iframe
         fullscreenIcon.addEventListener('click', toggleFullScreen);
 
-        // listen for messages from the iframe
-        document.addEventListener('iframe-message', event => {
-            console.log('recieved from iframe', event.data)
+        document.addEventListener('analyze-code', () => {
+            sendEventToIframe({ getCode: true, runCode: false });
         })
+
+        document.addEventListener('run-code', () => {
+            sendEventToIframe({ getCode: false, runCode: true });
+        })
+
+        // listen for messages from the iframe
+        window.addEventListener('message', event => {
+            if (event.source === iframe.contentWindow) {
+                // Access the user-code sent from the iframe
+                var codeFromIframe = event.data.code;
+                sendCode(codeFromIframe)
+            }
+        })
+
+        function sendCode(code) {
+            // send code to backend for revision
+            const event = new CustomEvent('userCode', { detail: { code } })
+            window.dispatchEvent(event)
+        }
         
     </script>
 </div>

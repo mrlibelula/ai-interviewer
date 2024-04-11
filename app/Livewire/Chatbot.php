@@ -18,7 +18,52 @@ class Chatbot extends Component
     public string $chatbot_color = 'sky';
     public string $chatbot_avatar = '🤖';
 
-    protected $listeners = ['appended-chat-message' => 'appendedChatMessage'];
+    protected $listeners = ['appended-chat-message' => 'appendedChatMessage', 'userCode'];
+
+    public function userCode(string $code)
+    {
+        $this->messages[] = [
+            'role' => 'user',
+            'content' => 'Please analyze my code',
+        ];
+
+        $blueprint = env('OPENAI_ANALYZE_USER_CODE_PROMPT_BASE_TEXT');
+        $prompt = Tool::replaceWildcards($blueprint, collect([
+            'user_code' => $code,
+            'challenge' => $this->challenge->title . '(' . $this->challenge->description . ')',
+        ]));
+        
+        $this->messages[] = [
+            'role' => 'system',
+            'content' => $prompt,
+        ];
+
+        $this->openai_chat_settings['messages'] = $this->messages;
+        auth()->user()->updateChallenge($this->challenge, ['openai_chat_settings' => $this->openai_chat_settings]);
+
+        $completion = Tool::getLLMCompletion($this->messages);
+        
+        $completion_role = $completion->choices[0]->message->role;
+        $completion_content = $completion->choices[0]->message->content;
+
+        $content_parts = explode('%%%%%', $completion_content);
+        
+        $content = trim($content_parts[0]) ?? '';
+        $solved = filter_var(strtolower(trim($content_parts[1] ?? 'false')), FILTER_VALIDATE_BOOLEAN);
+
+        info('Chatbot::userCode:54');
+        info([$this->challenge->title . ' (' . $this->challenge->id . ')' => ['user' => auth()->user()->email, 'solved' => $solved]]);
+        if ($solved) $this->dispatch('challengeSolved', ['challenge_id' => $this->challenge->id, 'solved' => $solved]);
+
+        array_push($this->messages, [
+            'role' => $completion_role,
+            'content' => $content,
+        ]);
+
+        // save data
+        $this->openai_chat_settings['messages'] = $this->messages;
+        auth()->user()->updateChallenge($this->challenge, ['openai_chat_settings' => $this->openai_chat_settings]);
+    }
 
     public function appendedChatMessage(array $openai_chat_settings)
     {

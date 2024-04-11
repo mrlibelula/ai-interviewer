@@ -11,13 +11,13 @@
 @endphp
 <div class="flex flex-col gap-y-1">
     <span class="{{ $tw_color }} font-semibold">{{ $avatar }} {{ $user }}:</span>
-    <code id="{{ $divId }}" 
+    <div class=" font-mono" id="{{ $divId }}" 
     @if ($animate)
     x-init="slowTextDisplay('{{ \App\Tool::prepareAiAnswerString($content) }}', {{ (int)$speed }}, '{{ $divId }}')"
     @else
     x-init="textDisplay('{{ \App\Tool::prepareAiAnswerString($content) }}', '{{ $divId }}')"
     @endif
-    ></code>
+    ></div>
 
     <script>
         let intervalId
@@ -37,7 +37,12 @@
                         chatElement.appendChild(document.createTextNode(splits[0]));
                         chatElement.appendChild(document.createElement("br"));
                         chatElement.appendChild(document.createElement("br"));
-                        chatElement.appendChild(document.createTextNode(splits[1]));
+                        let key = 1
+                        if (splits[key] === '') key++
+                        if (splits[key] === '') key++
+                        if (splits[key] === '') key++
+                        if (splits[key] === '') key++
+                        chatElement.appendChild(document.createTextNode(capitalizeFirstLetter(splits[key])));
                     } else {
                         chatElement.appendChild(document.createTextNode(splits[0]));
                     }
@@ -53,17 +58,23 @@
             const parts = text.split(/(\s+)/);
             let index = 0;
 
-            intervalId = setInterval(function() {
+            const intervalId = setInterval(function() {
                 if (index < parts.length) {
                     var part = parts[index];
                     const chatElement = document.getElementById(elementId);
                     part = decodeHTML(part);
                     var splits = part.split('??')
                     if (splits.length > 1) {
+                        //console.log('splits', splits)
                         chatElement.appendChild(document.createTextNode(splits[0]));
                         chatElement.appendChild(document.createElement("br"));
                         chatElement.appendChild(document.createElement("br"));
-                        chatElement.appendChild(document.createTextNode(splits[1]));
+                        let key = 1
+                        if (splits[key] === '') key++
+                        if (splits[key] === '') key++
+                        if (splits[key] === '') key++
+                        if (splits[key] === '') key++
+                        chatElement.appendChild(document.createTextNode(capitalizeFirstLetter(splits[key])));
                     } else {
                         chatElement.appendChild(document.createTextNode(splits[0]));
                     }
@@ -74,6 +85,10 @@
             }, delay);
 
             return originalText
+        }
+
+        function capitalizeFirstLetter(str) {
+            return str.charAt(0).toUpperCase() + str.slice(1);
         }
 
         function decodeHTML(html) {

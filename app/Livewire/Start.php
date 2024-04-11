@@ -44,11 +44,9 @@ class Start extends Component
         $this->openai_chat_settings['messages'][] = [
             'role' => 'user',
             'content' => $chat_message,
-            // 'temperature' => 0.7,
-            // 'max_tokens' => 64,
-            // 'top_p' => 1
         ];
-        
+
+        // append chat message
         $this->dispatch('appended-chat-message', $this->openai_chat_settings);
     }
 

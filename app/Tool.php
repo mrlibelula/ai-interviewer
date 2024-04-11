@@ -545,9 +545,9 @@ class Tool
      *
      * @param string $blueprint
      * @param Collection $wildcards
-     * @return void
+     * @return string
      */
-    public static function replaceWildcards(string $blueprint, Collection $wildcards)
+    public static function replaceWildcards(string $blueprint, Collection $wildcards): string
     {
         $wildcards->each(function ($wildcard, $key) use (&$blueprint) {
             $blueprint = self::regExWildcardReplacement($blueprint, $key, $wildcard);
@@ -727,8 +727,9 @@ class Tool
     }
 
     /**
-     * Removes line breaks "\n" and replaces them with "<br>"
-     * and also removes triple tick code block
+     * Removes line breaks "\n" and replaces them with "??" wildcard
+     * and also removes triple tick code block and returns chars intead of HTML entities
+     * Returns string with slashes in quotation marks if needed
      *
      * @param string $completion
      * @return string
@@ -737,6 +738,7 @@ class Tool
     {
         $completion = preg_replace('/\n/', '??', $completion);
         $completion = preg_replace('/```(javascript)?/', '', $completion);
-        return $completion;
+        $return = htmlspecialchars_decode($completion);
+        return addslashes($return);
     }
 }
