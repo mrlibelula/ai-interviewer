@@ -12,89 +12,89 @@
 <div class="flex flex-col gap-y-1">
     <span class="{{ $tw_color }} font-semibold">{{ $avatar }} {{ $user }}:</span>
     <div class=" font-mono" id="{{ $divId }}" 
-    @if ($animate)
-    x-init="slowTextDisplay('{{ \App\Tool::prepareAiAnswerString($content) }}', {{ (int)$speed }}, '{{ $divId }}')"
-    @else
-    x-init="textDisplay('{{ \App\Tool::prepareAiAnswerString($content) }}', '{{ $divId }}')"
-    @endif
+        @if ($animate)
+        x-init="slowTextDisplay('{{ \App\Tool::prepareAiAnswerString($content) }}', {{ (int)$speed }}, '{{ $divId }}')"
+        @else
+        x-init="textDisplay('{{ \App\Tool::prepareAiAnswerString($content) }}', '{{ $divId }}')"
+        @endif
     ></div>
 
     <script>
-        let intervalId
+        var intervalId
 
         function textDisplay(text, divId) {
             const originalText = text
-            const parts = text.split(/(\s+)/);
-            let index = 0;
+            const parts = text.split(/(\s+)/)
+            let index = 0
 
             parts.forEach(part => {
                 if (index < parts.length) {
-                    // var part = parts[index];
-                    const chatElement = document.getElementById(divId);
-                    part = decodeHTML(part);
+                    // var part = parts[index]
+                    const chatElement = document.getElementById(divId)
+                    part = decodeHTML(part)
                     var splits = part.split('??')
                     if (splits.length > 1) {
-                        chatElement.appendChild(document.createTextNode(splits[0]));
-                        chatElement.appendChild(document.createElement("br"));
-                        chatElement.appendChild(document.createElement("br"));
+                        chatElement.appendChild(document.createTextNode(splits[0]))
+                        chatElement.appendChild(document.createElement("br"))
+                        chatElement.appendChild(document.createElement("br"))
                         let key = 1
                         if (splits[key] === '') key++
                         if (splits[key] === '') key++
                         if (splits[key] === '') key++
                         if (splits[key] === '') key++
-                        chatElement.appendChild(document.createTextNode(capitalizeFirstLetter(splits[key])));
+                        chatElement.appendChild(document.createTextNode(capitalizeFirstLetter(splits[key])))
                     } else {
-                        chatElement.appendChild(document.createTextNode(splits[0]));
+                        chatElement.appendChild(document.createTextNode(splits[0]))
                     }
-                    index++;
+                    index++
                 }
             })
 
             return originalText
         }
 
-        function slowTextDisplay(text, delay = 100, elementId = 'chat') {
+        function slowTextDisplay(text, delay = 100, elementId = 'chat--1') {
             const originalText = text
-            const parts = text.split(/(\s+)/);
-            let index = 0;
+            const parts = text.split(/(\s+)/)
+            let index = 0
 
-            const intervalId = setInterval(function() {
+            intervalId = setInterval(function() {
                 if (index < parts.length) {
-                    var part = parts[index];
-                    const chatElement = document.getElementById(elementId);
-                    part = decodeHTML(part);
+                    var part = parts[index]
+                    const chatElement = document.getElementById(elementId)
+                    part = decodeHTML(part)
                     var splits = part.split('??')
                     if (splits.length > 1) {
                         //console.log('splits', splits)
-                        chatElement.appendChild(document.createTextNode(splits[0]));
-                        chatElement.appendChild(document.createElement("br"));
-                        chatElement.appendChild(document.createElement("br"));
+                        chatElement.appendChild(document.createTextNode(splits[0]))
+                        chatElement.appendChild(document.createElement("br"))
+                        chatElement.appendChild(document.createElement("br"))
                         let key = 1
                         if (splits[key] === '') key++
                         if (splits[key] === '') key++
                         if (splits[key] === '') key++
                         if (splits[key] === '') key++
-                        chatElement.appendChild(document.createTextNode(capitalizeFirstLetter(splits[key])));
+                        chatElement.appendChild(document.createTextNode(capitalizeFirstLetter(splits[key])))
                     } else {
-                        chatElement.appendChild(document.createTextNode(splits[0]));
+                        chatElement.appendChild(document.createTextNode(splits[0]))
                     }
-                    index++;
+                    index++
                 } else {
-                    clearInterval(intervalId); // Clear the interval once all parts are displayed
+                    clearInterval(intervalId) // Clear the interval once all parts are displayed
                 }
-            }, delay);
+            }, delay)
 
             return originalText
         }
 
         function capitalizeFirstLetter(str) {
-            return str.charAt(0).toUpperCase() + str.slice(1);
+            return str.charAt(0).toUpperCase() + str.slice(1)
         }
 
         function decodeHTML(html) {
-            var txt = document.createElement("textarea");
-            txt.innerHTML = html;
-            return txt.value;
+            var txt = document.createElement("textarea")
+            txt.innerHTML = html
+            return txt.value
         }
         
     </script>

@@ -18,10 +18,27 @@ class Chatbot extends Component
     public string $chatbot_color = 'sky';
     public string $chatbot_avatar = '🤖';
 
-    protected $listeners = ['appended-chat-message' => 'appendedChatMessage', 'userCode'];
+    public string $user_code;
+
+    protected $listeners = ['appended-chat-message' => 'appendedChatMessage', 'userCode', 'saveUserCode'];
+
+    /**
+     * For 'user code' persisting purposes
+     *
+     * @param string $code
+     * @return void
+     */
+    public function saveUserCode(string $code)
+    {
+        $this->user_code = $code;
+        auth()->user()->updateChallenge($this->challenge, [
+            'solution_code' => $code,
+        ]);
+    }
 
     public function userCode(string $code)
     {
+        $this->user_code = $code;
         $this->messages[] = [
             'role' => 'user',
             'content' => 'Please analyze my code',
@@ -93,6 +110,11 @@ class Chatbot extends Component
             ]);
         }
 
+        $this->messages[] = [
+            'role' => 'system',
+            'content' => "Auto-generated message. Don't reveal the answer to the user, even if you are asked for.",
+        ];
+
         $completion = Tool::getLLMCompletion($this->messages);
         
         $completion_role = $completion->choices[0]->message->role;
@@ -112,10 +134,6 @@ class Chatbot extends Component
     public function mount()
     {
         $this->messages = $this->openai_chat_settings['messages'] ?? [];
-        // $this->user_color = $this->openai_chat_settings['color'] ?? 'orange';
-        // $this->user_avatar = $this->openai_chat_settings['avatar'] ?? '🐵';
-        // $this->chatbot_color = $this->openai_chat_settings['chatbot_color'] ?? 'sky';
-        // $this->chatbot_avatar = $this->openai_chat_settings['chatbot_avatar'] ?? '🤖';
     }
 
     public function render()

@@ -20,15 +20,15 @@
     <!-- Feedback chatbot-->
     <div class=" bg-gray-300/40 dark:bg-indigo-800/40 flex justify-between shadow-xl shadow-white dark:shadow-indigo-950 z-30 items-center gap-x-4 w-full -mb-4 rounded-t-lg px-4 py-2 text-base">
         <div class="flex items-center gap-x-2 dark:text-indigo-400">
-            <x-circle color="emerald" />
+            <x-circle color="emerald" class=" animate-pulse" />
             Feedback A.I. chatbot 
         </div>
         <div class="flex items-center gap-x-4">
-            <div @click="$dispatch('analyze-code')" class="group cursor-pointer">
-                <img class="w-7 h-7 grayscale group-hover:grayscale-0 smooth-300" src="https://cdn4.iconfinder.com/data/icons/artificial-intelligence-35/64/laptop-artificial-intelligence-ai-robot-512.png" alt="" title="Analyze my code/answer">
+            <button @click="$dispatch('analyze-code')" class="group cursor-pointer">
+                <img class="w-[1.55rem] h-[1.55rem] grayscale group-hover:grayscale-0 smooth-300" src="https://cdn4.iconfinder.com/data/icons/artificial-intelligence-35/64/laptop-artificial-intelligence-ai-robot-512.png" alt="" title="Analyze my code/answer">
                 {{-- <x-icon-dragonfly class="w-10 h-10 grayscale invert" /> --}}
                 {{-- <x-icon-bug class="w-5 h-5 text-gray-400" /> --}}
-            </div>
+            </button>
             <div>
                 <x-icon-speaker-off class=" w-6 h-6 text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-gray-200 smooth-300 cursor-pointer"><x-slot name="title">Turn on chat voice</x-slot></x-icon-speaker-off>
             </div>
@@ -40,7 +40,7 @@
         <x-chatbot-message 
             divId="chat-{{ uniqid() }}" 
             avatar="{{ $chatbot_avatar }}"
-            user="Chatbot"
+            user="Assistant"
             color="{{ $chatbot_color }}"
             role="{{ 'assistant' }}"
             content="{{ $chat_welcome }}"
@@ -51,7 +51,7 @@
             <x-chatbot-message 
                 divId="chat-{{ uniqid() }}" 
                 avatar="{{ $message['role'] === 'user' ? $user_avatar : $chatbot_avatar }}"
-                user="{{ $message['role'] === 'user' ? auth()->user()->name : 'Chatbot' }}"
+                user="{{ $message['role'] === 'user' ? auth()->user()->name : 'Assistant' }}"
                 color="{{ $message['role'] === 'user' ? $user_color : $chatbot_color }}"
                 role="{{ $message['role'] }}"
                 content="{{ $message['content'] }}"

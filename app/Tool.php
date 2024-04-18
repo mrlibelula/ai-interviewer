@@ -541,7 +541,7 @@ class Tool
     }
 
     /**
-     * Replace wildcards on a blueprint prompt
+     * Replace wildcards on a blueprint GPT prompt
      *
      * @param string $blueprint
      * @param Collection $wildcards

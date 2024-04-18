@@ -10,6 +10,6 @@
     ];
     $tw_color = $tw_colors[$color] ?? $tw_colors['emerald'];
 @endphp
-<div class="{{ $tw_color }} w-2.5 h-2.5 rounded-full">
+<div {{ $attributes->merge(['class' => $tw_color . ' w-2.5 h-2.5 rounded-full']) }}>
     &nbsp;
 </div>

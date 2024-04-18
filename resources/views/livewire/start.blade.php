@@ -70,7 +70,7 @@
                     <x-h-accordion x-data="{ isOpen: true }" title="Try a solution">
                         <div class="mt-2">
                             <!-- code editor-->
-                            <x-code-editor />
+                            <x-code-editor solverCode="{{ $challenge_attributes['solution_code'] ?? '' }}" />
                         </div>
                     </x-h-accordion>
 

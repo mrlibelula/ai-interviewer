@@ -82,7 +82,6 @@ class Start extends Component
                 $challenge_attributes->save();
 
                 $this->challenge_attributes = $challenge_attributes->toArray();
-
                 $this->openai_chat_settings = json_decode($challenge_attributes->openai_chat_settings, true);
                 
             } else {
