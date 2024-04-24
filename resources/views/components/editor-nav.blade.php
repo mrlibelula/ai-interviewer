@@ -9,10 +9,10 @@
         </div>
     </div>
     <div class="flex items-center gap-x-2">
-        <div class="text-base hover:dark:text-emerald-400 smooth-300 border rounded shadow hover:bg-gray-100 dark:hover:bg-transparent dark:border-gray-600 dark:hover:border-emerald-500 px-3 cursor-pointer">
+        <div @click="$dispatch('run-code')" class="text-base hover:dark:text-emerald-400 smooth-300 border rounded shadow hover:bg-gray-100 dark:hover:bg-transparent dark:border-gray-600 dark:hover:border-emerald-500 px-3 cursor-pointer">
             Run
         </div>
-        <div class="text-base hover:dark:text-emerald-400 smooth-300 border rounded shadow hover:bg-gray-100 dark:hover:bg-transparent dark:border-gray-600 dark:hover:border-emerald-500 px-3 cursor-pointer">
+        <div @click="$dispatch('analyze-code')" class="text-base hover:dark:text-emerald-400 smooth-300 border rounded shadow hover:bg-gray-100 dark:hover:bg-transparent dark:border-gray-600 dark:hover:border-emerald-500 px-3 cursor-pointer">
             A.I. Analyzer
         </div>
     </div>

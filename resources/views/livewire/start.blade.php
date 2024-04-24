@@ -26,16 +26,14 @@
                     @endforeach
                 </div>
             </x-slot>
-            {{-- <x-slot name="right">
+            <x-slot name="right">
                 <div class="flex items-center gap-x-4">
-                    @if ($challenge)
-                    <!-- <x-button @click="$dispatch('getChallenge')" class=" whitespace-nowrap"> -->
-                    <x-button class=" whitespace-nowrap">
-                        Finish
-                    </x-button>
+                    @if ($is_challenge_solved)
+                    <x-icon-star class="w-[2.7rem] h-[2.7rem] text-amber-500 dark:text-amber-300 animate-spin-y" fill="currentColor" />
+                    {{-- <x-icon-shield /> --}}
                     @endif
                 </div>
-            </x-slot> --}}
+            </x-slot>
         </x-heading-content>
         @else
         <x-heading-content title="Congratulations!!" subtitle="You've finished all the challenges in this topic">
@@ -76,18 +74,9 @@
 
                 </div>
 
-                @if ($challenge)
-                <x-descr-list>
-                    <div class="flex items-center gap-x-3 justify-between">
-                        <div>
-                            Select another Topic
-                        </div>
-                        <div>
-                            Next challenge
-                        </div>
-                    </div>
-                </x-descr-list>
-                @endif
+                <div>
+                    &nbsp;
+                </div>
 
             </div>
 
@@ -103,7 +92,7 @@
                     <div class="grid grid-cols-2 items-center gap-1 justify-between w-full text-gray-950 dark:text-gray-400 bg-gray-200 dark:bg-gray-800 p-1 rounded-lg shadow">
                         <x-pill-xp label="Challenge XP">+{{ $challenge->difficulty->base_xp }}</x-pill-xp>
                         <x-pill-xp label="Bonus XP">+{{ $this->bonus_xp }}</x-pill-xp>
-                        <x-pill-xp label="Solved">{{ '0/' . $total_challenges_count }}</x-pill-xp>
+                        <x-pill-xp label="Solved">{{ $solved_challenges_count . '/' . $total_challenges_count }}</x-pill-xp>
                         <x-pill-xp label="Attempts">{{ $attempts }}</x-pill-xp>
                         <x-pill-xp label="Total XP" class="col-span-2">{{ '0' }}</x-pill-xp>
                     </div>
@@ -114,6 +103,16 @@
                         'chat_welcome' => $chat_welcome,
                         'openai_chat_settings' => $openai_chat_settings,
                     ])
+
+                    @if ($challenge)
+                    <div class="flex items-center gap-x-3 justify-between mt-16">
+                        @if ($is_challenge_solved)
+                        <x-secondary-button>
+                            Next challenge
+                        </x-secondary-button>
+                        @endif
+                    </div>
+                    @endif
                     
                 </div>
             </div>

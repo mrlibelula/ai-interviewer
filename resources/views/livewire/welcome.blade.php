@@ -4,6 +4,10 @@
     <x-dashboard-item title="Progress summary" x-data="{ isOpen: true }" class=" md:col-span-2">
         <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
             <div class="flex items-center gap-x-6">
+                <x-progress-circle value="{{ $perc_solved }}" />
+                <div>Solved challenges</div>
+            </div>
+            <div class="flex items-center gap-x-6">
                 <x-progress-circle value="90" />
                 <div>Sociability</div>
             </div>
@@ -35,7 +39,13 @@
 
     <!-- completed challenges -->
     <x-dashboard-item title="Completed challenges">
-        
+        <ul>
+            @foreach ($solved_challenges as $solved_challenge)
+                <li>
+                    <x-dot />{{ $solved_challenge->title }}
+                </li>
+            @endforeach
+        </ul>
     </x-dashboard-item>
 
     <!-- performance -->

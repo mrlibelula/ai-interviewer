@@ -85,6 +85,14 @@
                                 @endif
                                 </div>
                             </td>
+                            <td class="py-6 px-2 w-36">
+                                @if (\App\Tool::isChallengeSolved($challenge))
+                                <div class="flex items-center gap-x-3 justify-end">
+                                    <x-icon-star class="w-[2rem] h-[2rem] text-amber-500 dark:text-amber-300 animate-spin-y" fill="currentColor" />
+                                    {{-- <x-icon-shield /> --}}
+                                </div>
+                                @endif
+                            </td>
                             <td class="py-6 px-2 w-32 font-mono text-base text-left group-hover:text-gray-950 group-hover:dark:text-gray-100 smooth-300">
                                 <!-- not using wire:navigate because of chatbot animation bug, needs to reload entire page -->
                                 <a href="{{ route('interview-start', [

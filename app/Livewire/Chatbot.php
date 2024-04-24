@@ -68,9 +68,12 @@ class Chatbot extends Component
         $content = trim($content_parts[0]) ?? '';
         $solved = filter_var(strtolower(trim($content_parts[1] ?? 'false')), FILTER_VALIDATE_BOOLEAN);
 
-        info('Chatbot::userCode:54');
+        info('Chatbot::userCode:71');
         info([$this->challenge->title . ' (' . $this->challenge->id . ')' => ['user' => auth()->user()->email, 'solved' => $solved]]);
-        if ($solved) $this->dispatch('challengeSolved', ['challenge_id' => $this->challenge->id, 'solved' => $solved]);
+        if ($solved) {
+            $this->dispatch('challengeSolved');
+            $this->dispatch('get-code'); // save user code
+        }
 
         array_push($this->messages, [
             'role' => $completion_role,

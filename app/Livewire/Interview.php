@@ -27,9 +27,10 @@ class Interview extends Component
         $this->selected_challenges = null;
         if ($this->selected_topic_id && $this->selected_topic_id !== -1) {
             $this->selected_challenges = Challenge::byDifficultyAndTopic(
-                $this->selected_difficulty, 
-                $this->selected_topic_id, 
-                ['id', 'title', 'challenge_slug']
+                selected_difficulty: $this->selected_difficulty, 
+                topic_id: $this->selected_topic_id, 
+                user_id: auth()->user()->id,
+                return_cols: ['id', 'title', 'challenge_slug'],
             );
         }
     }

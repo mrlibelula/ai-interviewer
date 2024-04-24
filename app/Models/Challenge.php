@@ -15,10 +15,12 @@ class Challenge extends Model
     protected $guarded = [];
     protected $dates = ['deleted_at'];
 
-    public function users()
+    public function users(array $pivot_columns = [
+        'solved_at', 'current_time_limit', 'solution_code', 'attempts', 'bonus_xp', 'openai_chat_settings', 'observations'
+    ])
     {
         return $this->belongsToMany(User::class, 'challenge_solver')
-            ->withPivot('solved_at', 'current_time_limit', 'solution_code', 'attempts', 'bonus_xp', 'openai_chat_settings', 'observations')
+            ->withPivot($pivot_columns)
             ->withTimestamps();
     }
 
@@ -151,7 +153,19 @@ class Challenge extends Model
     //     return $ordered ? $builder->orderBy('title', 'asc')->get() : $builder->get();
     // }
 
-    public static function byDifficultyAndTopic(string $selected_difficulty, int $topic_id, array $return_cols = ['id', 'title'], bool $ordered = true, string $order_by = 'title', string $order = 'asc'): Collection
+    /**
+     * Get challenges by difficulty and topic
+     *
+     * @param string $selected_difficulty
+     * @param integer $topic_id
+     * @param integer $user_id
+     * @param array $return_cols
+     * @param boolean $ordered
+     * @param string $order_by
+     * @param string $order
+     * @return Collection
+     */
+    public static function byDifficultyAndTopic(string $selected_difficulty, int $topic_id, int $user_id, array $return_cols = ['id', 'title'], bool $ordered = true, string $order_by = 'title', string $order = 'asc'): Collection
     {
         $difficulty_id = Difficulty::select('id', 'name')->where('name', '=', strtolower($selected_difficulty))->first()->id;
         $builder = static::select(...$return_cols)
@@ -160,7 +174,10 @@ class Challenge extends Model
             })
             ->whereHas('topics', function ($q) use ($topic_id) {
                 $q->whereIn('topic_id', [$topic_id]);
-            });
+            })
+            ->with(['users' => function ($q) use($user_id) {
+                $q->where('users.id', $user_id);
+            }]);
         return $ordered ? $builder->orderBy($order_by, $order)->get() : $builder->get();
     }
 }

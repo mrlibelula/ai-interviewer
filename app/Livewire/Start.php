@@ -22,9 +22,20 @@ class Start extends Component
     public int $bonus_xp = 0;
     public int $attempts = 0;
     public int $total_challenges_count = 0;
+    public int $solved_challenges_count = 0;
     public array $openai_chat_settings;
+    public bool $is_challenge_solved = false;
 
-    protected $listeners = ['getChallenge', 'sendMessage', 'timeLimitEnded'];
+    protected $listeners = ['getChallenge', 'sendMessage', 'timeLimitEnded', 'challengeSolved'];
+
+    public function challengeSolved()
+    {
+        if ($this->challenge) {
+            auth()->user()->updateChallenge($this->challenge, [
+                'solved_at' => date('Y-m-d H:i:s'),
+            ]);
+        }
+    }
 
     public function timeLimitEnded()
     {
@@ -114,7 +125,6 @@ class Start extends Component
                         ->toArray();
                 }
             }
-            
         }
         
     }
@@ -124,13 +134,31 @@ class Start extends Component
         if ($challenge = $this->challenge_id ? Tool::fetchChallenge($this->challenge_id, ['id'], []) : null) {
             $this->challenge_ids[] = $challenge->id;
         } else {
-            $challenges = Challenge::byDifficultyAndTopic($this->selected_difficulty, $this->selected_topic_id, ['id'], false);
-            $challenges->each(function ($challenge) {
-                $this->challenge_ids[] = $challenge->id;
-            });
+            $challenges = Challenge::byDifficultyAndTopic(
+                selected_difficulty: $this->selected_difficulty,
+                topic_id: $this->selected_topic_id,
+                user_id: auth()->user()->id,
+                return_cols: ['id'],
+                ordered: false
+            );
+            $challenges->each(fn ($challenge) => $this->challenge_ids[] = $challenge->id);
         }
         if ($this->random) shuffle($this->challenge_ids);
+    }
+
+    public function getIsChallengeSolved()
+    {
+        $this->is_challenge_solved = Tool::isChallengeSolved($this->challenge) ? true : false;
+    }
+
+    public function totalChallengesCount()
+    {
         $this->total_challenges_count = Tool::challengesCount();
+    }
+
+    public function solvedChallengesCount()
+    {
+        $this->solved_challenges_count = Tool::userSolvedChallenges(auth()->user())->count();
     }
 
     public function mount(string $enc_selected_difficulty, string $enc_selected_topic_id, string|null $enc_challenge_id = null, string|null $challenge_slug = null)
@@ -141,8 +169,10 @@ class Start extends Component
         $this->challenge_id = $enc_challenge_id ? Tool::decode($enc_challenge_id) : null;
         $this->challenge_slug = $challenge_slug;
         $this->getChallenges();
+        $this->totalChallengesCount();
+        $this->solvedChallengesCount();
         $this->getChallenge();
-        $this->removeSolutionCode();
+        $this->getIsChallengeSolved();
     }
 
     public function removeSolutionCode()

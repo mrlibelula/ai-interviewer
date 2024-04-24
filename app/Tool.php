@@ -2,20 +2,22 @@
 
 namespace App;
 
+use stdClass;
 use App\Models\Tag;
+use App\Models\User;
 use App\Models\Topic;
+use App\Models\Enviro;
 use App\Models\Status;
 use App\Models\Package;
 use App\Models\Language;
 use App\Models\Challenge;
 use App\Models\Framework;
 use App\Models\Difficulty;
-use App\Models\Enviro;
 use App\Models\Visibility;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use OpenAI\Laravel\Facades\OpenAI;
-use stdClass;
 
 class Tool
 {
@@ -740,5 +742,45 @@ class Tool
         $completion = preg_replace('/```(javascript)?/', '', $completion);
         $return = htmlspecialchars_decode($completion);
         return addslashes($return);
+    }
+
+    /**
+     * Returns null if not solved or timestamp if solved
+     *
+     * @param Challenge $challenge
+     * @return null|string
+     */
+    public static function isChallengeSolved(Challenge $challenge): null|string
+    {
+        $pivot = isset($challenge->users->first()->pivot) ? $challenge->users->first()->pivot : null;
+        if ($pivot) return $pivot->solved_at ?? null;
+        return null;
+    }
+
+    /**
+     * Returns a collection of user solved challenges
+     *
+     * @param User $user
+     * @return Collection
+     */
+    public static function userSolvedChallenges(User $user): Collection
+    {
+        return $user->challenges()
+            ->wherePivotNotNull('solved_at')
+            ->select('challenges.id', 'challenges.title')
+            ->orderBy('title', 'asc')
+            ->get();
+    }
+
+    /**
+     * Returns an integer percentage of solved challenges
+     *
+     * @param integer $solved_challenges_count
+     * @param integer $nb_challenges
+     * @return integer
+     */
+    public static function percentageSolved(int $solved_challenges_count = 0, int $nb_challenges = 0): int
+    {
+        return number_format(($solved_challenges_count * 100) / $nb_challenges, 0);
     }
 }

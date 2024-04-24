@@ -10,13 +10,22 @@
         frameborder="0" 
         allowfullscreen
         id="codeIframe"
+        scrolling="no"
     ></iframe>
 
     <x-editor-nav class=" border-t border-gray-300 dark:border-gray-600" />
 
+    <div class="relative">
+        <iframe id="output-frame" class=" absolute bg-black rounded-md" frameborder="0" width="100%"></iframe>
+        <div class=" absolute px-4 py-2 text-gray-500 font-mono text-base">
+            Output
+        </div>
+    </div>
+
     <script>
         var iframe = document.getElementById('codeIframe')
         var fullscreenIcon = document.getElementById('fullscreenIcon')
+        var codeFromIframe
 
         // Function to make the iframe fullscreen
         function toggleFullScreen() {
@@ -43,7 +52,7 @@
         })
 
         document.addEventListener('run-code', () => {
-            sendEventToIframe({ getCode: false, runCode: true, saveCode: false })
+            sendEventToIframe({ getCode: true, runCode: true, saveCode: false })
         })
 
         document.addEventListener('get-code', () => {
@@ -53,8 +62,9 @@
         // listen for messages from the sandboxed iframe
         window.addEventListener('message', event => {
             if (event.source === iframe.contentWindow) {
-                var codeFromIframe = event.data.code
-                var saveCodeFromIframe = event.data.saveCode
+                codeFromIframe = event.data.code
+                if (event.data.hasOwnProperty('runCode')) { if (event.data.runCode) runJsCode(codeFromIframe) }
+                var saveCodeFromIframe = event.data.saveCode ?? null
                 saveCodeFromIframe
                     ? sendCode(codeFromIframe, 'saveUserCode')
                     : sendCode(codeFromIframe, 'userCode')
@@ -65,6 +75,45 @@
             // send user code to backend
             const event = new CustomEvent(eventName, { detail: { code } })
             window.dispatchEvent(event)
+        }
+
+        function runJsCode(code) {
+            //window.parent.postMessage({ code: code }, '*')
+
+            var outputFrame = document.getElementById('output-frame')
+            outputFrame.contentDocument.open()
+            outputFrame.contentDocument.write(`<html>
+                <head>
+                    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.0.3/dist/tailwind.min.css">
+                </head>
+                <body>
+                    <div class=" w-full h-full py-9 px-4 bg-black rounded-md text-gray-300 font-mono">
+                        <div id="output"></div>
+                    </div>
+                    
+                </body>
+                </html>`)
+            outputFrame.contentDocument.close()
+
+            var outputDiv = outputFrame.contentDocument.getElementById('output')
+            
+             // Intercept console.log outputs and redirect them to the output div
+            var consoleLog = console.log
+            console.log = function(message) {
+                outputDiv.textContent += message + '\n'
+                consoleLog.apply(console, arguments)
+            }
+
+            try {
+                // Create a function from the user-provided code and immediately invoke it
+                var result = new Function(code)()
+                // outputDiv.innerHTML += varDump(result)
+                outputDiv.innerHTML += result
+            } catch (error) {
+                // Display error message if code execution fails
+                outputDiv.textContent = "Error: " + error.message
+            }
+
         }
         
     </script>

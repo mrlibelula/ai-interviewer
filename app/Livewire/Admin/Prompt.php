@@ -2,9 +2,7 @@
 
 namespace App\Livewire\Admin;
 
-use App\Models\Challenge;
 use App\Models\Difficulty;
-use App\Models\Tag;
 use App\Models\Topic;
 use App\Models\Enviro;
 use App\Models\Language;

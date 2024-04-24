@@ -215,14 +215,26 @@
     }
 }
 
+/* star spin on 'y' axis */
+@keyframes spin-y {
+    to {
+        transform: rotateY(360deg);
+    }
+}
+
+.animate-spin-y:hover {
+    animation: spin-y 2s linear infinite;
+    transform-style: preserve-3d;
+}
+
 /* livewire wire:navigate top progress bar custom stuff */
 #nprogress .bar {
-    background: #f57116 !important;
+    background: #2fd399 !important;
 }
 #nprogress .peg {
-    box-shadow: 0 0 10px #f57116, 0 0 5px #f57116;
+    box-shadow: 0 0 10px #2fd399, 0 0 5px #2fd399;
 }
 #nprogress .spinner-icon {
-    border-top-color: #f57116 !important;
-    border-left-color: #f57116 !important;
+    border-top-color: #2fd399 !important;
+    border-left-color: #2fd399 !important;
 }
