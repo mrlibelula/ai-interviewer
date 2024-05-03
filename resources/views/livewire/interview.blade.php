@@ -67,22 +67,30 @@
                                 {{ $loop->iteration }}
                             </td>
                             <td class="py-6 px-2 text-left">
-                                @if ($challenge->languages->count())
-                                <div class=" text-base font-mono tracking-wide text-green-600 dark:text-green-400">
-                                    @foreach ($challenge->languages as $language)
-                                    {{ $language->name }}{{ !$loop->last ? ', ' : '' }}
-                                    @endforeach
-                                </div>
-                                    @endif
-                                <div class=" text-2xl dark:text-gray-300 group-hover:text-gray-950 group-hover:dark:text-gray-100 smooth-300">
-                                    {{ $challenge->title }}
-                                </div>
-                                <div class=" text-base text-gray-500 dark:text-gray-400 ">
-                                @if ($challenge->topics->count())
-                                    @foreach ($challenge->topics as $topic)
-                                    {{ $topic->name }}{{ !$loop->last ? ', ' : '' }}
-                                    @endforeach
-                                @endif
+                                <div class="flex items-center gap-x-6">
+                                    <!-- challenge icon -->
+                                    <div class="hidden lg:flex bg-gray-400 dark:bg-black w-[4.5rem] h-[4.5rem] rounded-md overflow-hidden border-2 border-gray-200 dark:border-gray-700 shadow">
+                                        <img class=" w-full h-full" src="{{ $challenge->banner_url }}" alt="">
+                                    </div>
+                                    <div>
+                                        @if ($challenge->languages->count())
+                                        <div class=" text-base font-mono tracking-wide text-green-600 dark:text-green-400">
+                                            @foreach ($challenge->languages as $language)
+                                            {{ $language->name }}{{ !$loop->last ? ', ' : '' }}
+                                            @endforeach
+                                        </div>
+                                            @endif
+                                        <div class=" text-2xl dark:text-gray-300 group-hover:text-gray-950 group-hover:dark:text-gray-100 smooth-300">
+                                            {{ $challenge->title }}
+                                        </div>
+                                        <div class=" text-base text-gray-500 dark:text-gray-400 ">
+                                        @if ($challenge->topics->count())
+                                            @foreach ($challenge->topics as $topic)
+                                            {{ $topic->name }}{{ !$loop->last ? ', ' : '' }}
+                                            @endforeach
+                                        @endif
+                                        </div>
+                                    </div>
                                 </div>
                             </td>
                             <td class="py-6 px-2 w-36">

@@ -1,1 +1,1 @@
-<img {{ $attributes->merge(['class' => 'w-8 h-8 animate-spin-y']) }} src="https://cdn-icons-png.flaticon.com/256/1200/1200773.png" alt="">
+<img {{ $attributes->merge(['class' => 'w-8 h-8']) }} src="https://cdn-icons-png.flaticon.com/256/1200/1200773.png" alt="">

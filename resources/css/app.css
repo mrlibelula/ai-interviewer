@@ -227,6 +227,11 @@
     transform-style: preserve-3d;
 }
 
+.group:hover .group-hover\:animate-spin-y {
+    animation: spin-y 2s linear infinite;
+    transform-style: preserve-3d;
+}
+
 /* livewire wire:navigate top progress bar custom stuff */
 #nprogress .bar {
     background: #2fd399 !important;

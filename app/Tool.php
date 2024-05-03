@@ -3,6 +3,7 @@
 namespace App;
 
 use stdClass;
+use Exception;
 use App\Models\Tag;
 use App\Models\User;
 use App\Models\Topic;
@@ -16,8 +17,8 @@ use App\Models\Difficulty;
 use App\Models\Visibility;
 use Illuminate\Support\Str;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
 use OpenAI\Laravel\Facades\OpenAI;
+use Illuminate\Support\Facades\Http;
 
 class Tool
 {
@@ -268,6 +269,9 @@ class Tool
         $solution_code = $llm_challenge->emulated_challenge_model['solution_code'] ?? '';
         $challenge_slug = Str::slug($challenge->title ?? '');
 
+        // generate an AI image (DALL-E) about the challenge
+        $banner_url = self::generateChallengeImage($challenge->title, $challenge->topics[0] ?? '', $challenge->languages[0] ?? '');
+
         $challenge_db = Challenge::create([
             'title' => $challenge->title,
             'description' => $challenge->challenge,
@@ -282,6 +286,7 @@ class Tool
             'chatgpt_prompt' => $prompt,
             'completion_id' => $completion->id,
             'ai_model' => $completion->model,
+            'banner_url' => $banner_url,
         ]);
 
         if ($challenge_db->wasRecentlyCreated) {
@@ -379,6 +384,44 @@ class Tool
         $result_obj->completion = $completion;
 
         return $result_obj;
+    }
+
+    /**
+     * Generate an AI image (DALL-E) about the challenge
+     *
+     * @param string $challenge_title
+     * @param string $challenge_topic
+     * @param string $language
+     * @return string
+     */
+    public static function generateChallengeImage(string $challenge_title, string $challenge_topic, string $language): string
+    {
+        $image_url = '';
+        $api_key = env('OPENAI_API_KEY');
+        $end_point = 'https://api.openai.com/v1/images/generations';
+        
+        try {
+            $prompt = Tool::replaceWildcards(env('OPENAI_DALLE_CHALLENGE_PROMPT_BASE_TEXT'), collect([
+                'challenge_title' => $challenge_title,
+                'challenge_topic' => $challenge_topic,
+                'language' => $language,
+            ]));
+            $response = Http::withHeaders([
+                'Content-Type' => 'application/json',
+                'Authorization' => 'Bearer ' . $api_key
+            ])->post($end_point, [
+                'prompt' => $prompt,
+                //'max_tokens' => 64, // Adjust as needed
+                //'temperature' => 0.7, // Adjust as needed
+                'n' => 1, // Number of completions to generate
+                'size' => "512x512",
+            ]);
+            $response_data = $response->json();
+            $image_url = $response_data['data'][0]['url'];
+        } catch (Exception $e) {
+            info(['error' => $e->getMessage()]);
+        }
+        return $image_url;
     }
 
     /**
@@ -544,6 +587,7 @@ class Tool
 
     /**
      * Replace wildcards on a blueprint GPT prompt
+     * and returns the final generated prompt
      *
      * @param string $blueprint
      * @param Collection $wildcards
@@ -781,6 +825,6 @@ class Tool
      */
     public static function percentageSolved(int $solved_challenges_count = 0, int $nb_challenges = 0): int
     {
-        return number_format(($solved_challenges_count * 100) / $nb_challenges, 0);
+        return $nb_challenges ? number_format(($solved_challenges_count * 100) / $nb_challenges, 0) : 0;
     }
 }

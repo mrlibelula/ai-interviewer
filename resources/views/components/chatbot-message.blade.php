@@ -21,7 +21,7 @@
 
     <script>
         var intervalId
-
+        
         function textDisplay(text, divId) {
             const originalText = text
             const parts = text.split(/(\s+)/)

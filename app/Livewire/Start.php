@@ -18,7 +18,7 @@ class Start extends Component
     public bool $random = false;
     public bool $time_limit_end = false;
     public array $challenge_attributes = [];
-    public string $chat_welcome = "I'm thrilled to have you here, ready to tackle some coding questions and challenges. Whether you're here to refine your coding skills, seek advice, or simply looking for a friendly coding companion, you're in the right place!.??Feel free to ask any questions, I'm eager to assist you and provide constructive feedback to help you grow as a coder. Let's dive into the world of algorithms and problem-solving together!.??Ready to embark on this coding adventure? Just type away, and let's get started!.";
+    public string $chat_welcome;
     public int $bonus_xp = 0;
     public int $attempts = 0;
     public int $total_challenges_count = 0;
@@ -35,6 +35,7 @@ class Start extends Component
                 'solved_at' => date('Y-m-d H:i:s'),
             ]);
         }
+        $this->getIsChallengeSolved();
     }
 
     public function timeLimitEnded()
@@ -63,7 +64,7 @@ class Start extends Component
 
     public function buildChatWelcomeMessage()
     {
-        $text = 'Hi ' . auth()->user()->name . ', ' . $this->chat_welcome;
+        $text = 'Hi ' . auth()->user()->name . ', ' . env('OPENAI_CHATBOT_WELCOME_MESSAGE');
         $this->chat_welcome  = $text;
     }
 
@@ -83,12 +84,12 @@ class Start extends Component
         if ($this->challenge) {
             // verify if Challenge is already attached to a User (solver)
             $attempted_challenge = auth()->user()->challenges->where('id', '=', $this->challenge->id)->first();
-            
+            $this->getIsChallengeSolved();
             // increment attempts
             if ($attempted_challenge) {
                 // already attached
                 $challenge_attributes = $attempted_challenge->pivot;
-                $this->attempts = $challenge_attributes->attempts + 1;
+                $this->attempts = !$this->is_challenge_solved ? $challenge_attributes->attempts + 1 : $challenge_attributes->attempts;
                 $challenge_attributes->attempts = $this->attempts;
                 $challenge_attributes->save();
 
@@ -163,6 +164,7 @@ class Start extends Component
 
     public function mount(string $enc_selected_difficulty, string $enc_selected_topic_id, string|null $enc_challenge_id = null, string|null $challenge_slug = null)
     {
+        $this->is_challenge_solved = false;
         $this->buildChatWelcomeMessage();
         $this->selected_difficulty = Tool::decode($enc_selected_difficulty);
         $this->selected_topic_id = (int)Tool::decode($enc_selected_topic_id);
@@ -172,7 +174,6 @@ class Start extends Component
         $this->totalChallengesCount();
         $this->solvedChallengesCount();
         $this->getChallenge();
-        $this->getIsChallengeSolved();
     }
 
     public function removeSolutionCode()

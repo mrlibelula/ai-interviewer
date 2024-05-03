@@ -27,6 +27,7 @@ return new class extends Migration
             $table->text('chatgpt_prompt')->nullable();
             $table->string('completion_id')->nullable();
             $table->string('ai_model')->nullable();
+            $table->string('banner_url')->nullable();
             $table->softDeletes();
             $table->timestamps();
 

@@ -13,6 +13,7 @@ class Chatbot extends Component
     public $openai_chat_settings;
 
     public array $messages = [];
+    public string $last_chatbot_message = '';
     public string $user_color = 'orange';
     public string $user_avatar = '🐵';
     public string $chatbot_color = 'sky';
@@ -68,7 +69,7 @@ class Chatbot extends Component
         $content = trim($content_parts[0]) ?? '';
         $solved = filter_var(strtolower(trim($content_parts[1] ?? 'false')), FILTER_VALIDATE_BOOLEAN);
 
-        info('Chatbot::userCode:71');
+        info('Chatbot::userCode:72');
         info([$this->challenge->title . ' (' . $this->challenge->id . ')' => ['user' => auth()->user()->email, 'solved' => $solved]]);
         if ($solved) {
             $this->dispatch('challengeSolved');
@@ -83,6 +84,8 @@ class Chatbot extends Component
         // save data
         $this->openai_chat_settings['messages'] = $this->messages;
         auth()->user()->updateChallenge($this->challenge, ['openai_chat_settings' => $this->openai_chat_settings]);
+        $this->getLastChatMessage();
+        $this->dispatch('speak');
     }
 
     public function appendedChatMessage(array $openai_chat_settings)
@@ -131,7 +134,8 @@ class Chatbot extends Component
         // save data
         $this->openai_chat_settings['messages'] = $this->messages;
         auth()->user()->updateChallenge($this->challenge, ['openai_chat_settings' => $this->openai_chat_settings]);
-
+        $this->getLastChatMessage();
+        $this->dispatch('speak');
     }
 
     public function mount()
@@ -139,8 +143,21 @@ class Chatbot extends Component
         $this->messages = $this->openai_chat_settings['messages'] ?? [];
     }
 
+    /**
+     * Used to listen a chat message
+     *
+     * @return void
+     */
+    public function getLastChatMessage()
+    {
+        $this->last_chatbot_message = count($this->messages) 
+            ? end($this->messages)['content'] ?? ''
+            : 'Hi ' . auth()->user()->name . ', ' . env('OPENAI_CHATBOT_WELCOME_MESSAGE');
+    }
+
     public function render()
     {
+        $this->getLastChatMessage();
         return view('livewire.chatbot');
     }
 }

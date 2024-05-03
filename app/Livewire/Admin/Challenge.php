@@ -164,7 +164,7 @@ class Challenge extends Component
 
     public function getChallenges()
     {
-        $this->challenges = DBChallenge::with('topics:id,name')->select('id', 'title')->orderBy('title', 'asc')->get();
+        $this->challenges = DBChallenge::with('topics:id,name')->select('id', 'title', 'banner_url')->orderBy('title', 'asc')->get();
     }
 
     public function loadChallenge()

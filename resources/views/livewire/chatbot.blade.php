@@ -1,4 +1,27 @@
-<div class="flex flex-col items-center gap-y-4">
+<div x-data="{
+    msg: null,
+    listen: false,
+    femaleChatVoice: false,
+
+    toggleListen() {
+        this.listen = !this.listen
+        if (this.listen) this.listenChat()
+        if (!this.listen) window.speechSynthesis.cancel()
+    },
+    
+    listenChat() {
+        if (this.listen) {
+            this.msg = new SpeechSynthesisUtterance()
+            this.msg.lang = 'en-US'
+            this.msg.text = $wire.entangle('last_chatbot_message').initialValue
+            this.msg.voice = this.femaleChatVoice ? window.speechSynthesis.getVoices()[2] : window.speechSynthesis.getVoices()[0]
+            this.msg.volume = 1
+            this.msg.rate = 1
+            this.msg.pitch = 1
+            window.speechSynthesis.speak(this.msg)
+        }
+    }, 
+}" x-init="listenChat" @speak="listenChat" class="flex flex-col items-center gap-y-4">
     {{-- <div class="flex items-center gap-x-4 justify-between">
         <img title="Analyse my code" class=" w-1/6 grayscale hover:grayscale-0 hover:scale-125 smooth-300 cursor-pointer" src="https://ibuildings.com/img/blog/2019/07/img/Analyse_Your_Code_Static_Analysis_Gert_de_Pagter_0@500w.7f768d868c2b36494aa963f10913abc1.png" alt="">
         <img title="Analyse my code" class=" w-1/6 grayscale hover:grayscale-0 hover:scale-125 smooth-300 cursor-pointer" src="https://cdn-icons-png.freepik.com/512/5815/5815178.png" alt="">
@@ -30,7 +53,12 @@
                 {{-- <x-icon-bug class="w-5 h-5 text-gray-400" /> --}}
             </button>
             <div>
-                <x-icon-speaker-off class=" w-6 h-6 text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-gray-200 smooth-300 cursor-pointer"><x-slot name="title">Turn on chat voice</x-slot></x-icon-speaker-off>
+                <template x-if="!listen">
+                    <x-icon-speaker-off @click="toggleListen" class=" w-6 h-6 text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-gray-200 smooth-300 cursor-pointer"><x-slot name="title">Turn on chat voice</x-slot></x-icon-speaker-off>
+                </template>
+                <template x-if="listen">
+                    <x-icon-speaker @click="toggleListen" class=" w-6 h-6 text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-gray-200 smooth-300 cursor-pointer"><x-slot name="title">Turn off chat voice</x-slot></x-icon-speaker>
+                </template>
             </div>
         </div>
     </div>

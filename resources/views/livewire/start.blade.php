@@ -29,8 +29,12 @@
             <x-slot name="right">
                 <div class="flex items-center gap-x-4">
                     @if ($is_challenge_solved)
-                    <x-icon-star class="w-[2.7rem] h-[2.7rem] text-amber-500 dark:text-amber-300 animate-spin-y" fill="currentColor" />
-                    {{-- <x-icon-shield /> --}}
+                    <div class="group p-2 rounded-md bg-gradient-to-br from-gray-500 via-gray-400/70 to-gray-800/50 shadow-md w-[2.3rem] h-[2.3rem]">
+                        <x-icon-star class="w-full h-full text-amber-300 group-hover:animate-spin-y" fill="currentColor" />
+                    </div>
+                    {{-- <div class="group p-2 rounded-md bg-gradient-to-br from-gray-500 via-gray-400/70 to-gray-800/50 shadow-md w-[2.3rem] h-[2.3rem]">
+                        <x-icon-shield class=" w-full h-full group-hover:animate-spin-y" />
+                    </div> --}}
                     @endif
                 </div>
             </x-slot>

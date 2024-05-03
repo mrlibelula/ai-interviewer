@@ -30,7 +30,7 @@ class Interview extends Component
                 selected_difficulty: $this->selected_difficulty, 
                 topic_id: $this->selected_topic_id, 
                 user_id: auth()->user()->id,
-                return_cols: ['id', 'title', 'challenge_slug'],
+                return_cols: ['id', 'title', 'challenge_slug', 'banner_url'],
             );
         }
     }
