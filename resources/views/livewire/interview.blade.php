@@ -68,10 +68,10 @@
                             </td>
                             <td class="py-6 px-2 text-left">
                                 <div class="flex items-center gap-x-6">
-                                    <!-- challenge icon -->
+                                    {{-- <!-- challenge icon -->
                                     <div class="hidden lg:flex bg-gray-400 dark:bg-black w-[4.5rem] h-[4.5rem] rounded-md overflow-hidden border-2 border-gray-200 dark:border-gray-700 shadow">
                                         <img class=" w-full h-full" src="{{ $challenge->banner_url }}" alt="">
-                                    </div>
+                                    </div> --}}
                                     <div>
                                         @if ($challenge->languages->count())
                                         <div class=" text-base font-mono tracking-wide text-green-600 dark:text-green-400">

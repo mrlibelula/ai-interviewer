@@ -269,8 +269,9 @@ class Tool
         $solution_code = $llm_challenge->emulated_challenge_model['solution_code'] ?? '';
         $challenge_slug = Str::slug($challenge->title ?? '');
 
-        // generate an AI image (DALL-E) about the challenge
-        $banner_url = self::generateChallengeImage($challenge->title, $challenge->topics[0] ?? '', $challenge->languages[0] ?? '');
+        // // generate an AI image (DALL-E) about the challenge
+        // $banner_url = self::generateChallengeImage($challenge->title, $challenge->topics[0] ?? '', $challenge->languages[0] ?? '');
+        $banner_url = null;
 
         $challenge_db = Challenge::create([
             'title' => $challenge->title,
