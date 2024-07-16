@@ -34,6 +34,9 @@ class Start extends Component
             auth()->user()->updateChallenge($this->challenge, [
                 'solved_at' => date('Y-m-d H:i:s'),
             ]);
+            // calculate 'bonus_xp' on solved
+            
+
         }
         $this->getIsChallengeSolved();
     }
@@ -127,6 +130,7 @@ class Start extends Component
                 }
             }
         }
+        // info($this->challenge_attributes);
         
     }
 

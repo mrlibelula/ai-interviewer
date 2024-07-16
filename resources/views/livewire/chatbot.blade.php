@@ -41,10 +41,10 @@
     </div> --}}
 
     <!-- Feedback chatbot-->
-    <div class=" bg-gray-300/40 dark:bg-indigo-800/40 flex justify-between shadow-xl shadow-white dark:shadow-indigo-950 z-30 items-center gap-x-4 w-full -mb-4 rounded-t-lg px-4 py-2 text-base">
-        <div class="flex items-center gap-x-2 dark:text-indigo-400">
+    <div class=" bg-gray-300/40 dark:bg-emerald-800/40 flex justify-between shadow-xl shadow-white dark:shadow-emerald-950 z-30 items-center gap-x-4 w-full -mb-4 rounded-t-lg px-4 py-2 text-base">
+        <div class="flex items-center gap-x-2 dark:text-emerald-400">
             <x-circle color="emerald" class=" animate-pulse" />
-            Feedback A.I. chatbot 
+            A.I. feedback chatbot 
         </div>
         <div class="flex items-center gap-x-4">
             <button @click="$dispatch('analyze-code')" class="group cursor-pointer">
@@ -67,7 +67,7 @@
         <!-- always needed (avoids first user message bug when hitting enter) -->
         <x-chatbot-message 
             divId="chat-{{ uniqid() }}" 
-            avatar="{{ $chatbot_avatar }}"
+            avatar="{{ $chatbot_emoji }}"
             user="Assistant"
             color="{{ $chatbot_color }}"
             role="{{ 'assistant' }}"
@@ -78,7 +78,7 @@
             @if (strtolower($message['role']) !== 'system')
             <x-chatbot-message 
                 divId="chat-{{ uniqid() }}" 
-                avatar="{{ $message['role'] === 'user' ? $user_avatar : $chatbot_avatar }}"
+                avatar="{{ $message['role'] === 'user' ? $user_emoji : $chatbot_emoji }}"
                 user="{{ $message['role'] === 'user' ? auth()->user()->name : 'Assistant' }}"
                 color="{{ $message['role'] === 'user' ? $user_color : $chatbot_color }}"
                 role="{{ $message['role'] }}"

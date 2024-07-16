@@ -30,7 +30,6 @@
             :class="{ 'invert_': darkMode }"
             src="{{ \App\Tool::randomItem([
                 "https://mir-s3-cdn-cf.behance.net/project_modules/1400_webp/464f94172268465.65a01be1af5ee.png",
-                "https://cdn.pixabay.com/photo/2023/05/10/03/46/ai-generated-7982835_1280.png",
                 "https://mir-s3-cdn-cf.behance.net/project_modules/max_3840/ee47a7193089229.65e63f2864588.png",
     
                 "https://mir-s3-cdn-cf.behance.net/project_modules/2800_webp/3964bc175456361.6511890469cd7.jpg",

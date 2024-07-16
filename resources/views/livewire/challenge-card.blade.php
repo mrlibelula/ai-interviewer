@@ -68,18 +68,32 @@
         @endif
     @endif
 
+    @if ($tags)
+        @if (count($challenge->tags))
+            <div class="flex items-center -mt-1 z-[35] gap-x-2 text-base text-wrap font-semibold text-gray-500/70 dark:text-gray-400/60 italic">
+            @foreach ($challenge->tags as $tag)
+                <div>#{{ ucfirst(Str::camel($tag->name)) }}</div>
+            @endforeach
+            </div>
+        @endif
+    @endif
+
     <div class="text-xl md:text-2xl {{ !$title ? '' : 'py-4' }}">
         {{ $challenge->description }}
     </div>
 
+    @php
+        // solves multi-level json response bug
+        $test_cases = Arr::flatten(json_decode($challenge->test_cases, true));
+    @endphp
     
-    @if (count(json_decode($challenge->test_cases, true)))
+    @if (count($test_cases))
     <x-h-accordion x-data="{ isOpen: true }">
         <x-slot name="title">
             Test cases
         </x-slot>
         <div class="flex flex-col">
-            @foreach (json_decode($challenge->test_cases, true) as $case)
+            @foreach ($test_cases as $case)
             <div>
                 {{ $case }}
             </div>

@@ -6,6 +6,10 @@
     display: none;
 }
 
+.animate-star {
+    @apply text-amber-500 dark:text-amber-300 group-hover:animate-spin-y;
+}
+
 .breadcrumb-dot {
     @apply hidden xl:block -mx-8;
 }

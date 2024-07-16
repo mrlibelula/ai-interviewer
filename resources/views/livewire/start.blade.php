@@ -22,7 +22,9 @@
             <x-slot name="top">
                 <div class="w-fit pb-2 flex items-center gap-x-2">
                     @foreach ($challenge->languages as $language)
-                    <div class=" text-emerald-500 dark:text-emerald-500 text-base font-semibold">#{{ $language->name }}</div>
+                    <div class=" text-emerald-500 dark:text-emerald-400 text-base font-semibold">
+                        {{ $language->name }}
+                    </div>
                     @endforeach
                 </div>
             </x-slot>
@@ -64,6 +66,7 @@
                     @livewire('challenge-card', [
                         'challenge' => $challenge, 
                         'header' => false,
+                        'tags' => true,
                         'title' => false,
                         'footer' => false, 
                         'creators' => false, 

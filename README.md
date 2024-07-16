@@ -51,6 +51,7 @@ In turn, the burden is also taken off of candidates, they need only create a job
 ## Next task
 
 - Add "read" and timestamps to chatbot messages.
+- Add the user name to the chatbot memory.
 - When importing new challenge, put an editor near so we can proof the code.
 - How can we determine if a text is code (any language) or just a string.
 - [ok?] When placing the wildcard for topic/s, include also the selected topic subtree.

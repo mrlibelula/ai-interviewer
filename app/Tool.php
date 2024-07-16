@@ -135,6 +135,45 @@ class Tool
     }
 
     /**
+     * Finds an object item inside an array
+     * by given property and value
+     *
+     * @param array $array_of_objects
+     * @param string $prop
+     * @param $value
+     * @return stdClass
+     */
+    public static function findObjectByProp(array $array_of_objects, string $prop, $value): stdClass
+    {
+        foreach ($array_of_objects as $object) {
+            if (property_exists($object, $prop)) {
+                if ($object->$prop == $value) {
+                    return $object;
+                }
+            }
+        }
+        return new stdClass;
+    }
+
+    /**
+     * Sort array by key
+     *
+     * @param array $array
+     * @param string $sort_by
+     * @param string $order_by
+     * @param boolean $case_sensitive
+     * @return array
+     */
+    public static function arraySortBy(array $array, string $sort_by, string $order_by = 'asc', bool $case_sensitive = false): array
+    {
+        return (array)collect($array)->sortBy([
+            strtolower($order_by) === 'asc' 
+                ? fn ($a, $b) => ($case_sensitive ? $a[$sort_by] : strtolower($a[$sort_by])) <=> ($case_sensitive ? $b[$sort_by] : strtolower($b[$sort_by]))
+                : fn ($a, $b) => ($case_sensitive ? $b[$sort_by] : strtolower($b[$sort_by])) <=> ($case_sensitive ? $a[$sort_by] : strtolower($a[$sort_by]))
+        ])->values()->all();
+    }
+
+    /**
      * Updates or creates JSON properties values and returns updated JSON string
      *
      * @param string $original_json_data
@@ -155,17 +194,15 @@ class Tool
      * Prompts OpenAI and obtains array of completion messages
      *
      * @param array $messages
-     * @return \OpenAI\Responses\Chat\CreateResponse
+     * @return \OpenAI\Responses\Chat\CreateResponse|null
      */
-    public static function getLLMCompletion(array $messages = ['role' => 'user', 'content' => 'hi']): \OpenAI\Responses\Chat\CreateResponse
+    public static function getLLMCompletion(array $messages = ['role' => 'user', 'content' => 'hi']): \OpenAI\Responses\Chat\CreateResponse|null
     {
-        $result = [];
         try {
             $completion = OpenAI::chat()->create([
                 'model' => env('OPENAI_MODEL'), 
                 'messages' => $messages, 
             ]);
-            // info($messages);
             return $completion;
         } catch (\OpenAI\Exceptions\ErrorException $ee) {
             dump($ee->getMessage());
@@ -173,7 +210,7 @@ class Tool
             dump($te->getMessage());
         }
 
-        return $result;
+        return null;
     }
 
     /**
@@ -307,8 +344,10 @@ class Tool
     
             // assign framework/s
             $frameworks = [];
-            foreach ($challenge->frameworks as $challenge_fw) {
-                $frameworks[] = Framework::select('id', 'name')->where('name', 'like', '%' . $challenge_fw .'%')->first();
+            if (isset($challenge->frameworks)) {
+                foreach ($challenge->frameworks as $challenge_fw) {
+                    $frameworks[] = Framework::select('id', 'name')->where('name', 'like', '%' . $challenge_fw .'%')->first();
+                }
             }
     
             if (count($frameworks)) {
@@ -790,16 +829,17 @@ class Tool
     }
 
     /**
-     * Returns null if not solved or timestamp if solved
+     * Returns 'null' if not solved or 'timestamp' if Challenge solved by User
      *
      * @param Challenge $challenge
+     * @param User|null $user
      * @return null|string
      */
-    public static function isChallengeSolved(Challenge $challenge): null|string
+    public static function isChallengeSolved(Challenge $challenge, User|null $user = null): null|string
     {
-        $pivot = isset($challenge->users->first()->pivot) ? $challenge->users->first()->pivot : null;
-        if ($pivot) return $pivot->solved_at ?? null;
-        return null;
+        $user_id = $user ? $user->id : auth()->user()->id;
+        $pivot = $challenge->users->where(fn ($q) => $q->id === $user_id)->first()->pivot ?? null;
+        return $pivot ? $pivot->solved_at : null;
     }
 
     /**
@@ -827,5 +867,16 @@ class Tool
     public static function percentageSolved(int $solved_challenges_count = 0, int $nb_challenges = 0): int
     {
         return $nb_challenges ? number_format(($solved_challenges_count * 100) / $nb_challenges, 0) : 0;
+    }
+
+    /**
+     * Get available OpenAI API models from 'mrlibelula@gmail.com' account
+     * This action cost OpenAI tokens
+     *
+     * @return array
+     */
+    public static function getOpenAIModelsCompletion(): array
+    {
+        return OpenAI::models()->list()->toArray()['data'];
     }
 }

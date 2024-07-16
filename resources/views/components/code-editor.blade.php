@@ -52,11 +52,15 @@
         })
 
         document.addEventListener('run-code', () => {
-            sendEventToIframe({ getCode: true, runCode: true, saveCode: false })
+            sendEventToIframe({ getCode: false, runCode: true, saveCode: false })
         })
 
         document.addEventListener('get-code', () => {
             sendEventToIframe({ getCode: true, runCode: false, saveCode: true })
+        })
+
+        document.addEventListener('save-code', () => {
+            sendEventToIframe({ getCode: false, runCode: false, saveCode: true })
         })
 
         // listen for messages from the sandboxed iframe
@@ -82,22 +86,25 @@
 
             var outputFrame = document.getElementById('output-frame')
             outputFrame.contentDocument.open()
-            outputFrame.contentDocument.write(`<html>
-                <head>
-                    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.0.3/dist/tailwind.min.css">
-                </head>
-                <body>
-                    <div class=" w-full h-full py-9 px-4 bg-black rounded-md text-gray-300 font-mono">
-                        <div id="output"></div>
-                    </div>
-                    
-                </body>
-                </html>`)
+            outputFrame.contentDocument.write(`<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sandboxed Script</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.0.3/dist/tailwind.min.css">
+</head>
+<body>
+    <div class=" w-full h-full py-9 px-4 bg-black rounded-md text-gray-300 font-mono">
+        <div id="output"></div>
+    </div>
+</body>
+</html>`)
             outputFrame.contentDocument.close()
 
             var outputDiv = outputFrame.contentDocument.getElementById('output')
             
-             // Intercept console.log outputs and redirect them to the output div
+             // Intercept 'console.log' outputs and redirect them to the output div
             var consoleLog = console.log
             console.log = function(message) {
                 outputDiv.textContent += message + '\n'
@@ -105,15 +112,12 @@
             }
 
             try {
-                // Create a function from the user-provided code and immediately invoke it
-                var result = new Function(code)()
-                // outputDiv.innerHTML += varDump(result)
+                var result = new Function(code + '; return "";')()  // avoids returning 'undefined' at the end of code execution
                 outputDiv.innerHTML += result
             } catch (error) {
                 // Display error message if code execution fails
                 outputDiv.textContent = "Error: " + error.message
             }
-
         }
         
     </script>

@@ -15,6 +15,12 @@ class Interview extends Component
     public string $selected_difficulty = 'easy';
     public int $selected_topic_id;
     public $selected_challenges;
+    public string $challenge_list_order = 'squares'; // list|squares
+
+    public function changeChallengeListOrderTo(string $list_order = 'list')
+    {
+        $this->challenge_list_order = $list_order;
+    }
 
     public function updatedSelectedDifficulty()
     {
@@ -30,7 +36,7 @@ class Interview extends Component
                 selected_difficulty: $this->selected_difficulty, 
                 topic_id: $this->selected_topic_id, 
                 user_id: auth()->user()->id,
-                return_cols: ['id', 'title', 'challenge_slug', 'banner_url'],
+                return_cols: ['id', 'title', 'challenge_slug', 'banner_url', 'description'],
             );
         }
     }

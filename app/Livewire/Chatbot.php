@@ -14,10 +14,10 @@ class Chatbot extends Component
 
     public array $messages = [];
     public string $last_chatbot_message = '';
-    public string $user_color = 'orange';
-    public string $user_avatar = '🐵';
-    public string $chatbot_color = 'sky';
-    public string $chatbot_avatar = '🤖';
+    public string $user_color = 'fuchsia';
+    public string $user_emoji = '🐵';
+    public string $chatbot_color = 'emerald';
+    public string $chatbot_emoji = '🤖';
 
     public string $user_code;
 
@@ -40,9 +40,11 @@ class Chatbot extends Component
     public function userCode(string $code)
     {
         $this->user_code = $code;
+        $this->saveUserCode($code);
+
         $this->messages[] = [
             'role' => 'user',
-            'content' => 'Please analyze my code',
+            'content' => 'auto-generated: "analyze my solution code"',
         ];
 
         $blueprint = env('OPENAI_ANALYZE_USER_CODE_PROMPT_BASE_TEXT');
@@ -60,6 +62,8 @@ class Chatbot extends Component
         auth()->user()->updateChallenge($this->challenge, ['openai_chat_settings' => $this->openai_chat_settings]);
 
         $completion = Tool::getLLMCompletion($this->messages);
+
+        if (!$completion) return;
         
         $completion_role = $completion->choices[0]->message->role;
         $completion_content = $completion->choices[0]->message->content;
@@ -69,12 +73,9 @@ class Chatbot extends Component
         $content = trim($content_parts[0]) ?? '';
         $solved = filter_var(strtolower(trim($content_parts[1] ?? 'false')), FILTER_VALIDATE_BOOLEAN);
 
-        info('Chatbot::userCode:72');
+        info('Chatbot::userCode:76');
         info([$this->challenge->title . ' (' . $this->challenge->id . ')' => ['user' => auth()->user()->email, 'solved' => $solved]]);
-        if ($solved) {
-            $this->dispatch('challengeSolved');
-            $this->dispatch('get-code'); // save user code
-        }
+        if ($solved) $this->dispatch('challengeSolved');
 
         array_push($this->messages, [
             'role' => $completion_role,
@@ -84,6 +85,7 @@ class Chatbot extends Component
         // save data
         $this->openai_chat_settings['messages'] = $this->messages;
         auth()->user()->updateChallenge($this->challenge, ['openai_chat_settings' => $this->openai_chat_settings]);
+
         $this->getLastChatMessage();
         $this->dispatch('speak');
     }

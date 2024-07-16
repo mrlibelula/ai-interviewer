@@ -58,68 +58,133 @@
                 </x-descr-list>
                 
                 @if ($selected_challenges)
-                <x-h5>Available A.I. Challenges ({{ count($selected_challenges) }})</x-h5>
-                <div class=" text-center">
-                    <x-table class="bg-gray-300/30 dark:bg-gray-800/70 w-full">
-                        @foreach ($selected_challenges as $challenge)
-                        <tr class="group font-semibold hover:bg-gray-300/70 hover:dark:bg-gray-700 smooth-300">
-                            <td class="py-6 px-1 w-16 text-base opacity-60">
-                                {{ $loop->iteration }}
-                            </td>
-                            <td class="py-6 px-2 text-left">
-                                <div class="flex items-center gap-x-6">
-                                    {{-- <!-- challenge icon -->
-                                    <div class="hidden lg:flex bg-gray-400 dark:bg-black w-[4.5rem] h-[4.5rem] rounded-md overflow-hidden border-2 border-gray-200 dark:border-gray-700 shadow">
-                                        <img class=" w-full h-full" src="{{ $challenge->banner_url }}" alt="">
-                                    </div> --}}
-                                    <div>
-                                        @if ($challenge->languages->count())
-                                        <div class=" text-base font-mono tracking-wide text-green-600 dark:text-green-400">
-                                            @foreach ($challenge->languages as $language)
-                                            {{ $language->name }}{{ !$loop->last ? ', ' : '' }}
-                                            @endforeach
-                                        </div>
-                                            @endif
-                                        <div class=" text-2xl dark:text-gray-300 group-hover:text-gray-950 group-hover:dark:text-gray-100 smooth-300">
-                                            {{ $challenge->title }}
-                                        </div>
-                                        <div class=" text-base text-gray-500 dark:text-gray-400 ">
-                                        @if ($challenge->topics->count())
-                                            @foreach ($challenge->topics as $topic)
-                                            {{ $topic->name }}{{ !$loop->last ? ', ' : '' }}
-                                            @endforeach
-                                        @endif
+                <div class="flex items-center justify-between gap-x-4">
+                    <x-h5>Available A.I. Challenges ({{ count($selected_challenges) }})</x-h5>
+                    <div class="flex items-center gap-x-4">
+                        <x-btn-list 
+                            :active="$challenge_list_order === 'list' ? true : false" 
+                            wire:click="changeChallengeListOrderTo('list')"
+                        />
+                        <x-btn-squares 
+                            :active="$challenge_list_order === 'squares' ? true : false" 
+                            wire:click="changeChallengeListOrderTo('squares')"
+                        />
+                    </div>
+                </div>
+
+                    @if ($challenge_list_order === 'list')
+                    <!-- challenges - list view -->
+                    <div class=" text-center">
+                        <x-table class="bg-gray-300/30 dark:bg-gray-800/70 w-full">
+                            @foreach ($selected_challenges as $challenge)
+                            <tr class="group font-semibold hover:bg-gray-300/70 hover:dark:bg-gray-700 smooth-300">
+                                <td class="py-6 px-1 w-16 text-base opacity-60">
+                                    {{ $loop->iteration }}
+                                </td>
+                                <td class="py-6 px-2 text-left">
+                                    <div class="flex items-center gap-x-6">
+                                        <div>
+                                            @if ($challenge->languages->count())
+                                            <div class=" text-base font-mono tracking-wide text-green-600 dark:text-green-400">
+                                                @foreach ($challenge->languages as $language)
+                                                {{ $language->name }}{{ !$loop->last ? ', ' : '' }}
+                                                @endforeach
+                                            </div>
+                                                @endif
+                                            <div class=" text-2xl dark:text-gray-300 group-hover:text-gray-950 group-hover:dark:text-gray-100 smooth-300">
+                                                {{ $challenge->title }}
+                                            </div>
+                                            <div class=" text-sm flex items-center gap-x-2 flex-wrap mt-2">
+                                                @if (count($challenge->tags))
+                                                    @foreach ($challenge->tags as $tag)
+                                                    <div>#{{ ucfirst(Str::camel($tag->name)) }}</div>
+                                                    @endforeach
+                                                @endif
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            </td>
-                            <td class="py-6 px-2 w-36">
-                                @if (\App\Tool::isChallengeSolved($challenge))
-                                <div class="flex items-center gap-x-3 justify-end">
-                                    <x-icon-star class="w-[2rem] h-[2rem] text-amber-500 dark:text-amber-300 animate-spin-y" fill="currentColor" />
-                                    {{-- <x-icon-shield /> --}}
-                                </div>
-                                @endif
-                            </td>
-                            <td class="py-6 px-2 w-32 font-mono text-base text-left group-hover:text-gray-950 group-hover:dark:text-gray-100 smooth-300">
-                                <!-- not using wire:navigate because of chatbot animation bug, needs to reload entire page -->
-                                <a href="{{ route('interview-start', [
-                                    \App\Tool::encode($selected_difficulty), 
-                                    \App\Tool::encode($selected_topic_id), 
-                                    \App\Tool::encode($challenge->id), 
-                                    $challenge->challenge_slug, 
-                                ]) }}">
-                                    <x-secondary-button>
-                                        <div class=" text-sm">
-                                            Start
+                                </td>
+                                <td class="py-6 px-2 w-36">
+                                    @if (\App\Tool::isChallengeSolved($challenge))
+                                    <div class="flex items-center gap-x-3 justify-end">
+                                        <x-icon-star class="w-[2rem] h-[2rem] animate-star" fill="currentColor" />
+                                        {{-- <x-icon-shield /> --}}
+                                    </div>
+                                    @endif
+                                </td>
+                                <td class="py-6 px-2 w-32 font-mono text-base text-left group-hover:text-gray-950 group-hover:dark:text-gray-100 smooth-300">
+                                    <!-- not using wire:navigate because of chatbot animation bug, needs to reload entire page -->
+                                    <a href="{{ route('interview-start', [
+                                        \App\Tool::encode($selected_difficulty), 
+                                        \App\Tool::encode($selected_topic_id), 
+                                        \App\Tool::encode($challenge->id), 
+                                        $challenge->challenge_slug, 
+                                    ]) }}">
+                                        <x-secondary-button>
+                                            <div class=" text-sm">
+                                                Start
+                                            </div>
+                                        </x-secondary-button>
+                                    </a>
+                                </td>                            
+                            </tr>
+                            @endforeach
+                        </x-table>
+                    </div>
+                    @else
+                    <!-- challenges - squares view -->
+                    <div class=" grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-12">
+                        @foreach ($selected_challenges as $challenge)
+                        @php
+                            $is_solved = (bool)\App\Tool::isChallengeSolved($challenge);
+                            $languages = $challenge->languages;
+                        @endphp
+                        <!-- not using wire:navigate because of chatbot animation bug, needs to reload entire page -->
+                        <a href="{{ route('interview-start', [
+                            \App\Tool::encode($selected_difficulty), 
+                            \App\Tool::encode($selected_topic_id), 
+                            \App\Tool::encode($challenge->id), 
+                            $challenge->challenge_slug, 
+                        ]) }}" 
+                            class="group p-0.5 rounded-lg w-full h-full bg-gradient-to-br {{ $is_solved ? ' from-emerald-500 to-gray-100 dark:from-[#1a6ef9] dark:to-gray-950' : ' from-gray-300 to-gray-100 dark:from-gray-600 dark:to-gray-950' }} smooth-300 cursor-pointer opacity-[0.80] hover:opacity-100 overflow-hidden  shadow-md"
+                        >
+                            <div class="p-6 rounded-lg bg-white/80 dark:bg-black/80 w-full h-full">
+                                <div class="flex items-start justify-between gap-x-6">
+                                    <div class="w-full text-left">
+                                        @if ($languages->count())
+                                        <div class="flex items-center text-sm dark:text-emerald-400 tracking-wide">
+                                            @foreach ($languages as $language)
+                                            <div>
+                                                {{ $language->name }}{{ !$loop->last ? ', ' : '' }}
+                                            </div>
+                                            @endforeach
                                         </div>
-                                    </x-secondary-button>
-                                </a>
-                            </td>                            
-                        </tr>
+                                        @endif
+                                        <div class="font-semibold leading-tight {{ $is_solved ? 'dark:text-gray-100 dark:group-hover:text-white' : 'dark:text-gray-300 dark:group-hover:text-white' }} text-[1.35rem]">
+                                            {{ $challenge->title }}
+                                        </div>
+                                        <div class=" text-sm flex items-center gap-x-2 flex-wrap mt-2 opacity-70">
+                                            @if (count($challenge->tags))
+                                                @foreach ($challenge->tags as $tag)
+                                                <div>#{{ ucfirst(Str::camel($tag->name)) }}</div>
+                                                @endforeach
+                                            @endif
+                                        </div>
+                                        <div class=" text-base mt-2">
+                                            {{ $challenge->description }}
+                                        </div>
+                                    </div>
+                                    @if ($is_solved)
+                                    <div class=" leading-tight">
+                                        <x-icon-star fill="currentColor" class="w-6 h-6 animate-star" />
+                                    </div>
+                                    @endif
+                                </div>
+                            </div>
+                        </a>
                         @endforeach
-                    </x-table>
-                </div>
+                    </div>
+                    @endif
                 @endif
             </div>
             

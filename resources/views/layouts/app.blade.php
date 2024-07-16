@@ -46,8 +46,9 @@
             <circle cx="512" cy="512" r="512" fill="url(#759c1415-0410-454c-8f7c-9a820de03641)" fill-opacity="0.7" />
             <defs>
                 <radialGradient id="759c1415-0410-454c-8f7c-9a820de03641">
-                    <stop :stop-color="darkMode ? '#434c5b' : '#e1e4e8'" />
-                    <stop offset="1" :stop-color="darkMode ? '#434c5b' : '#e1e4e8'" />
+                    <!-- gray: #e1e4e8 - green: #b5cece -->
+                    <stop :stop-color="darkMode ? '#434c5b' : '#bfc0c2'" />
+                    <stop offset="1" :stop-color="darkMode ? '#434c5b' : '#bfc0c2'" />
                 </radialGradient>
             </defs>
         </svg>

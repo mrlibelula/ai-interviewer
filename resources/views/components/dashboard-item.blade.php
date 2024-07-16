@@ -1,5 +1,5 @@
 @props(['title' => '', 'info' => null])
-<div {{ $attributes->merge(['class' => 'flex flex-col gap-y-8 p-6 md:p-8 rounded-xl h-fit bg-gray-100 dark:bg-gray-800 shadow-md', 'x-data' => '{ isOpen: false }']) }}>
+<div {{ $attributes->merge(['class' => 'flex flex-col gap-y-8 p-6 md:p-8 rounded-xl h-fit bg-gray-100 dark:bg-gray-800 shadow-md', 'x-data' => '{ isOpen: true }']) }}>
     <div class="flex items-center justify-between">
         <div class=" font-semibold text-gray-600 dark:text-gray-300 lg:text-2xl">
             {{ $title }}
