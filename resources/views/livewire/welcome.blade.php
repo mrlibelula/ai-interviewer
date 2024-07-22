@@ -28,6 +28,16 @@
                 <x-progress-circle value="60" />
                 <div>Communication skills</div>
             </div>
+            <div class="flex items-center gap-x-6">
+                <div class="flex items-center justify-center w-[5rem] h-[5rem] rounded-full shadow-lg border-[2px] border-gray-200 dark:border-gray-700" 
+                    style="background: conic-gradient(#2fd399 100%, transparent 3%);"
+                >
+                    <div class="flex items-center justify-center whitespace-nowrap w-[4.3rem] h-[4.3rem] rounded-full bg-gray-100/80 dark:bg-gray-800/80 text-xl text-gray-900 dark:text-gray-300 font-mono">
+                        {{ $total_user_bonus_xp }}{{ 'XP' }}
+                    </div>
+                </div>
+                <div>Total <span class=" font-bold text-black dark:text-gray-200">XP</span> points</div>
+            </div>
         </div>
     </x-dashboard-item>
 

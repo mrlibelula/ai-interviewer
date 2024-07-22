@@ -4,6 +4,7 @@ namespace App;
 
 use stdClass;
 use Exception;
+use Carbon\Carbon;
 use App\Models\Tag;
 use App\Models\User;
 use App\Models\Topic;
@@ -17,6 +18,7 @@ use App\Models\Difficulty;
 use App\Models\Visibility;
 use Illuminate\Support\Str;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use OpenAI\Laravel\Facades\OpenAI;
 use Illuminate\Support\Facades\Http;
 
@@ -878,5 +880,54 @@ class Tool
     public static function getOpenAIModelsCompletion(): array
     {
         return OpenAI::models()->list()->toArray()['data'];
+    }
+
+    /**
+     * Get seconds from an array of hours, minutes and seconds
+     *
+     * @param array $time_array
+     * @return integer
+     */
+    public static function calculateSeconds(array $time_array = [
+        'hours' => 1,
+        'minutes' => 0,
+        'seconds' => 0,
+    ]): int
+    {
+        $carbon = Carbon::create(2000, 1, 1, $time_array['hours'], $time_array['minutes'], $time_array['seconds']);
+        return $carbon->diffInSeconds(Carbon::create(2000, 1, 1, 0, 0, 0));
+    }
+
+    /**
+     * Calculates user completion time
+     *
+     * @param Challenge $challenge
+     * @param array $elapsed_time
+     * @return integer
+     */
+    public static function calculateCompletionTime(Challenge $challenge, array $elapsed_time = [
+        'hours' => 0,
+        'minutes' => 10,
+        'seconds' => 0,
+    ]): int
+    {
+        $completed_in = Tool::calculateSeconds($elapsed_time); // seconds
+        $challenge_seconds = Carbon::createFromTimeString($challenge->time_limit)->diffInSeconds(Carbon::today()); // seconds
+        return $challenge_seconds - $completed_in;
+    }
+
+    /**
+     * Calculates de total User's bonus XP
+     *
+     * @param integer $user_id
+     * @return integer|null
+     */
+    public static function totalUserBonusXP(int $user_id): int|null
+    {
+        return DB::table('challenge_solver')
+            ->select(DB::raw('SUM(bonus_xp) as total_bonus_xp'))
+            ->where('user_id', $user_id)
+            ->first()
+            ->total_bonus_xp;
     }
 }

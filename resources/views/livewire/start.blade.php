@@ -97,11 +97,10 @@
 
                     <!-- XP panel -->
                     <div class="grid grid-cols-2 items-center gap-1 justify-between w-full text-gray-950 dark:text-gray-400 bg-gray-200 dark:bg-gray-800 p-1 rounded-lg shadow">
-                        <x-pill-xp label="Challenge XP">+{{ $challenge->difficulty->base_xp }}</x-pill-xp>
+                        <x-pill-xp label="Total XP">{{ $total_user_bonus_xp }}</x-pill-xp>
                         <x-pill-xp label="Bonus XP">+{{ $this->bonus_xp }}</x-pill-xp>
                         <x-pill-xp label="Solved">{{ $solved_challenges_count . '/' . $total_challenges_count }}</x-pill-xp>
                         <x-pill-xp label="Attempts">{{ $attempts }}</x-pill-xp>
-                        <x-pill-xp label="Total XP" class="col-span-2">{{ '0' }}</x-pill-xp>
                     </div>
 
                     <!-- A.I. chatbot panel -->
@@ -114,7 +113,7 @@
                     @if ($challenge)
                     <div class="flex items-center gap-x-3 justify-between mt-16">
                         @if ($is_challenge_solved)
-                        <x-secondary-button>
+                        <x-secondary-button wire:click="nextChallenge">
                             Next challenge
                         </x-secondary-button>
                         @endif

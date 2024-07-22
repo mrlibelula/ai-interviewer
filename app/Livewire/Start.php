@@ -6,6 +6,7 @@ use App\Tool;
 use Livewire\Component;
 use App\Models\Challenge;
 use Illuminate\Database\UniqueConstraintViolationException;
+use Illuminate\Http\Request;
 
 class Start extends Component
 {
@@ -19,28 +20,51 @@ class Start extends Component
     public bool $time_limit_end = false;
     public array $challenge_attributes = [];
     public string $chat_welcome;
+    public int $total_user_bonus_xp = 0;
     public int $bonus_xp = 0;
     public int $attempts = 0;
     public int $total_challenges_count = 0;
     public int $solved_challenges_count = 0;
     public array $openai_chat_settings;
     public bool $is_challenge_solved = false;
+    public array $elapsed_time = [
+        'hours' => 0,
+        'minutes' => 0,
+        'seconds' => 0,
+    ];
 
-    protected $listeners = ['getChallenge', 'sendMessage', 'timeLimitEnded', 'challengeSolved'];
+    protected $listeners = ['getChallenge', 'sendMessage', 'timeLimitEnded', 'challengeSolved', 'currentElapsedTime'];
+
+    public function nextChallenge()
+    {
+        // 
+    }
+
+    public function currentElapsedTime(int $hours, int $minutes, int $seconds)
+    {
+        $this->elapsed_time = [
+            'hours' => $hours,
+            'minutes' => $minutes,
+            'seconds' => $seconds,
+        ];
+    }
 
     public function challengeSolved()
     {
         if ($this->challenge) {
+            // only give bonus xp to a User that didn't 'already solved' the Challenge
+            if (!$this->is_challenge_solved) {
+                $this->bonus_xp = Tool::calculateBonusXP(Tool::calculateCompletionTime($this->challenge, $this->elapsed_time));
+            }
             auth()->user()->updateChallenge($this->challenge, [
+                'bonus_xp' => $this->bonus_xp,
                 'solved_at' => date('Y-m-d H:i:s'),
             ]);
-            // calculate 'bonus_xp' on solved
-            
-
         }
         $this->getIsChallengeSolved();
+        $this->totalUserBonusXP();
     }
-
+    
     public function timeLimitEnded()
     {
         $this->time_limit_end = true;
@@ -178,6 +202,18 @@ class Start extends Component
         $this->totalChallengesCount();
         $this->solvedChallengesCount();
         $this->getChallenge();
+        $this->totalUserBonusXP();
+        $this->loadBonusXP();
+    }
+
+    public function loadBonusXP()
+    {
+        $this->bonus_xp = $this->challenge_attributes['bonus_xp'] ?? 0;
+    }
+
+    public function totalUserBonusXP()
+    {
+        $this->total_user_bonus_xp = Tool::totalUserBonusXP(auth()->user()->id) ?? 0;
     }
 
     public function removeSolutionCode()

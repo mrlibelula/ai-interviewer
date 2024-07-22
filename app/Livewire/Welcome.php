@@ -18,6 +18,7 @@ class Welcome extends Component
     public $topics;
     public $available_ai_models = [];
     public $ai_models_last_updated = '';
+    public int $total_user_bonus_xp = 0;
 
     public function getAiModels()
     {
@@ -54,6 +55,12 @@ class Welcome extends Component
         $this->nb_challenges = Challenge::select('id')->count();
         $this->solved_challenges = Tool::userSolvedChallenges(auth()->user());
         $this->perc_solved = Tool::percentageSolved($this->solved_challenges->count(), $this->nb_challenges);
+        $this->totalXP();
+    }
+
+    public function totalXP()
+    {
+        $this->total_user_bonus_xp = Tool::totalUserBonusXP(auth()->user()->id) ?? 0;
     }
 
     public function render()
