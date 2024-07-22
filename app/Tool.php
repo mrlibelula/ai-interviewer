@@ -920,14 +920,14 @@ class Tool
      * Calculates de total User's bonus XP
      *
      * @param integer $user_id
-     * @return integer|null
+     * @return integer
      */
-    public static function totalUserBonusXP(int $user_id): int|null
+    public static function totalUserBonusXP(int $user_id): int
     {
         return DB::table('challenge_solver')
             ->select(DB::raw('SUM(bonus_xp) as total_bonus_xp'))
             ->where('user_id', $user_id)
             ->first()
-            ->total_bonus_xp;
+            ->total_bonus_xp ?? 0;
     }
 }

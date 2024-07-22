@@ -60,7 +60,7 @@ class Welcome extends Component
 
     public function totalXP()
     {
-        $this->total_user_bonus_xp = Tool::totalUserBonusXP(auth()->user()->id) ?? 0;
+        $this->total_user_bonus_xp = Tool::totalUserBonusXP(auth()->user()->id);
     }
 
     public function render()

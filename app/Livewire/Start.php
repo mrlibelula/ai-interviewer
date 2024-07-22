@@ -213,7 +213,7 @@ class Start extends Component
 
     public function totalUserBonusXP()
     {
-        $this->total_user_bonus_xp = Tool::totalUserBonusXP(auth()->user()->id) ?? 0;
+        $this->total_user_bonus_xp = Tool::totalUserBonusXP(auth()->user()->id);
     }
 
     public function removeSolutionCode()
