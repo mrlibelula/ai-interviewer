@@ -99,7 +99,7 @@ class Challenge extends Component
     {
         // validate
         if ($this->hours >= 0 && $this->hours <= 23) {
-            $this->challenge->time_limit = implode(':', [$this->hours, $this->minutes, $this->seconds]);
+            $this->challenge->time_limit = sprintf('%02d:%02d:%02d', $this->hours, $this->minutes, $this->seconds);
             $this->challenge->save();
         }
     }
@@ -108,7 +108,7 @@ class Challenge extends Component
     {
         // validate
         if ($this->minutes >= 0 && $this->minutes <= 59) {
-            $this->challenge->time_limit = implode(':', [$this->hours, $this->minutes, $this->seconds]);
+            $this->challenge->time_limit = sprintf('%02d:%02d:%02d', $this->hours, $this->minutes, $this->seconds);
             $this->challenge->save();
         }
     }
@@ -117,7 +117,7 @@ class Challenge extends Component
     {
         // validate
         if ($this->seconds >= 0 && $this->seconds <= 59) {
-            $this->challenge->time_limit = implode(':', [$this->hours, $this->minutes, $this->seconds]);
+            $this->challenge->time_limit = sprintf('%02d:%02d:%02d', $this->hours, $this->minutes, $this->seconds);
             $this->challenge->save();
         }
     }
