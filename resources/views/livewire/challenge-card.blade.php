@@ -41,20 +41,6 @@
     </div>
     @endif
 
-    <!-- challenge banner -->
-    @if(!request()->routeIs('interview-start'))
-    {{-- <div class="relative h-[5rem] bg-cover bg-center rounded-md" 
-        style="background-image: url({{ $challenge->banner_url }})"
-    >
-        <div class="absolute z-30 h-full w-full" 
-            style="
-                /* Permalink - use to edit and share this gradient: https://colorzilla.com/gradient-editor/#293342+0,293342+100&0+0,0.45+0,0.55+70,1+100 */
-                background: linear-gradient(to bottom,  rgba(41,51,66,0.45) 0%,rgba(41,51,66,0.55) 70%,rgba(41,51,66,1) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
-            "
-        ></div>
-    </div> --}}
-    @endif
-
     @if ($title)
         <div class="mt-2 z-[35] text-[1.5rem] md:text-[1.7rem] font-semibold text-gray-900 dark:text-gray-300">
             {{ $challenge->title ?? 'n/a' }}
