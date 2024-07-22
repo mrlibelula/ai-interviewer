@@ -1,8 +1,8 @@
 <div {{ $attributes->merge(['class' => 'flex items-center justify-between gap-x-4 py-2']) }}>
     <div @click="$dispatch('get-code')" class="p-1 cursor-pointer group w-fit flex items-start gap-x-1">
         <div class=" -mt-1.5 dark:text-gray-500 group-hover:dark:text-gray-200 smooth-300">
-            <i class="save icon"></i>
-            {{-- <i class="cloud upload icon"></i> --}}
+            {{-- <i class="save icon"></i> --}}
+            <i class="cloud upload icon"></i>
         </div>
         <div class="text-base group-hover:dark:text-emerald-400 smooth-300 leading-none">
             Save code
