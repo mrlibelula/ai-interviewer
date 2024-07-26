@@ -1,7 +1,7 @@
 <div class="flex flex-col gap-y-8">
     <x-heading class="-mb-8">
         @if ($challenge)
-        <x-heading-content right_vertical_position="start">
+        <x-heading-content right_vertical_position="center">
             <x-slot name="title">
                 <div class="text-left">
                     {{ $challenge->title ?? 'n/a' }}
@@ -31,12 +31,12 @@
             <x-slot name="right">
                 <div class="flex items-center gap-x-4">
                     @if ($is_challenge_solved)
-                    <div class="group p-2 rounded-md bg-gradient-to-br from-gray-500 via-gray-400/70 to-gray-800/50 shadow-md w-[2.3rem] h-[2.3rem]">
+                    {{-- <div class="group p-2_ rounded-md_ _bg-gradient-to-br _from-gray-500 _via-gray-400/70 to-gray-800/50_ shadow-md_ w-[2.3rem] h-[2.3rem]">
                         <x-icon-star class="w-full h-full text-amber-300 group-hover:animate-spin-y" fill="currentColor" />
-                    </div>
-                    {{-- <div class="group p-2 rounded-md bg-gradient-to-br from-gray-500 via-gray-400/70 to-gray-800/50 shadow-md w-[2.3rem] h-[2.3rem]">
-                        <x-icon-shield class=" w-full h-full group-hover:animate-spin-y" />
                     </div> --}}
+                    <div class="group p-2_ rounded-md_ _bg-gradient-to-br _from-gray-500 _via-gray-400/70 to-gray-800/50_ _shadow-md w-[2.5rem] h-[2.5rem] md:w-[3.5em] md:h-[3.5em]">
+                        <x-icon-shield class=" w-full h-full group-hover:animate-spin-y" />
+                    </div>
                     @endif
                 </div>
             </x-slot>
@@ -93,14 +93,24 @@
                     
                     <!-- countdown timer -->
                     <x-countdown-timer time_limit="{{ $challenge->time_limit }}" class="text-[1.5rem] text-gray-950 dark:text-gray-300 tracking-widest font-mono text-center w-full" />
-                    {{-- <x-countdown-timer time_limit="00:00:03" class="text-[1.5rem] text-gray-950 dark:text-gray-300 tracking-widest font-mono text-center w-full" /> --}}
 
                     <!-- XP panel -->
                     <div class="grid grid-cols-2 items-center gap-1 justify-between w-full text-gray-950 dark:text-gray-400 bg-gray-200 dark:bg-gray-800 p-1 rounded-lg shadow">
-                        <x-pill-xp label="Total XP">{{ $total_user_bonus_xp }}</x-pill-xp>
-                        <x-pill-xp label="Bonus XP">+{{ $this->bonus_xp }}</x-pill-xp>
-                        <x-pill-xp label="Solved">{{ $solved_challenges_count . '/' . $total_challenges_count }}</x-pill-xp>
+                        <x-pill-xp label="Bonus XP">+{{ $total_user_bonus_xp }}</x-pill-xp>
+                        <x-pill-xp label="Extra Bonus">+{{ $total_user_extra_xp }}</x-pill-xp>
+                        <x-pill-xp label="Solved">
+                            <div class="flex items-center gap-x-2 justify-between w-full">
+                                @if ($is_challenge_solved)
+                                <div class="group p-2_ rounded-md_ _bg-gradient-to-br _from-gray-500 _via-gray-400/70 to-gray-800/50_ shadow-md_ w-5 h-5">
+                                    <x-icon-star class="w-full h-full text-amber-300 group-hover:animate-spin-y" fill="currentColor" />
+                                </div>
+                                @endif
+                                {{ $solved_challenges_count . '/' . $total_challenges_count }}
+                            </div>
+                        </x-pill-xp>
                         <x-pill-xp label="Attempts">{{ $attempts }}</x-pill-xp>
+                        <x-pill-xp class=" col-span-2" label="Total XP gained in this challenge">+{{ $total_bonus }}</x-pill-xp>
+                        <x-pill-xp class=" col-span-2 dark:bg-gray-900/50" label="Overall Total XP">+{{ $total_user_bonus }}</x-pill-xp>
                     </div>
 
                     <!-- A.I. chatbot panel -->

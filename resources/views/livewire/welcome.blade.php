@@ -7,33 +7,34 @@
     
     <!-- progress summary -->
     <x-dashboard-item title="Progress summary" x-data="{ isOpen: true }" class=" md:col-span-2">
-        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-            <div class="flex items-center gap-x-6">
+        {{-- <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8"> --}}
+        <div class="flex items-center justify-around_ justify-start gap-x-[5rem]">
+            <div class="flex flex-col gap-y-4 items-center gap-x-6">
                 <x-progress-circle value="{{ $perc_solved }}" />
                 <div>Solved challenges</div>
             </div>
-            <div class="flex items-center gap-x-6">
+            {{-- <div class="flex flex-col gap-y-4 items-center gap-x-6">
                 <x-progress-circle value="90" />
                 <div>Sociability</div>
             </div>
-            <div class="flex items-center gap-x-6">
+            <div class="flex flex-col gap-y-4 items-center gap-x-6">
                 <x-progress-circle value="80" />
                 <div>Professionalism</div>
             </div>
-            <div class="flex items-center gap-x-6">
+            <div class="flex flex-col gap-y-4 items-center gap-x-6">
                 <x-progress-circle value="45" />
                 <div>Energy level</div>
             </div>
-            <div class="flex items-center gap-x-6">
+            <div class="flex flex-col gap-y-4 items-center gap-x-6">
                 <x-progress-circle value="60" />
                 <div>Communication skills</div>
-            </div>
-            <div class="flex items-center gap-x-6">
-                <div class="flex items-center justify-center w-[5rem] h-[5rem] rounded-full shadow-lg border-[2px] border-gray-200 dark:border-gray-700" 
+            </div> --}}
+            <div class="flex flex-col gap-y-4 items-center gap-x-6">
+                <div class="flex items-center justify-center w-[8rem] h-[8rem] rounded-full shadow-lg border-[2px] border-gray-200 dark:border-gray-700" 
                     style="background: conic-gradient(#2fd399 100%, transparent 3%);"
                 >
-                    <div class="flex items-center justify-center whitespace-nowrap w-[4.3rem] h-[4.3rem] rounded-full bg-gray-100/80 dark:bg-gray-800/80 text-xl text-gray-900 dark:text-gray-300 font-mono">
-                        {{ $total_user_bonus_xp }}{{ 'XP' }}
+                    <div class="flex items-center justify-center whitespace-nowrap w-[6.3rem] h-[6.3rem] rounded-full bg-emerald-100/80 dark:bg-emerald-800/80 text-2xl text-gray-900 dark:text-gray-300 font-mono">
+                        <span class=" mr-1">{{ $total_user_bonus_xp }}</span>{{ 'XP' }}
                     </div>
                 </div>
                 <div>Total <span class=" font-bold text-black dark:text-gray-200">XP</span> points</div>

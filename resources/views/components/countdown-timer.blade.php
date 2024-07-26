@@ -1,5 +1,8 @@
 @props(['time_limit'])
-<div x-data="countdownTimer('{{ $time_limit }}')" x-init="startTimer()" {{ $attributes }}>
+<div 
+    x-data="countdownTimer('{{ $time_limit }}')" 
+    x-init="startTimer()" {{ $attributes }} 
+>
     {{-- <span x-text="hours.padStart(2, '0') + ':' + minutes.padStart(2, '0') + ':' + seconds.padStart(2, '0')"></span> --}}
     <span id="hours" x-text="hours.padStart(2, '0')" class="border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 whitespace-nowrap"></span>
     <span class=" -mx-3 text-emerald-400 dark:text-emerald-500 animate-pulse">:</span>
@@ -8,7 +11,11 @@
     <span id="seconds" x-text="seconds.padStart(2, '0')" class="border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 whitespace-nowrap"></span>
     <script>
         function countdownTimer(startTime) {
-            const [initialHours, initialMinutes, initialSeconds] = startTime.split(':').map(Number)
+            const [ initialHours, initialMinutes, initialSeconds ] = startTime.split(':').map(Number)
+            let timerInterval
+            document.addEventListener('stop-timer', () => {
+                clearInterval(timerInterval)
+            })
             return {
                 hours: initialHours.toString().padStart(2, '0'),
                 minutes: initialMinutes.toString().padStart(2, '0'),
@@ -16,7 +23,7 @@
                 startTimer() {
                     const totalSeconds = initialHours * 3600 + initialMinutes * 60 + initialSeconds
                     let remainingSeconds = totalSeconds
-                    const timerInterval = setInterval(() => {
+                    timerInterval = setInterval(() => {
                         remainingSeconds--
                         this.hours = Math.floor(remainingSeconds / 3600).toString().padStart(2, '0')
                         this.minutes = Math.floor((remainingSeconds % 3600) / 60).toString().padStart(2, '0')

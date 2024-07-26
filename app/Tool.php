@@ -761,24 +761,26 @@ class Tool
 
     /**
      * Returns calculated bonus XP points based on
-     * completion time and time threshold range
+     * completion time, time threshold range
+     * and 'solved_time_seconds'
      *
      * @param integer $completion_time_seconds
      * @param integer $high_threshold_seconds
      * @param integer $medium_threshold_seconds
-     * @return integer
+     * @return array
      */
-    public static function calculateBonusXP(int $completion_time_seconds, int $high_threshold_seconds = 300, int $medium_threshold_seconds = 600): int
+    public static function calculateBonusXP(int $completion_time_seconds, int $high_threshold_seconds = 300, int $medium_threshold_seconds = 600): array
     {
         $bonus_xp = 0;
+        $extra_bonus = 0;
         if ($completion_time_seconds < $high_threshold_seconds) {
             $bonus_xp = 20;
+            $extra_bonus = (int)(($high_threshold_seconds - $completion_time_seconds) * 0.1 - $bonus_xp); // 0.1 XP for each second faster
         } elseif ($completion_time_seconds < $medium_threshold_seconds) {
             $bonus_xp = 10;
-        } else {
-            $bonus_xp = 0;
+            $extra_bonus = (int)(($medium_threshold_seconds - $completion_time_seconds) * 0.05 - $bonus_xp); // 0.05 XP for each second faster
         }
-        return $bonus_xp;
+        return [ 'bonus_xp' => $bonus_xp, 'extra_bonus' => $extra_bonus];
     }
 
     /**
@@ -899,7 +901,7 @@ class Tool
     }
 
     /**
-     * Calculates user completion time
+     * Calculates user completion time (in seconds)
      *
      * @param Challenge $challenge
      * @param array $elapsed_time
@@ -917,17 +919,39 @@ class Tool
     }
 
     /**
-     * Calculates de total User's bonus XP
+     * Calculates the total User's challenge bonus XP and extra_bonus from DB
+     *
+     * @param integer $user_id
+     * @param integer $challenge_id
+     * @return array
+     */
+    public static function totalUserChallengeBonus(int $user_id, int $challenge_id): array
+    {
+        $db = DB::table('challenge_solver')
+            ->select(DB::raw('SUM(bonus_xp) as total_bonus_xp, SUM(extra_bonus) as total_extra_bonus, SUM(bonus_xp) + SUM(extra_bonus) as total_bonus'))
+            ->where('user_id', $user_id)
+            ->where('challenge_id', $challenge_id)
+            ->first();
+        
+        return [
+            'total_bonus_xp' => $db->total_bonus_xp ?? 0, 
+            'total_extra_bonus' => $db->total_extra_bonus ?? 0,
+            'total_bonus' => $db->total_bonus ?? 0,
+        ];
+    }
+
+    /**
+     * TOTAL User bonus
      *
      * @param integer $user_id
      * @return integer
      */
-    public static function totalUserBonusXP(int $user_id): int
+    public static function totalUserBonus(int $user_id): int
     {
         return DB::table('challenge_solver')
-            ->select(DB::raw('SUM(bonus_xp) as total_bonus_xp'))
-            ->where('user_id', $user_id)
-            ->first()
-            ->total_bonus_xp ?? 0;
+        ->select(DB::raw('SUM(bonus_xp) + SUM(extra_bonus) as total_bonus'))
+        ->where('user_id', $user_id)
+        ->first()
+        ->total_bonus ?? 0;
     }
 }

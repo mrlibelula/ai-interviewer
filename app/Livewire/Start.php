@@ -6,7 +6,6 @@ use App\Tool;
 use Livewire\Component;
 use App\Models\Challenge;
 use Illuminate\Database\UniqueConstraintViolationException;
-use Illuminate\Http\Request;
 
 class Start extends Component
 {
@@ -21,6 +20,10 @@ class Start extends Component
     public array $challenge_attributes = [];
     public string $chat_welcome;
     public int $total_user_bonus_xp = 0;
+    public int $total_user_extra_xp = 0;
+    public int $total_bonus = 0;
+    public int $total_xp = 0;
+    public int $total_user_bonus = 0;
     public int $bonus_xp = 0;
     public int $attempts = 0;
     public int $total_challenges_count = 0;
@@ -51,18 +54,25 @@ class Start extends Component
 
     public function challengeSolved()
     {
+        $completion_time = 0;
         if ($this->challenge) {
             // only give bonus xp to a User that didn't 'already solved' the Challenge
             if (!$this->is_challenge_solved) {
-                $this->bonus_xp = Tool::calculateBonusXP(Tool::calculateCompletionTime($this->challenge, $this->elapsed_time));
+                $bonus = Tool::calculateBonusXP(Tool::calculateCompletionTime($this->challenge, $this->elapsed_time));
+                $this->bonus_xp = $bonus['bonus_xp'];
+                $completion_time = Tool::calculateCompletionTime($this->challenge, $this->elapsed_time);
             }
             auth()->user()->updateChallenge($this->challenge, [
                 'bonus_xp' => $this->bonus_xp,
+                'extra_bonus' => $bonus['extra_bonus'],
+                'solved_time_seconds' => $completion_time,
                 'solved_at' => date('Y-m-d H:i:s'),
             ]);
         }
         $this->getIsChallengeSolved();
-        $this->totalUserBonusXP();
+        $this->totalUserBonus();
+        $this->solvedChallengesCount();
+        $this->dispatch('stop-timer', [ 'solved' => true ]);
     }
     
     public function timeLimitEnded()
@@ -202,7 +212,7 @@ class Start extends Component
         $this->totalChallengesCount();
         $this->solvedChallengesCount();
         $this->getChallenge();
-        $this->totalUserBonusXP();
+        $this->totalUserBonus();
         $this->loadBonusXP();
     }
 
@@ -211,9 +221,13 @@ class Start extends Component
         $this->bonus_xp = $this->challenge_attributes['bonus_xp'] ?? 0;
     }
 
-    public function totalUserBonusXP()
+    public function totalUserBonus()
     {
-        $this->total_user_bonus_xp = Tool::totalUserBonusXP(auth()->user()->id);
+        $total_bonus = Tool::totalUserChallengeBonus(auth()->user()->id, $this->challenge->id);
+        $this->total_user_bonus_xp = $total_bonus['total_bonus_xp'];
+        $this->total_user_extra_xp = $total_bonus['total_extra_bonus'];
+        $this->total_bonus = $total_bonus['total_bonus_xp'] + $total_bonus['total_extra_bonus'];
+        $this->total_user_bonus = Tool::totalUserBonus(auth()->user()->id);
     }
 
     public function removeSolutionCode()
