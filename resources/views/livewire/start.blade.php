@@ -90,8 +90,7 @@
             <!-- right panel -->
             <div class="xl:w-[30%] w-full">
                 <div class="flex flex-col items-center gap-y-10 ">
-                    
-                    <!-- countdown timer -->
+
                     <x-countdown-timer time_limit="{{ $challenge->time_limit }}" class="text-[1.5rem] text-gray-950 dark:text-gray-300 tracking-widest font-mono text-center w-full" />
 
                     <!-- XP panel -->
@@ -122,10 +121,16 @@
 
                     @if ($challenge)
                     <div class="flex items-center gap-x-3 justify-between mt-16">
-                        @if ($is_challenge_solved)
+                        @if ($is_challenge_solved && count($challenge_ids) > 1)
                         <x-secondary-button wire:click="nextChallenge">
                             Next challenge
                         </x-secondary-button>
+                        @elseif ($is_challenge_solved)
+                        <a wire:navigate href="{{ route('interview') }}">
+                            <x-secondary-button>
+                                Challenges List
+                            </x-secondary-button>
+                        </a>
                         @endif
                     </div>
                     @endif

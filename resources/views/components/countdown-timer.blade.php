@@ -13,7 +13,7 @@
         function countdownTimer(startTime) {
             const [ initialHours, initialMinutes, initialSeconds ] = startTime.split(':').map(Number)
             let timerInterval
-            document.addEventListener('stop-timer', () => {
+            window.addEventListener('stop-timer', () => {
                 clearInterval(timerInterval)
             })
             return {

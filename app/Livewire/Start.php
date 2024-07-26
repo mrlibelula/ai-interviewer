@@ -25,6 +25,7 @@ class Start extends Component
     public int $total_xp = 0;
     public int $total_user_bonus = 0;
     public int $bonus_xp = 0;
+    public int $extra_bonus = 0;
     public int $attempts = 0;
     public int $total_challenges_count = 0;
     public int $solved_challenges_count = 0;
@@ -40,7 +41,22 @@ class Start extends Component
 
     public function nextChallenge()
     {
-        // 
+        $this->challenge_ids = session()->get('challenge_ids');
+        info($this->challenge_ids);
+        if(count($this->challenge_ids) > 1) {
+            // multiple challenges selected
+            $this->getChallenge();
+            $next_challenge = $this->challenge;
+            // $next_challenge_id = array_shift($this->challenge_ids);
+            // dd($this->challenge);
+            // session()->put('challenge_ids', $this->challenge_ids);
+            return redirect()->route('interview-start', [
+                'enc_selected_difficulty' => Tool::encode($this->selected_difficulty),
+                'enc_selected_topic_id' => Tool::encode($this->selected_topic_id),
+                'enc_challenge_id' => Tool::encode($next_challenge->id),
+                'challenge_slug' => $next_challenge->challenge_slug ?? '',
+            ]);
+        }
     }
 
     public function currentElapsedTime(int $hours, int $minutes, int $seconds)
@@ -54,25 +70,26 @@ class Start extends Component
 
     public function challengeSolved()
     {
-        $completion_time = 0;
         if ($this->challenge) {
             // only give bonus xp to a User that didn't 'already solved' the Challenge
+            $completion_time = 0;
             if (!$this->is_challenge_solved) {
                 $bonus = Tool::calculateBonusXP(Tool::calculateCompletionTime($this->challenge, $this->elapsed_time));
                 $this->bonus_xp = $bonus['bonus_xp'];
+                $this->extra_bonus = $bonus['extra_bonus'];
                 $completion_time = Tool::calculateCompletionTime($this->challenge, $this->elapsed_time);
             }
             auth()->user()->updateChallenge($this->challenge, [
                 'bonus_xp' => $this->bonus_xp,
-                'extra_bonus' => $bonus['extra_bonus'],
+                'extra_bonus' => $this->extra_bonus,
                 'solved_time_seconds' => $completion_time,
                 'solved_at' => date('Y-m-d H:i:s'),
             ]);
+            $this->getIsChallengeSolved();
+            $this->totalUserBonus();
+            $this->solvedChallengesCount();
+            $this->dispatch('stop-timer');
         }
-        $this->getIsChallengeSolved();
-        $this->totalUserBonus();
-        $this->solvedChallengesCount();
-        $this->dispatch('stop-timer', [ 'solved' => true ]);
     }
     
     public function timeLimitEnded()
@@ -116,6 +133,8 @@ class Start extends Component
         $this->challenge = count($this->challenge_ids)
             ? Tool::fetchChallenge(array_shift($this->challenge_ids))
             : null;
+
+        session()->put('challenge_ids', $this->challenge_ids);
         
         // set Challenge attributes for pivot table
         if ($this->challenge) {
@@ -164,25 +183,28 @@ class Start extends Component
                 }
             }
         }
-        // info($this->challenge_attributes);
-        
     }
 
     public function getChallenges()
     {
-        if ($challenge = $this->challenge_id ? Tool::fetchChallenge($this->challenge_id, ['id'], []) : null) {
-            $this->challenge_ids[] = $challenge->id;
+        if (session()->has('challenge_ids')) {
+            $this->challenge_ids = session()->get('challenge_ids');
         } else {
-            $challenges = Challenge::byDifficultyAndTopic(
-                selected_difficulty: $this->selected_difficulty,
-                topic_id: $this->selected_topic_id,
-                user_id: auth()->user()->id,
-                return_cols: ['id'],
-                ordered: false
-            );
-            $challenges->each(fn ($challenge) => $this->challenge_ids[] = $challenge->id);
+            if ($challenge = $this->challenge_id ? Tool::fetchChallenge($this->challenge_id, ['id'], []) : null) {
+                $this->challenge_ids[] = $challenge->id;
+            } else {
+                $challenges = Challenge::byDifficultyAndTopic(
+                    selected_difficulty: $this->selected_difficulty,
+                    topic_id: $this->selected_topic_id,
+                    user_id: auth()->user()->id,
+                    return_cols: ['id'],
+                    ordered: false
+                );
+                $challenges->each(fn ($challenge) => $this->challenge_ids[] = $challenge->id);
+            }
+            if ($this->random) shuffle($this->challenge_ids);
+            session()->put('challenge_ids', $this->challenge_ids);
         }
-        if ($this->random) shuffle($this->challenge_ids);
     }
 
     public function getIsChallengeSolved()
@@ -207,6 +229,7 @@ class Start extends Component
         $this->selected_difficulty = Tool::decode($enc_selected_difficulty);
         $this->selected_topic_id = (int)Tool::decode($enc_selected_topic_id);
         $this->challenge_id = $enc_challenge_id ? Tool::decode($enc_challenge_id) : null;
+        !$this->challenge_id ? session()->remove('challenge_ids') : '';
         $this->challenge_slug = $challenge_slug;
         $this->getChallenges();
         $this->totalChallengesCount();

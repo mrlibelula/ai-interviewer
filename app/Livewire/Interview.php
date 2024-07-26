@@ -53,6 +53,7 @@ class Interview extends Component
 
     public function mount()
     {
+        session()->has('challenge_ids') ? session()->remove('challenge_ids') : '';
         $this->getDifficulties();
     }
 
