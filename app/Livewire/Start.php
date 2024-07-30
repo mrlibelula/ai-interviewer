@@ -41,22 +41,13 @@ class Start extends Component
 
     public function nextChallenge()
     {
-        $this->challenge_ids = session()->get('challenge_ids');
-        info($this->challenge_ids);
-        if(count($this->challenge_ids) > 1) {
-            // multiple challenges selected
-            $this->getChallenge();
-            $next_challenge = $this->challenge;
-            // $next_challenge_id = array_shift($this->challenge_ids);
-            // dd($this->challenge);
-            // session()->put('challenge_ids', $this->challenge_ids);
-            return redirect()->route('interview-start', [
-                'enc_selected_difficulty' => Tool::encode($this->selected_difficulty),
-                'enc_selected_topic_id' => Tool::encode($this->selected_topic_id),
-                'enc_challenge_id' => Tool::encode($next_challenge->id),
-                'challenge_slug' => $next_challenge->challenge_slug ?? '',
-            ]);
-        }
+        $next_challenge = Tool::fetchChallenge(collect($this->challenge_ids)->first());
+        return redirect()->route('interview-start', [
+            'enc_selected_difficulty' => Tool::encode($this->selected_difficulty),
+            'enc_selected_topic_id' => Tool::encode($this->selected_topic_id),
+            'enc_challenge_id' => Tool::encode($next_challenge->id),
+            'challenge_slug' => $next_challenge->challenge_slug ?? '',
+        ]);
     }
 
     public function currentElapsedTime(int $hours, int $minutes, int $seconds)
@@ -78,13 +69,13 @@ class Start extends Component
                 $this->bonus_xp = $bonus['bonus_xp'];
                 $this->extra_bonus = $bonus['extra_bonus'];
                 $completion_time = Tool::calculateCompletionTime($this->challenge, $this->elapsed_time);
+                auth()->user()->updateChallenge($this->challenge, [
+                    'bonus_xp' => $this->bonus_xp,
+                    'extra_bonus' => $this->extra_bonus,
+                    'solved_time_seconds' => $completion_time,
+                    'solved_at' => date('Y-m-d H:i:s'),
+                ]);
             }
-            auth()->user()->updateChallenge($this->challenge, [
-                'bonus_xp' => $this->bonus_xp,
-                'extra_bonus' => $this->extra_bonus,
-                'solved_time_seconds' => $completion_time,
-                'solved_at' => date('Y-m-d H:i:s'),
-            ]);
             $this->getIsChallengeSolved();
             $this->totalUserBonus();
             $this->solvedChallengesCount();
@@ -156,17 +147,9 @@ class Start extends Component
                 // attach Challenge to current User (solver)
                 $this->attempts++;
                 try {
-                    // dd($this->challenge->pivot);
-                    // $challenge_attributes = $this->challenge->pivot;
-                    // $this->openai_chat_settings = json_decode($challenge_attributes->openai_chat_settings, true);
-
                     $this->challenge_attributes = [
                         'current_time_limit' => $this->challenge->time_limit, 
                         'attempts' => $this->attempts, 
-                        // 'bonus_xp' => $this->bonus_xp, 
-                        // 'solution_code' => '', 
-                        // 'openai_chat_settings' => json_encode($this->openai_chat_settings), 
-                        // 'observations' => json_encode([]), 
                     ];
     
                     auth()->user()->attachChallenge($this->challenge, $this->challenge_attributes);
