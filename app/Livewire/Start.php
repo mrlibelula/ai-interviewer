@@ -115,7 +115,7 @@ class Start extends Component
 
     /**
      * Obtains the first available challange from the 'challenge_ids' list
-     * and removes it from the list
+     * and removes it from the list, or else, fetches the actual challenge_id challenge
      *
      * @return void
      */
