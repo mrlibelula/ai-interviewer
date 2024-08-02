@@ -47,7 +47,7 @@
                 <a wire:navigate href="{{ route('interview') }}">
                     <x-button>
                         <div class=" whitespace-nowrap">
-                            Go back
+                            Start New Interview
                         </div>
                     </x-button>
                 </a>

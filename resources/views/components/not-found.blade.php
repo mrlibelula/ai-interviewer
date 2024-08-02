@@ -5,4 +5,7 @@
     <div>
         {{ $slot ?? 'Nothing found' }}
     </div>
+    <a wire:navigate href="{{ route('dashboard') }}">
+        <x-button type="button">Dashboard</x-button>
+    </a>
 </div>

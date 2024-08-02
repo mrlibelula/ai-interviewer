@@ -123,7 +123,7 @@ class Start extends Component
     {
         $this->challenge = count($this->challenge_ids)
             ? Tool::fetchChallenge(array_shift($this->challenge_ids))
-            : null;
+            : Tool::fetchChallenge($this->challenge_id);
 
         session()->put('challenge_ids', $this->challenge_ids);
         
@@ -229,11 +229,13 @@ class Start extends Component
 
     public function totalUserBonus()
     {
-        $total_bonus = Tool::totalUserChallengeBonus(auth()->user()->id, $this->challenge->id);
-        $this->total_user_bonus_xp = $total_bonus['total_bonus_xp'];
-        $this->total_user_extra_xp = $total_bonus['total_extra_bonus'];
-        $this->total_bonus = $total_bonus['total_bonus_xp'] + $total_bonus['total_extra_bonus'];
-        $this->total_user_bonus = Tool::totalUserBonus(auth()->user()->id);
+        if ($this->challenge) {
+            $total_bonus = Tool::totalUserChallengeBonus(auth()->user()->id, $this->challenge->id);
+            $this->total_user_bonus_xp = $total_bonus['total_bonus_xp'];
+            $this->total_user_extra_xp = $total_bonus['total_extra_bonus'];
+            $this->total_bonus = $total_bonus['total_bonus_xp'] + $total_bonus['total_extra_bonus'];
+            $this->total_user_bonus = Tool::totalUserBonus(auth()->user()->id);
+        }
     }
 
     public function removeSolutionCode()
