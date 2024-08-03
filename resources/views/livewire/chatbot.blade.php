@@ -47,7 +47,7 @@
             A.I. feedback chatbot 
         </div>
         <div class="flex items-center gap-x-4">
-            <button @click="$dispatch('analyze-code')" class="group cursor-pointer">
+            <button @click="$dispatch('analyze-code'); $dispatch('chatbot-loader-on')" class="group cursor-pointer">
                 <img class="w-[1.55rem] h-[1.55rem] grayscale group-hover:grayscale-0 smooth-300" src="https://cdn4.iconfinder.com/data/icons/artificial-intelligence-35/64/laptop-artificial-intelligence-ai-robot-512.png" alt="" title="Analyze my code/answer">
                 {{-- <x-icon-dragonfly class="w-10 h-10 grayscale invert" /> --}}
                 {{-- <x-icon-bug class="w-5 h-5 text-gray-400" /> --}}

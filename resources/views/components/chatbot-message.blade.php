@@ -70,7 +70,6 @@
                     part = decodeHTML(part)
                     var splits = part.split('??')
                     if (splits.length > 1) {
-                        //console.log('splits', splits)
                         chatElement.appendChild(document.createTextNode(splits[0]))
                         chatElement.appendChild(document.createElement("br"))
                         chatElement.appendChild(document.createElement("br"))

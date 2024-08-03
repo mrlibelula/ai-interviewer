@@ -1,4 +1,10 @@
-<div x-data="{ chat_message: '' }" {{ $attributes->merge(['class' => 'flex flex-col w-full']) }}>
+<div x-data="{ 
+    chat_message: '',
+    loader74: false,
+}" 
+    @chatbot-loader-on.window="loader74 = true" 
+    @chatbot-loader-off.window="loader74 = false" 
+    {{ $attributes->merge(['class' => 'flex flex-col w-full']) }}>
     <div class="h-[18rem] flex flex-col-reverse gap-y-6 bg-white dark:bg-emerald-950/30 py-5 px-4 text-base overflow-hidden overflow-y-auto w-full leading-tight smooth-300 border border-gray-300 dark:border-emerald-800/70 shadow">
         <div class="flex flex-col items-start gap-x-2 gap-y-4">
             {{ $slot }}
@@ -8,16 +14,20 @@
             Welcome to the Code Interview Challenge Chatbot!
         </div>
     </div>
-
+    
     <div class="relative">
+        <section x-cloak x-show="loader74" ><span class="loader-74 absolute -mt-1.5 z-40"> </span></section>
         <textarea 
             x-model="chat_message" 
-            @keydown.enter.prevent="$dispatch('sendMessage', { chat_message })" 
+            @keydown.enter.prevent="loader74 = true; $dispatch('sendMessage', { chat_message });" 
             id="chat-textarea" 
             class="absolute min-h-16 pr-16 bg-gray-200/40 dark:bg-emerald-950/30 border-l border-r border-b border-t-0 border-gray-200 dark:border-emerald-800/70 w-full rounded-b-lg overflow-hidden shadow focus:outline-none focus:ring dark:focus:border-emerald-800/80 focus:bg-gray-50 dark:focus:bg-gray-950 focus:border-emerald-800/80 dark:focus:ring-emerald-800/80 focus:ring-gray-400 text-gray-950 dark:text-gray-300" 
             placeholder="Message to chatbot"
         ></textarea>
-        <div @click.prevent="$dispatch('sendMessage', { chat_message })" class="absolute right-[1rem] top-[1rem] p-1 group cursor-pointer">
+        <div 
+            @click.prevent="loader74 = true; $dispatch('sendMessage', { chat_message });" 
+            class="absolute right-[1rem] top-[1rem] p-1 group cursor-pointer"
+        >
             <x-icon-paper-plane class="w-6 h-6 text-gray-600 dark:text-emerald-500 group-hover:text-black group-hover:dark:text-gray-400 smooth-300" stroke-width="2" />
         </div>
         <script>
