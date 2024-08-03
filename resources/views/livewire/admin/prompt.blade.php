@@ -41,7 +41,7 @@
                 <div wire:click="loadBlueprintDataAndStoreToDB(true)" class="flex flex-col items-start">
                     <x-secondary-button class="mt-6">Rebuild prompt from this blueprint</x-secondary-button>
                 </div>
-                <x-secondary-button class="mt-6">Edit blueprint</x-secondary-button>
+                {{-- <x-secondary-button class="mt-6">Edit blueprint</x-secondary-button> --}}
             </div>
             
         </x-descr-list>
