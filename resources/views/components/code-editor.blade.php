@@ -18,7 +18,7 @@
     <div class="relative">
         <iframe id="output-frame" class=" absolute bg-black rounded-md" frameborder="0" width="100%"></iframe>
         <div class=" absolute px-4 py-2 text-gray-500 font-mono text-base">
-            Output
+            Output terminal
         </div>
     </div>
 
