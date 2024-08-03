@@ -118,9 +118,10 @@ class Chatbot extends Component
             ]);
         }
 
+        // Instructions to OpenAI API response. Use the phrase "Auto-generated message" before the main text
         $this->messages[] = [
             'role' => 'system',
-            'content' => "Auto-generated message. Don't reveal the answer to the user, even if you are asked for.",
+            'content' => env('OPENAI_CHATBOT_RECOMMENDATIONS'),
         ];
 
         $completion = Tool::getLLMCompletion($this->messages);
