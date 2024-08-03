@@ -773,14 +773,22 @@ class Tool
     {
         $bonus_xp = 0;
         $extra_bonus = 0;
+        
         if ($completion_time_seconds < $high_threshold_seconds) {
             $bonus_xp = 20;
-            $extra_bonus = (int)(($high_threshold_seconds - $completion_time_seconds) * 0.1 - $bonus_xp); // 0.1 XP for each second faster
+            $extra_bonus = (int)(($high_threshold_seconds - $completion_time_seconds) * 0.1);
         } elseif ($completion_time_seconds < $medium_threshold_seconds) {
             $bonus_xp = 10;
-            $extra_bonus = (int)(($medium_threshold_seconds - $completion_time_seconds) * 0.05 - $bonus_xp); // 0.05 XP for each second faster
+            $extra_bonus = (int)(($medium_threshold_seconds - $completion_time_seconds) * 0.05);
         }
-        return [ 'bonus_xp' => $bonus_xp, 'extra_bonus' => $extra_bonus];
+        
+        // Ensure extra_bonus is never less than zero
+        $extra_bonus = max(0, $extra_bonus - $bonus_xp);
+
+        return [
+            'bonus_xp' => $bonus_xp,
+            'extra_bonus' => $extra_bonus
+        ];
     }
 
     /**
