@@ -138,7 +138,6 @@ class Chatbot extends Component
         auth()->user()->updateChallenge($this->challenge, ['openai_chat_settings' => $this->openai_chat_settings]);
         $this->getLastChatMessage();
         $this->dispatch('speak');
-        $this->dispatch('chatbot-loader-off');
     }
 
     public function mount()
