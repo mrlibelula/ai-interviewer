@@ -961,9 +961,9 @@ class Tool
     public static function totalUserBonus(int $user_id): int
     {
         return DB::table('challenge_solver')
-        ->select(DB::raw('SUM(bonus_xp) + SUM(extra_bonus) as total_bonus'))
-        ->where('user_id', $user_id)
-        ->first()
-        ->total_bonus ?? 0;
+            ->select(DB::raw('SUM(bonus_xp) + SUM(extra_bonus) as total_bonus'))
+            ->where('user_id', $user_id)
+            ->first()
+            ->total_bonus ?? 0;
     }
 }
