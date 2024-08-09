@@ -18,7 +18,7 @@
             break;
     }
 @endphp
-<div {{ $attributes->merge(['class' => 'flex flex-col md:flex-row items-start ' . $r_position . ' gap-y-4 md:gap-x-8 py-12']) }}>
+<div {{ $attributes->merge(['class' => 'flex flex-col md:flex-row items-start ' . $r_position . ' gap-y-4 md:gap-x-8 py-12 px-4 sm:px-6 lg:px-8 -mt-2 xl:mt-6']) }}>
     <div class="flex flex-col text-center xl:text-left w-full">
         @isset($top)
         {{ $top }}

@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Models\Topic;
 use App\Models\Enviro;
 use App\Models\Status;
+use Livewire\Component as LivewireComponent;
 use App\Models\Package;
 use App\Models\Language;
 use App\Models\Challenge;
@@ -17,6 +18,7 @@ use App\Models\Framework;
 use App\Models\Difficulty;
 use App\Models\Visibility;
 use Illuminate\Support\Str;
+use Illuminate\View\Component as ViewComponent;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use OpenAI\Laravel\Facades\OpenAI;
@@ -94,25 +96,25 @@ class Tool
         }
     }
 
-    // /**
-    //  * Dispatches a Toastr event from '$component'
-    //  * with specific message type
-    //  * and ['title', 'message'] array
-    //  * 
-    //  * Listeners must be installed in main layout
-    //  *
-    //  * @param LivewireComponent|ViewComponent $component
-    //  * @param string $type
-    //  * @param array $message_array
-    //  * @return void
-    //  */
-    // public static function toastr(LivewireComponent|ViewComponent $component, string $type = 'info', array $message_array): void
-    // {
-    //     $component->dispatch($type, [ 
-    //         'title' => $message_array['title'] ?? '',
-    //         'message' => $message_array['message'] ?? 'No message', 
-    //     ]);
-    // }
+    /**
+     * Dispatches a Toastr event from '$component'
+     * with specific message type
+     * and ['title', 'message'] array
+     * 
+     * Listeners must be installed in main layout
+     *
+     * @param LivewireComponent|ViewComponent $component
+     * @param string $type
+     * @param array $message_array
+     * @return void
+     */
+    public static function toastr(LivewireComponent|ViewComponent $component, string $type = 'info', array $message_array): void
+    {
+        $component->dispatch($type, [ 
+            'title' => $message_array['title'] ?? '',
+            'message' => $message_array['message'] ?? 'No message', 
+        ]);
+    }
 
     /**
      * Finds an array item inside an array
@@ -196,23 +198,24 @@ class Tool
      * Prompts OpenAI and obtains array of completion messages
      *
      * @param array $messages
-     * @return \OpenAI\Responses\Chat\CreateResponse|null
+     * @return \OpenAI\Responses\Chat\CreateResponse|string
      */
-    public static function getLLMCompletion(array $messages = ['role' => 'user', 'content' => 'hi']): \OpenAI\Responses\Chat\CreateResponse|null
+    public static function getLLMCompletion(array $messages = ['role' => 'user', 'content' => 'hi']): \OpenAI\Responses\Chat\CreateResponse|string
     {
         try {
-            $completion = OpenAI::chat()->create([
+            return OpenAI::chat()->create([
                 'model' => env('OPENAI_MODEL'), 
                 'messages' => $messages, 
             ]);
-            return $completion;
         } catch (\OpenAI\Exceptions\ErrorException $ee) {
-            dump($ee->getMessage());
+            info($ee->getMessage());
+            $error = $ee->getMessage();
         } catch (\OpenAI\Exceptions\TransporterException $te) {
-            dump($te->getMessage());
+            info($te->getMessage());
+            $error = $te->getMessage();
         }
 
-        return null;
+        return $error;
     }
 
     /**
@@ -856,6 +859,7 @@ class Tool
 
     /**
      * Returns a collection of user solved challenges
+     * with bonus XP and extra bonus
      *
      * @param User $user
      * @return Collection
@@ -864,7 +868,7 @@ class Tool
     {
         return $user->challenges()
             ->wherePivotNotNull('solved_at')
-            ->select('challenges.id', 'challenges.title')
+            ->select('challenges.id', 'challenges.title', 'bonus_xp', 'extra_bonus')
             ->orderBy('title', 'asc')
             ->get();
     }

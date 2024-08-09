@@ -6,13 +6,13 @@
 >
     
     <!-- progress summary -->
-    <x-dashboard-item title="Progress summary" x-data="{ isOpen: true }" class=" md:col-span-2">
+    <x-dashboard-item title="Progress summary" :fixedHeight="false" x-data="{ isOpen: true }" class=" md:col-span-2">
         {{-- <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8"> --}}
-        <div class="flex items-center justify-around_ justify-start gap-x-[5rem]">
-            <div class="flex flex-col gap-y-4 items-center gap-x-6">
-                <x-progress-circle value="{{ $perc_solved }}" />
-                <div>Solved challenges</div>
-            </div>
+        {{-- <x-dashboard-item class="flex items-center justify-around_ justify-start gap-x-[5rem]"> --}}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3_ _xl:grid-cols-4 gap-10">
+            
+            <x-progress :number="$perc_solved">Success rate</x-progress>
+
             {{-- <div class="flex flex-col gap-y-4 items-center gap-x-6">
                 <x-progress-circle value="90" />
                 <div>Sociability</div>
@@ -29,7 +29,11 @@
                 <x-progress-circle value="60" />
                 <div>Communication skills</div>
             </div> --}}
-            <div class="flex flex-col gap-y-4 items-center gap-x-6">
+
+            {{-- <x-progress :number="0">Performance by Topic</x-progress> --}}
+
+            <!-- total xp points -->
+            <div class="flex flex-col gap-y-4 items-center gap-x-6 text-center">
                 <div class="flex items-center justify-center w-[8rem] h-[8rem] rounded-full shadow-lg border-[2px] border-gray-200 dark:border-gray-700" 
                     style="background: conic-gradient(#2fd399 100%, transparent 3%);"
                 >
@@ -39,11 +43,12 @@
                 </div>
                 <div>Total <span class=" font-bold text-black dark:text-gray-200">XP</span> points</div>
             </div>
+
         </div>
     </x-dashboard-item>
 
     <!-- AI models -->
-    <x-dashboard-item title="{{ 'Available A.I. models (' . count($available_ai_models) . ')' }}">
+    <x-dashboard-item title="{{ 'Available A.I. models (' . count($available_ai_models) . ')' }}" x-data="{ isOpen: true }">
         <div class="flex flex-col gap-y-6 px-1 py-2">
             <div class="flex flex-col lg:flex-row items-center gap-y-6 lg:gap-x-6">
                 <select class="form-select w-full">
@@ -72,7 +77,7 @@
     </x-dashboard-item>
 
     <!-- completed challenges -->
-    <x-dashboard-item title="Completed challenges">
+    <x-dashboard-item title="Completed challenges" x-data="{ isOpen: true }">
         <ul>
             @foreach ($solved_challenges as $solved_challenge)
             <li>
@@ -83,22 +88,22 @@
     </x-dashboard-item>
 
     <!-- performance -->
-    <x-dashboard-item title="Performance">
+    <x-dashboard-item title="Performance" x-data="{ isOpen: false }">
 
     </x-dashboard-item>
 
     <!-- achievements -->
-    <x-dashboard-item title="Achievements & Badges">
+    <x-dashboard-item title="Achievements & Badges" x-data="{ isOpen: false }">
 
     </x-dashboard-item>
 
     <!-- recommended challenges -->
-    <x-dashboard-item title="Recommended challenges">
+    <x-dashboard-item title="Recommended challenges" x-data="{ isOpen: false }">
 
     </x-dashboard-item>
 
     <!-- topics -->
-    <x-dashboard-item title="Training topics">
+    <x-dashboard-item title="Training topics" x-data="{ isOpen: false }">
         <ul>
         @foreach($topics as $topic)
             @livewire('tree-node', ['topic' => $topic, 'level' => 0], key($topic->id))
@@ -107,12 +112,12 @@
     </x-dashboard-item>
 
     <!-- learning resources -->
-    <x-dashboard-item title="Learning resources">
+    <x-dashboard-item title="Learning resources" x-data="{ isOpen: false }">
 
     </x-dashboard-item>
 
     <!-- community engagement -->
-    <x-dashboard-item title="Community engagement">
+    <x-dashboard-item title="Community engagement" x-data="{ isOpen: false }">
 
     </x-dashboard-item>
     

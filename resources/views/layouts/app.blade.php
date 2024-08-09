@@ -50,8 +50,8 @@
             <defs>
                 <radialGradient id="759c1415-0410-454c-8f7c-9a820de03641">
                     <!-- gray: #e1e4e8 - green: #b5cece -->
-                    <stop :stop-color="darkMode ? '#434c5b' : '#bfc0c2'" />
-                    <stop offset="1" :stop-color="darkMode ? '#434c5b' : '#bfc0c2'" />
+                    <stop :stop-color="darkMode ? '#434c5b' : '#dddee0'" />
+                    <stop offset="1" :stop-color="darkMode ? '#434c5b' : '#dddee0'" />
                 </radialGradient>
             </defs>
         </svg>
@@ -105,14 +105,14 @@
         
         @livewireScripts
 
-        {{-- <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js" integrity="sha512-VEd+nq25CkR676O+pLBnDW09R7VQX9Mdiij052gVCp5yVH3jGtH70Ho/UUv4mJDsEdTvqRCFZg0NKGiojGnUCw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js" integrity="sha512-VEd+nq25CkR676O+pLBnDW09R7VQX9Mdiij052gVCp5yVH3jGtH70Ho/UUv4mJDsEdTvqRCFZg0NKGiojGnUCw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
         
         <script>
             $(document).ready(function() {
                 toastr.options = {
                     progressBar: true,
-                    positionClass: 'toast-top-right',
+                    positionClass: 'toast-top-center custom-toast-position',
                     closeButton: true,
                     preventDuplicates: false,
                     showMethod: 'slideDown',
@@ -136,7 +136,7 @@
             })
 
 
-        </script> --}}
+        </script>
 
     </body>
     

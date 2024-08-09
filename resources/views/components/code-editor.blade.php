@@ -40,7 +40,7 @@
             }
         }
 
-        function sendEventToIframe(message = { getCode: false, runCode: false, saveCode: false }) {
+        function sendEventToIframe(message = { getCode: false, runCode: false, saveCode: false, complexity: false }) {
             iframe.contentWindow.postMessage(message, '*')
         }
 
@@ -48,19 +48,23 @@
         fullscreenIcon.addEventListener('click', toggleFullScreen)
 
         document.addEventListener('analyze-code', () => {
-            sendEventToIframe({ getCode: true, runCode: false, saveCode: false })
+            sendEventToIframe({ getCode: true, runCode: false, saveCode: false, complexity: false })
         })
 
         document.addEventListener('run-code', () => {
-            sendEventToIframe({ getCode: false, runCode: true, saveCode: false })
+            sendEventToIframe({ getCode: false, runCode: true, saveCode: false, complexity: false })
+        })
+
+        document.addEventListener('complexity', () => {
+            sendEventToIframe({ getCode: true, runCode: false, saveCode: true, complexity: true })
         })
 
         document.addEventListener('get-code', () => {
-            sendEventToIframe({ getCode: true, runCode: false, saveCode: true })
+            sendEventToIframe({ getCode: true, runCode: false, saveCode: true, complexity: false })
         })
 
         document.addEventListener('save-code', () => {
-            sendEventToIframe({ getCode: false, runCode: false, saveCode: true })
+            sendEventToIframe({ getCode: false, runCode: false, saveCode: true, complexity: false })
         })
 
         // listen for messages from the sandboxed iframe
@@ -69,6 +73,10 @@
                 codeFromIframe = event.data.code
                 if (event.data.hasOwnProperty('runCode')) { if (event.data.runCode) runJsCode(codeFromIframe) }
                 var saveCodeFromIframe = event.data.saveCode ?? null
+                if (event.data.hasOwnProperty('complexity')) {
+                    sendCodeForComplexity(codeFromIframe)
+                    return
+                }
                 saveCodeFromIframe
                     ? sendCode(codeFromIframe, 'saveUserCode')
                     : sendCode(codeFromIframe, 'userCode')
@@ -77,6 +85,11 @@
 
         function sendCode(code, eventName) {
             // send user code to backend
+            const event = new CustomEvent(eventName, { detail: { code } })
+            window.dispatchEvent(event)
+        }
+
+        function sendCodeForComplexity(code, eventName = 'complexityCode') {
             const event = new CustomEvent(eventName, { detail: { code } })
             window.dispatchEvent(event)
         }

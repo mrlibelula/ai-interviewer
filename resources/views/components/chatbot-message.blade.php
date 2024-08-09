@@ -25,81 +25,85 @@
     ></div>
 
     <script>
-        var intervalId
-        
+        var intervalId;
+    
         function textDisplay(text, divId) {
-            const originalText = text
-            const parts = text.split(/(\s+)/)
-            let index = 0
-
-            parts.forEach(part => {
-                if (index < parts.length) {
-                    // var part = parts[index]
-                    const chatElement = document.getElementById(divId)
-                    part = decodeHTML(part)
-                    var splits = part.split('??')
-                    if (splits.length > 1) {
-                        chatElement.appendChild(document.createTextNode(splits[0]))
-                        chatElement.appendChild(document.createElement("br"))
-                        chatElement.appendChild(document.createElement("br"))
-                        let key = 1
-                        if (splits[key] === '') key++
-                        if (splits[key] === '') key++
-                        if (splits[key] === '') key++
-                        if (splits[key] === '') key++
-                        chatElement.appendChild(document.createTextNode(capitalizeFirstLetter(splits[key])))
-                    } else {
-                        chatElement.appendChild(document.createTextNode(splits[0]))
-                    }
-                    index++
+            const chatElement = document.getElementById(divId);
+            const lines = text.split(/\n/); // Split text by line breaks
+    
+            lines.forEach((line, lineIndex) => {
+                if (lineIndex > 0) {
+                    chatElement.appendChild(document.createElement("br"));
                 }
-            })
-
-            return originalText
+    
+                const parts = line.split(/(\s+)/); // Split line into words and spaces
+                parts.forEach(part => {
+                    const splitPart = part.split('??');
+                    if (splitPart.length > 1) {
+                        chatElement.appendChild(document.createTextNode(splitPart[0]));
+                        chatElement.appendChild(document.createElement("br"));
+                        chatElement.appendChild(document.createElement("br"));
+                        let key = 1;
+                        while (key < splitPart.length && splitPart[key] === '') key++;
+                        if (key < splitPart.length) {
+                            chatElement.appendChild(document.createTextNode(capitalizeFirstLetter(splitPart[key])));
+                        }
+                    } else {
+                        chatElement.appendChild(document.createTextNode(decodeHTML(part)));
+                    }
+                });
+            });
+    
+            return text;
         }
-
+    
         function slowTextDisplay(text, delay = 100, elementId = 'chat--1') {
-            const originalText = text
-            const parts = text.split(/(\s+)/)
-            let index = 0
-
+            const chatElement = document.getElementById(elementId);
+            const lines = text.split(/\n/); // Split text by line breaks
+            let lineIndex = 0;
+            let wordIndex = 0;
+            let words = lines[0].split(/(\s+)/);
+    
             intervalId = setInterval(function() {
-                if (index < parts.length) {
-                    var part = parts[index]
-                    const chatElement = document.getElementById(elementId)
-                    part = decodeHTML(part)
-                    var splits = part.split('??')
-                    if (splits.length > 1) {
-                        chatElement.appendChild(document.createTextNode(splits[0]))
-                        chatElement.appendChild(document.createElement("br"))
-                        chatElement.appendChild(document.createElement("br"))
-                        let key = 1
-                        if (splits[key] === '') key++
-                        if (splits[key] === '') key++
-                        if (splits[key] === '') key++
-                        if (splits[key] === '') key++
-                        chatElement.appendChild(document.createTextNode(capitalizeFirstLetter(splits[key])))
+                if (wordIndex < words.length) {
+                    const part = words[wordIndex];
+                    const splitPart = part.split('??');
+                    if (splitPart.length > 1) {
+                        chatElement.appendChild(document.createTextNode(splitPart[0]));
+                        chatElement.appendChild(document.createElement("br"));
+                        chatElement.appendChild(document.createElement("br"));
+                        let key = 1;
+                        while (key < splitPart.length && splitPart[key] === '') key++;
+                        if (key < splitPart.length) {
+                            chatElement.appendChild(document.createTextNode(capitalizeFirstLetter(splitPart[key])));
+                        }
                     } else {
-                        chatElement.appendChild(document.createTextNode(splits[0]))
+                        chatElement.appendChild(document.createTextNode(decodeHTML(part)));
                     }
-                    index++
+                    wordIndex++;
+                } else if (lineIndex < lines.length - 1) {
+                    chatElement.appendChild(document.createElement("br"));
+                    lineIndex++;
+                    words = lines[lineIndex].split(/(\s+)/);
+                    wordIndex = 0;
                 } else {
-                    clearInterval(intervalId) // Clear the interval once all parts are displayed
+                    clearInterval(intervalId);
                 }
-            }, delay)
-
-            return originalText
+            }, delay);
+    
+            return text;
         }
-
+    
         function capitalizeFirstLetter(str) {
-            return str.charAt(0).toUpperCase() + str.slice(1)
+            return str.charAt(0).toUpperCase() + str.slice(1);
         }
-
+    
         function decodeHTML(html) {
-            var txt = document.createElement("textarea")
-            txt.innerHTML = html
-            return txt.value
+            var txt = document.createElement("textarea");
+            txt.innerHTML = html;
+            return txt.value;
         }
-        
     </script>
+    
+    
 </div>

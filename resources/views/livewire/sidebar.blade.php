@@ -13,23 +13,20 @@
             
         </a>
         <div class="flex flex-col items-center mt-3 border-t border-gray-300 dark:border-gray-700">
-            <!-- dashboard -->
-            <a wire:navigate href="{{ route('dashboard') }}" class="flex items-center justify-center w-12 h-12 mt-2 rounded hover:bg-gray-300 dark:hover:bg-gray-700">
-                <x-icon-squares class="w-7 h-7 stroke-current" />
-            </a>
-
             {{-- <a class="flex items-center justify-center w-12 h-12 mt-2 rounded hover:bg-gray-300 dark:hover:bg-gray-700" href="#">
                 <svg class="w-7 h-7 stroke-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                 </svg>
             </a> --}}
 
+            <!-- dashboard -->
+            <x-side-bar-item link="{{ route('dashboard') }}">
+                <x-icon-squares class="w-7 h-7 stroke-current" />
+            </x-side-bar-item>
             <!-- stats -->
-            <a class="flex items-center justify-center w-12 h-12 mt-2 bg-gray-300_ _dark:bg-gray-700 rounded" href="#">
-                <svg class="w-7 h-7 stroke-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                </svg>
-            </a>
+            <x-side-bar-item link="{{ route('metrics') }}">
+                <x-icon-progress class="w-7 h-7" />
+            </x-side-bar-item>
 
             {{-- <a class="flex items-center justify-center w-12 h-12 mt-2 rounded hover:bg-gray-300 dark:hover:bg-gray-700" href="#">
                 <svg class="w-7 h-7 stroke-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -58,16 +55,19 @@
             </a> --}}
 
             <!-- admin -->
-            <a wire:navigate href="/user/profile" class="flex items-center justify-center w-12 h-12 mt-2 rounded hover:bg-gray-300 dark:hover:bg-gray-700">
+            @if (auth()->user()->hasRole('admin') || auth()->user()->hasRole('recruiter'))
+            <x-side-bar-item link="{{ route('admin-dashboard') }}">
                 <x-icon-cog class="w-7 h-7" />
-            </a>
-
+            </x-side-bar-item>
+            @endif
+            
             <!-- profile -->
-            <a wire:navigate href="/user/profile" class="flex items-center justify-center w-12 h-12 mt-2 rounded hover:bg-gray-300 dark:hover:bg-gray-700">
+            <x-side-bar-item link="/user/profile">
                 <svg class="w-7 h-7 stroke-current" data-slot="icon" fill="none" stroke-width="2" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"></path>
                 </svg>
-            </a>
+            </x-side-bar-item>
+            
         </div>
         <a @click.prevent="$root.submit();" class="flex items-center justify-center w-16 h-16 mt-auto bg-gray-200 dark:bg-gray-800/50 hover:bg-gray-300 smooth-300" href="{{ route('logout') }}">
             <x-icon-logout class="w-7 h-7 stroke-current" />

@@ -11,13 +11,13 @@
     <div class="flex flex-col md:flex-row items-center gap-y-2 md:gap-y-0 md:gap-x-2">
         
         <x-editor-nav-button class="w-full text-center whitespace-nowrap" 
-            @click="$dispatch('run-code'); $dispatch('chatbot-loader-on')"
+            @click="$dispatch('run-code'); $dispatch('chatbot-loader-on');"
         >
             Run and A.I. analyze
         </x-editor-nav-button>
         {{-- <x-editor-nav-button class="w-full text-center whitespace-nowrap" @click="$dispatch('analyze-code')">A.I. Analyzer</x-editor-nav-button> --}}
         <x-editor-nav-button 
-            @click="$dispatch('chatbot-loader-on')"
+            @click="$dispatch('complexity'); $dispatch('chatbot-loader-on');"
             class="w-full text-center whitespace-nowrap"
         >
             Analyze T/S Complexity

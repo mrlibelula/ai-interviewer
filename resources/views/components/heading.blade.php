@@ -5,7 +5,7 @@
     :class="{ 'pattern-angular-dark': darkMode, 'pattern-angular-light': !darkMode }" 
     @endif
 >
-    <div {{ $attributes->merge(['class' => 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8']) }}>
+    <div {{ $attributes->merge(['class' => 'max-w-7xl mx-auto']) }}>
         {{ $slot }}
     </div>
 </header>

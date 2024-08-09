@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Models\Challenge;
 use App\Tool;
+use Exception;
 use Livewire\Component;
 
 class Chatbot extends Component
@@ -21,7 +22,12 @@ class Chatbot extends Component
 
     public string $user_code;
 
-    protected $listeners = ['appended-chat-message' => 'appendedChatMessage', 'userCode', 'saveUserCode'];
+    protected $listeners = [
+        'appended-chat-message' => 'appendedChatMessage', 
+        'userCode', 
+        'saveUserCode', 
+        'complexityCode'
+    ];
 
     /**
      * For 'user code' persisting purposes
@@ -32,11 +38,83 @@ class Chatbot extends Component
     public function saveUserCode(string $code)
     {
         $this->user_code = $code;
-        auth()->user()->updateChallenge($this->challenge, [
-            'solution_code' => $code,
-        ]);
+        try {
+            auth()->user()->updateChallenge($this->challenge, [
+                'solution_code' => $code,
+            ]);
+            Tool::toastr($this, 'success', [
+                'message' => 'Code saved',
+            ]);
+        } catch (Exception $e) {
+            Tool::toastr($this, 'error', [
+                'message' => 'Could not save the code. ' . $e->getMessage(),
+            ]);
+        }
+        
     }
 
+    /**
+     * Asks GPT to analyze the code in terms of time/space complexity
+     *
+     * @param string $code
+     * @return void
+     */
+    public function complexityCode(string $code)
+    {
+        $this->user_code = $code;
+        $this->saveUserCode($code);
+
+        $this->messages[] = [
+            'role' => 'user',
+            'content' => 'auto-generated: "analyze the time/space complexity (big-O notation) of my code"',
+        ];
+
+        $blueprint = env('OPENAI_COMPLEXITY_ANALYSIS_USER_CODE_PROMPT_BASE_TEXT');
+        $prompt = Tool::replaceWildcards($blueprint, collect([
+            'user_code' => $code,
+            'challenge' => $this->challenge->title . ' (' . $this->challenge->description . ')',
+            'user_name' => auth()->user()->name ?? 'user',
+        ]));
+
+        $this->messages[] = [
+            'role' => 'system',
+            'content' => $prompt,
+        ];
+
+        $this->openai_chat_settings['messages'] = $this->messages;
+        auth()->user()->updateChallenge($this->challenge, ['openai_chat_settings' => $this->openai_chat_settings]);
+
+        $completion = Tool::getLLMCompletion($this->messages);
+
+        if (!$completion instanceof \OpenAI\Responses\Chat\CreateResponse) {
+            Tool::toastr($this, 'error', [
+                'message' => $completion,
+            ]);
+            return;
+        }
+
+        $completion_role = $completion->choices[0]->message->role;
+        $completion_content = $completion->choices[0]->message->content;
+
+        array_push($this->messages, [
+            'role' => $completion_role,
+            'content' => $completion_content,
+        ]);
+
+        // save data
+        $this->openai_chat_settings['messages'] = $this->messages;
+        auth()->user()->updateChallenge($this->challenge, ['openai_chat_settings' => $this->openai_chat_settings]);
+
+        $this->getLastChatMessage();
+        $this->dispatch('speak');
+    }
+
+    /**
+     * Asks GPT to analyze the user code and check if its solving the problem
+     *
+     * @param string $code
+     * @return void
+     */
     public function userCode(string $code)
     {
         $this->user_code = $code;
@@ -50,7 +128,8 @@ class Chatbot extends Component
         $blueprint = env('OPENAI_ANALYZE_USER_CODE_PROMPT_BASE_TEXT');
         $prompt = Tool::replaceWildcards($blueprint, collect([
             'user_code' => $code,
-            'challenge' => $this->challenge->title . '(' . $this->challenge->description . ')',
+            'challenge' => $this->challenge->title . ' (' . $this->challenge->description . ')',
+            'user_name' => auth()->user()->name ?? 'user',
         ]));
         
         $this->messages[] = [
@@ -63,7 +142,12 @@ class Chatbot extends Component
 
         $completion = Tool::getLLMCompletion($this->messages);
 
-        if (!$completion) return;
+        if (!$completion instanceof \OpenAI\Responses\Chat\CreateResponse) {
+            Tool::toastr($this, 'error', [
+                'message' => $completion,
+            ]);
+            return;
+        }
         
         $completion_role = $completion->choices[0]->message->role;
         $completion_content = $completion->choices[0]->message->content;
@@ -73,7 +157,7 @@ class Chatbot extends Component
         $content = trim($content_parts[0]) ?? '';
         $solved = filter_var(strtolower(trim($content_parts[1] ?? 'false')), FILTER_VALIDATE_BOOLEAN);
 
-        info('Chatbot::userCode:76');
+        info('Chatbot::userCode(string $code) at line 143');
         info([$this->challenge->title . ' (' . $this->challenge->id . ')' => ['user' => auth()->user()->email, 'solved' => $solved]]);
         if ($solved) $this->dispatch('challengeSolved');
 
@@ -147,7 +231,7 @@ class Chatbot extends Component
     }
 
     /**
-     * Used to listen a chat message
+     * 'listen' (speak) the last chat message
      *
      * @return void
      */

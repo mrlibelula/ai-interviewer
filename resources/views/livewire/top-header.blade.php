@@ -49,9 +49,14 @@
             <x-context-item class="sm:hidden">
                 <input placeholder="Search challenges" class="form-input h-[2.25rem] w-full text-sm placeholder-gray-500 placeholder:text-sm " />
             </x-context-item>
-            <x-context-item>
-                <x-slot name="icon"><x-icon-progress /></x-slot>
+            <x-context-item wire:navigate href="{{ route('dashboard') }}">
+                <x-slot name="icon"><x-icon-squares /></x-slot>
                 My progress
+            </x-context-item>
+
+            <x-context-item wire:navigate href="{{ route('metrics') }}">
+                <x-slot name="icon"><x-icon-progress /></x-slot>
+                Metrics
             </x-context-item>
     
             <x-context-item>
@@ -69,17 +74,17 @@
                 Topics
             </x-context-item>
 
-            <x-context-item>
+            {{-- <x-context-item>
                 <x-slot name="icon"><x-icon-cog /></x-slot>
                 Options
-            </x-context-item>
+            </x-context-item> --}}
 
             <!-- admin -->
             @if (auth()->user()->hasRole('admin') || auth()->user()->hasRole('recruiter'))
             <x-context-divider />
 
             <x-context-item wire:navigate href="{{ route('admin-dashboard') }}">
-                <x-slot name="icon"><x-icon-cog-admin /></x-slot>
+                <x-slot name="icon"><x-icon-cog /></x-slot>
                 Administrative options
             </x-context-item>
             @endif

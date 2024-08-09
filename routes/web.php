@@ -7,6 +7,7 @@ use App\Livewire\Admin\Prompt;
 use App\Livewire\Admin\Challenge;
 use App\Livewire\Admin\Dashboard;
 use App\Livewire\Admin\Challenges;
+use App\Livewire\Metrics;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
 
@@ -36,6 +37,7 @@ Route::middleware([
     })->name('dashboard');
     Route::get('/interview', Interview::class)->name('interview');
     Route::get('/interview/start/{enc_selected_difficulty}/{enc_selected_topic_id}/{enc_challenge_id?}/{challenge_slug?}', Start::class)->name('interview-start');
+    Route::get('/metrics', Metrics::class)->name('metrics');
 });
 
 Route::middleware([

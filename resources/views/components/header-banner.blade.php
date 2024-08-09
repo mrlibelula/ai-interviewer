@@ -1,5 +1,5 @@
 <x-container class="md:mt-6">
-    <x-heading :hasBg="true" class="w-full">
+    <x-heading :hasBg="true" class="w-full px-4 sm:px-6 lg:px-8">
         <div class="flex flex-col md:flex-row items-center gap-y-4 md:gap-x-8 py-6">
             <div class="flex flex-col md:flex-row gap-y-4 md:gap-y-0 justify-center md:justify-start items-center gap-x-4 w-full">
                 @isset($icon)
