@@ -114,7 +114,7 @@
                     progressBar: true,
                     positionClass: 'toast-top-center custom-toast-position',
                     closeButton: true,
-                    preventDuplicates: false,
+                    preventDuplicates: true,
                     showMethod: 'slideDown',
                 }
             })
