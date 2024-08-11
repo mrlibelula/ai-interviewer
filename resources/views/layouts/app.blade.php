@@ -27,6 +27,7 @@
         <!-- Favicon -->
 		<link rel="shortcut icon" href="{{ url(asset('images/libesoft.io_inv.png')) }}">
 
+        <!-- Toastr -->
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" integrity="sha512-vKMx8UnXk60zUwyUnUPM3HbQo8QfmNx7+ltw8Pm5zLusl1XIfwcxo8DbWCqMGKaWeNxWA8yrx5v3SaVpMvR3CA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
         <script src="https://code.jquery.com/jquery-3.6.2.min.js" integrity="sha256-2krYZKh//PcchRtd+H+VyyQoZ/e3EcrkxhM8ycwASPA=" crossorigin="anonymous"></script>
 
@@ -120,19 +121,19 @@
             })
 
             window.addEventListener('success', event => {
-                toastr.success(event.detail[0].message, event.detail[0].title)
+                if (event.detail) toastr.success(event.detail[0].message, event.detail[0].title)
             })
             
             window.addEventListener('warning', event => {
-                toastr.warning(event.detail[0].message, event.detail[0].title)
+                if (event.detail) toastr.warning(event.detail[0].message, event.detail[0].title)
             })
             
             window.addEventListener('error', event => {
-                toastr.error(event.detail[0].message, event.detail[0].title)
+                if (event.detail) toastr.error(event.detail[0].message, event.detail[0].title)
             })
             
             window.addEventListener('info', event => {
-                toastr.info(event.detail[0].message, event.detail[0].title)
+                if (event.detail) toastr.info(event.detail[0].message, event.detail[0].title)
             })
 
 
