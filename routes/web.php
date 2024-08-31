@@ -8,6 +8,7 @@ use App\Livewire\Admin\Challenge;
 use App\Livewire\Admin\Dashboard;
 use App\Livewire\Admin\Challenges;
 use App\Livewire\Metrics;
+use App\Livewire\MetricsDifficulty;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
 
@@ -38,6 +39,7 @@ Route::middleware([
     Route::get('/interview', Interview::class)->name('interview');
     Route::get('/interview/start/{enc_selected_difficulty}/{enc_selected_topic_id}/{enc_challenge_id?}/{challenge_slug?}', Start::class)->name('interview-start');
     Route::get('/metrics', Metrics::class)->name('metrics');
+    Route::get('/metrics/difficulty', MetricsDifficulty::class)->name('metrics-difficulty');
 });
 
 Route::middleware([
@@ -53,6 +55,6 @@ Route::middleware([
 });
 
 Route::get('/embed-editor', function () {
-    $response = Http::get('https://libe.dev/code/editor.html');
+    $response = Http::get('https://iframes.libe.dev/editor.html');
     return response($response->body())->header('Content-Type', 'text/html');
 })->name('embed-editor');

@@ -1,6 +1,6 @@
 <form method="POST" action="{{ route('logout') }}" x-data class="hidden sm:flex flex-col items-center h-full overflow-hidden">
     @csrf
-    <div class="flex flex-col items-center w-16 h-full overflow-hidden text-gray-700 dark:text-gray-500 bg-gray-100 dark:bg-gray-800/30">
+    <div class="flex flex-col items-center w-[4rem] h-full overflow-hidden text-gray-700 dark:text-gray-500 bg-gray-100 dark:bg-gray-800/30">
         <a wire:navigate class="flex items-center justify-center mt-3" href="/">
             {{-- <div class="material-icons my-auto text-3xl text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-rose-500 to-sky-400"> headset_mic </div> --}}
             {{-- <img class="w-9" src="https://cdn-icons-png.flaticon.com/512/4600/4600333.png" alt=""> --}}
@@ -26,6 +26,11 @@
             <!-- stats -->
             <x-side-bar-item link="{{ route('metrics') }}">
                 <x-icon-progress class="w-7 h-7" />
+                @if ($feedbacks['problem_specific'] || $feedbacks['optimization'] || $feedbacks['best_practices'])
+                <!--red dot-->
+                <span class="absolute inline-flex w-2 h-2 right-[0.9rem] -mt-[1.5rem] bg-rose-400 rounded-full opacity-75 animate-ping"></span>
+                <span class="absolute inline-flex w-2 h-2 right-[0.9rem] -mt-[1.5rem] bg-rose-700 rounded-full"></span>
+                @endif
             </x-side-bar-item>
 
             {{-- <a class="flex items-center justify-center w-12 h-12 mt-2 rounded hover:bg-gray-300 dark:hover:bg-gray-700" href="#">

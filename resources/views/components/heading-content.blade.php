@@ -27,7 +27,7 @@
             {{ $title }}
         </h2>
         @isset($subtitle)
-        <h6 class=" text-xl text-gray-700 dark:text-gray-300/70">
+        <h6 class="text-xl mt-2 text-gray-700 dark:text-gray-300/70">
             {{ $subtitle }}
         </h6>
         @endisset

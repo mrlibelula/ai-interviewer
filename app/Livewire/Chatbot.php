@@ -42,13 +42,13 @@ class Chatbot extends Component
             auth()->user()->updateChallenge($this->challenge, [
                 'solution_code' => $code,
             ]);
-            Tool::toastr($this, 'success', [
+            Tool::toastr($this, [
                 'message' => 'Code saved',
-            ]);
+            ], 'success');
         } catch (Exception $e) {
-            Tool::toastr($this, 'error', [
+            Tool::toastr($this, [
                 'message' => 'Could not save the code. ' . $e->getMessage(),
-            ]);
+            ], 'error');
         }
         
     }
@@ -87,9 +87,9 @@ class Chatbot extends Component
         $completion = Tool::getLLMCompletion($this->messages);
 
         if (!$completion instanceof \OpenAI\Responses\Chat\CreateResponse) {
-            Tool::toastr($this, 'error', [
+            Tool::toastr($this, [
                 'message' => $completion,
-            ]);
+            ], 'error');
             return;
         }
 
@@ -143,9 +143,9 @@ class Chatbot extends Component
         $completion = Tool::getLLMCompletion($this->messages);
 
         if (!$completion instanceof \OpenAI\Responses\Chat\CreateResponse) {
-            Tool::toastr($this, 'error', [
+            Tool::toastr($this, [
                 'message' => $completion,
-            ]);
+            ], 'error');
             return;
         }
         

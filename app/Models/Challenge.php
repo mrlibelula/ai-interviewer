@@ -13,7 +13,7 @@ class Challenge extends Model
 
     protected $table = 'challenges';
     protected $guarded = [];
-    protected $dates = ['deleted_at'];
+    protected $dates = ['deleted_at', 'solved_at'];
 
     public function users(array $pivot_columns = [
         'solved_at', 'current_time_limit', 'solution_code', 'attempts', 'bonus_xp', 'openai_chat_settings', 'observations'
@@ -137,6 +137,13 @@ class Challenge extends Model
         Static methods
     */
 
+    /**
+     * Get Challenges by difficulty
+     *
+     * @param string $selected_difficulty
+     * @param boolean $ordered
+     * @return Collection
+     */
     public static function byDifficulty(string $selected_difficulty, bool $ordered = true): Collection
     {
         $builder = static::whereHas('difficulty', function($query) use($selected_difficulty) {
@@ -144,14 +151,6 @@ class Challenge extends Model
         });
         return $ordered ? $builder->orderBy('title', 'asc')->get() : $builder->get();
     }
-
-    // public static function byDifficulty(string $selected_difficulty, bool $ordered = true): Collection
-    // {
-    //     $difficulty_id = Difficulty::select('id', 'name')->where('name', '=', strtolower($selected_difficulty))->first()->id;
-    //     $builder = static::select('id', 'title')
-    //         ->where('difficulty_id', '=', $difficulty_id);
-    //     return $ordered ? $builder->orderBy('title', 'asc')->get() : $builder->get();
-    // }
 
     /**
      * Get challenges by difficulty and topic

@@ -91,6 +91,29 @@ class Start extends Component
 
     public function sendMessage(string $chat_message)
     {
+        // validate chat input
+        if (!strlen($chat_message) || strlen($chat_message) < 3) {
+            $error_message = 'Chat message must be at least 3 characters long';
+            Tool::toastr($this, [
+                'message' => $error_message,
+            ], 'error');
+            $this->dispatch('chatbot-loader-off');
+            $this->dispatch('chatbot-error-true', [
+                'error_message' => $error_message,
+            ]);
+            return;
+        }
+        if (strlen($chat_message) > 150) {
+            $error_message = 'Chat message must be less than 150 characters long';
+            Tool::toastr($this, [
+                'message' => $error_message,
+            ], 'error');
+            $this->dispatch('chatbot-loader-off');
+            $this->dispatch('chatbot-error-true', [
+                'error_message' => $error_message,
+            ]);
+            return;
+        }
         // append to '$openai_chat_settings->messages' array
         $attempted_challenge = auth()->user()->challenges->where('id', '=', $this->challenge->id)->first();
         if ($attempted_challenge) {
@@ -109,8 +132,7 @@ class Start extends Component
 
     public function buildChatWelcomeMessage()
     {
-        $text = 'Hi ' . auth()->user()->name . ', ' . env('OPENAI_CHATBOT_WELCOME_MESSAGE');
-        $this->chat_welcome  = $text;
+        $this->chat_welcome = 'Hi ' . auth()->user()->name . ', ' . env('OPENAI_CHATBOT_WELCOME_MESSAGE');
     }
 
     /**

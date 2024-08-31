@@ -16,7 +16,7 @@
 @endphp
 <div class="flex flex-col gap-y-1">
     <span class="{{ $tw_color }} font-semibold">{{ $avatar }} {{ $user }}:</span>
-    <div class=" font-mono" id="{{ $divId }}" 
+    <div class="tracking-wide leading-normal " id="{{ $divId }}" 
         @if ($animate)
         x-init="slowTextDisplay('{{ \App\Tool::prepareAiAnswerString($content) }}', {{ (int)$speed }}, '{{ $divId }}')"
         @else

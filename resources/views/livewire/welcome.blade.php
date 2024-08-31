@@ -2,16 +2,17 @@
     x-data="{ spinnerOn: false }"
     @spinner-off.window="spinnerOn = false"
     @spinner-on.window="spinnerOn = true"
-    class="grid grid-cols-1 md:grid-cols-2 gap-10 py-10"
+    class="grid grid-cols-1 md:grid-cols-2 gap-10 py-10_"
 >
     
     <!-- progress summary -->
-    <x-dashboard-item title="Progress summary" :fixedHeight="false" x-data="{ isOpen: true }" class=" md:col-span-2">
+    {{-- <x-dashboard-item title="Progress summary" :fixedHeight="false" x-data="{ isOpen: true }" class=" md:col-span-2"> --}}
         {{-- <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8"> --}}
         {{-- <x-dashboard-item class="flex items-center justify-around_ justify-start gap-x-[5rem]"> --}}
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3_ _xl:grid-cols-4 gap-10">
+        
+        {{-- <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3_ _xl:grid-cols-4 gap-10"> --}}
             
-            <x-progress :number="$perc_solved">Success rate</x-progress>
+            {{-- <x-progress :number="$perc_solved">Success rate</x-progress> --}}
 
             {{-- <div class="flex flex-col gap-y-4 items-center gap-x-6">
                 <x-progress-circle value="90" />
@@ -33,7 +34,7 @@
             {{-- <x-progress :number="0">Performance by Topic</x-progress> --}}
 
             <!-- total xp points -->
-            <div class="flex flex-col gap-y-4 items-center gap-x-6 text-center">
+            {{-- <div class="flex flex-col gap-y-4 items-center gap-x-6 text-center">
                 <div class="flex items-center justify-center w-[8rem] h-[8rem] rounded-full shadow-lg border-[2px] border-gray-200 dark:border-gray-700" 
                     style="background: conic-gradient(#2fd399 100%, transparent 3%);"
                 >
@@ -42,10 +43,10 @@
                     </div>
                 </div>
                 <div>Total <span class=" font-bold text-black dark:text-gray-200">XP</span> points</div>
-            </div>
+            </div> --}}
 
-        </div>
-    </x-dashboard-item>
+        {{-- </div> --}}
+    {{-- </x-dashboard-item> --}}
 
     <!-- AI models -->
     <x-dashboard-item title="{{ 'Available A.I. models (' . count($available_ai_models) . ')' }}" x-data="{ isOpen: true }">
@@ -77,7 +78,7 @@
     </x-dashboard-item>
 
     <!-- completed challenges -->
-    <x-dashboard-item title="Completed challenges" x-data="{ isOpen: true }">
+    <x-dashboard-item title="Completed challenges {{ count($solved_challenges) ? '(' . count($solved_challenges) . ')' : '' }}" x-data="{ isOpen: true }">
         <ul>
             @foreach ($solved_challenges as $solved_challenge)
             <li>
@@ -103,13 +104,13 @@
     </x-dashboard-item>
 
     <!-- topics -->
-    <x-dashboard-item title="Training topics" x-data="{ isOpen: false }">
+    {{-- <x-dashboard-item title="Training topics" x-data="{ isOpen: false }">
         <ul>
         @foreach($topics as $topic)
             @livewire('tree-node', ['topic' => $topic, 'level' => 0], key($topic->id))
         @endforeach
         </ul>
-    </x-dashboard-item>
+    </x-dashboard-item> --}}
 
     <!-- learning resources -->
     <x-dashboard-item title="Learning resources" x-data="{ isOpen: false }">

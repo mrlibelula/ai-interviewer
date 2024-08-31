@@ -1,4 +1,4 @@
-@props(['right' => null])
+@props(['right' => null, 'subtitle' => ''])
 <x-heading-content right_vertical_position="center">
     <x-slot name="title">
         <div class="flex justify-center xl:justify-start items-center gap-x-4">
@@ -7,7 +7,9 @@
         </div>
     </x-slot>
     <x-slot name="subtitle">
-        {{ $slot }}
+        <div class=" flex items-center">
+            {{ $subtitle }}
+        </div>
     </x-slot>
     @if ($right)
     <x-slot name="right">

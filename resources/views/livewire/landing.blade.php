@@ -30,7 +30,7 @@
             :class="{ 'invert_': darkMode }"
             src="{{ \App\Tool::randomItem([
                 "https://mir-s3-cdn-cf.behance.net/project_modules/1400_webp/464f94172268465.65a01be1af5ee.png",
-                "https://mir-s3-cdn-cf.behance.net/project_modules/max_3840/ee47a7193089229.65e63f2864588.png",
+                // "https://mir-s3-cdn-cf.behance.net/project_modules/max_3840/ee47a7193089229.65e63f2864588.png",
     
                 "https://mir-s3-cdn-cf.behance.net/project_modules/2800_webp/3964bc175456361.6511890469cd7.jpg",
                 "https://mir-s3-cdn-cf.behance.net/project_modules/2800_webp/0ba1da175456361.65118903acb42.jpg",
@@ -51,10 +51,10 @@
                 "https://mir-s3-cdn-cf.behance.net/project_modules/1400_webp/1a5c78172268465.65a01be5a9089.jpg",
                 "https://mir-s3-cdn-cf.behance.net/project_modules/1400_webp/9bec91172268465.65a01bef8201c.jpg",
                 "https://mir-s3-cdn-cf.behance.net/project_modules/1400_webp/ad551e172268465.65a01bf0420cf.jpg",
-                "https://mir-s3-cdn-cf.behance.net/project_modules/2800_webp/9128a7165908369.642884bb024e1.jpg",
-                "https://mir-s3-cdn-cf.behance.net/project_modules/2800_webp/cb258a165908369.642886bd75f47.jpg",
+                // "https://mir-s3-cdn-cf.behance.net/project_modules/2800_webp/9128a7165908369.642884bb024e1.jpg",
+                // "https://mir-s3-cdn-cf.behance.net/project_modules/2800_webp/cb258a165908369.642886bd75f47.jpg",
     
-                "https://mir-s3-cdn-cf.behance.net/project_modules/1400_webp/adf124179927969.653410c653d12.jpg",
+                // "https://mir-s3-cdn-cf.behance.net/project_modules/1400_webp/adf124179927969.653410c653d12.jpg",
                 "https://mir-s3-cdn-cf.behance.net/project_modules/2800_webp/6f88fc172268465.65a013b808ff0.jpg",
                 "https://mir-s3-cdn-cf.behance.net/project_modules/2800_webp/0f71eb172268465.65a0156d6ab6d.jpg",
 

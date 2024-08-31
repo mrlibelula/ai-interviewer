@@ -41,8 +41,8 @@
     </div> --}}
 
     <!-- Feedback chatbot-->
-    <div class=" bg-gray-300/40 dark:bg-emerald-800/40 flex justify-between shadow-xl shadow-white dark:shadow-emerald-950 z-30 items-center gap-x-4 w-full -mb-4 rounded-t-lg px-4 py-2 text-base">
-        <div class="flex items-center gap-x-2 dark:text-emerald-400">
+    <div class=" bg-gray-300/40 dark:bg-slate-700/30 flex justify-between shadow-xl shadow-white dark:shadow-slate-950 z-30 items-center gap-x-4 w-full -mb-4 rounded-t-lg px-4 py-2 text-base">
+        <div class="flex items-center gap-x-2 text-emerald-600 font-semibold dark:text-slate-300">
             <x-circle color="emerald" class=" animate-pulse" />
             A.I. feedback chatbot 
         </div>

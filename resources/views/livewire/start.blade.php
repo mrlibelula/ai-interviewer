@@ -60,7 +60,7 @@
         @if ($challenge)
         <div class="flex flex-col gap-y-20 xl:gap-y-0 xl:flex-row w-full items-start gap-x-10">
             <!-- challenge -->
-            <div class="flex flex-col gap-y-12 xl:w-[70%] w-full xl:pr-[2.5rem] xl:border-r xl:border-dotted xl:border-gray-500 xl:dark:border-gray-600">
+            <div class="flex flex-col gap-y-12 xl:w-[70%] w-full xl:pr-[2.5rem] xl:border-r_ xl:border-dotted xl:border-gray-500 xl:dark:border-gray-600">
                 <div class="flex flex-col gap-y-4">
                     
                     @livewire('challenge-card', [

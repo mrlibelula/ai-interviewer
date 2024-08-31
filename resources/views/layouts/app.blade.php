@@ -42,10 +42,19 @@
 
     <body 
         class="font-sans antialiased relative cursor-default dark:text-gray-400 text-xl bg-white dark:bg-gray-900 h-screen"
-        {{-- :class="{ 'pattern-color-dark': darkMode, 'pattern-squares-light': !darkMode }" --}}
+        @if (request()->routeIs('profile.show')
+        )
+        :class="{ 'pattern-color-dark': darkMode, 'pattern-squares-light': !darkMode }"
+        @endif
         style="background-attachment: fixed;"
         :style="'scrollbar-width: auto; ' + (darkMode ? 'scrollbar-color: #838a97 #161e2e;' : 'scrollbar-color: #374151 #ffffff;')"
     >
+        @if (request()->routeIs('landing') 
+            || request()->routeIs('dashboard')
+            || request()->routeIs('profile.show')
+            || request()->routeIs('interview-start')
+        )
+        <!-- bg effect -->
         <svg viewBox="0 0 1024 1024" class="absolute hidden lg:block left-1/2_ -top-[5rem] xl:-top-[30rem] top-[40%]_ _top-2/3 -z-10 h-[75rem]_ w-[68rem] -translate-y-1/2 [mask-image:radial-gradient(closest-side,white,transparent)] sm:left-full_ sm:-ml-80 _xl:left-1/2 left-1/4 xl:ml-0 xl:-translate-x-1/2 xl:translate-y-0" aria-hidden="true">
             <circle cx="512" cy="512" r="512" fill="url(#759c1415-0410-454c-8f7c-9a820de03641)" fill-opacity="0.7" />
             <defs>
@@ -56,6 +65,7 @@
                 </radialGradient>
             </defs>
         </svg>
+        @endif
         <x-banner />
         <div class="flex">
             <!-- sidebar -->
@@ -86,10 +96,10 @@
                     
                 </div>
                 @if (!request()->routeIs('landing'))
-                <footer class="p-page-x flex flex-col gap-y-2 justify-center items-center pt-14 lg:pt-20 pb-8">
+                <footer class="p-page-x flex flex-col gap-y-2 justify-center items-center px-10 pt-14 lg:pt-20 pb-8">
                     <a href="https://libe.dev" target="_other_LIBEDEV" class="flex items-center">
                         <x-libe-dev-logo class=" scale-[.55]" />
-                        <div class=" text-base text-gray-500">
+                        <div class=" text-sm text-gray-500">
                             {{ date('Y') }} - libe.dev
                         </div>
                     </a>

@@ -6,7 +6,7 @@ use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
 
-class MetricsNav extends Component
+class Table2 extends Component
 {
     /**
      * Create a new component instance.
@@ -21,6 +21,6 @@ class MetricsNav extends Component
      */
     public function render(): View|Closure|string
     {
-        return view('components.metrics-nav');
+        return view('components.table2');
     }
 }

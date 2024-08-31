@@ -11,7 +11,7 @@
     
     <x-container>
         @if (count($challenges))
-            <select wire:model.live="challenge_id" class="form-select w-full">
+            <select wire:model.live="challenge_id" class="form-select text-lg md:text-xl w-full">
                 <option selected value="-1"> -- Challenge list -- </option>
                 @foreach ($challenges as $db_challenge)
                 <option value="{{ $db_challenge->id }}">
@@ -67,7 +67,7 @@
                         <x-admin.setup-box>
                             <x-slot name="title">Difficulty</x-slot>
                             <div>
-                                <select wire:model.live='difficulty_id' class="form-select w-full">
+                                <select wire:model.live='difficulty_id' class="form-select text-lg md:text-xl w-full">
                                     @foreach ($difficulties as $difficulty)
                                     <option value="{{ $difficulty->id }}">
                                         {{ ucfirst($difficulty->name) }}
@@ -165,7 +165,7 @@
                         <x-admin.setup-box>
                             <x-slot name="title">Status</x-slot>
                             <div>
-                                <select wire:model.live='status_id' class="form-select w-full">
+                                <select wire:model.live='status_id' class="form-select text-lg md:text-xl w-full">
                                     @foreach ($statuses as $status)
                                     <option value="{{ $status->id }}">
                                         {{ ucfirst($status->name) }}
@@ -179,7 +179,7 @@
                         <x-admin.setup-box>
                             <x-slot name="title">Visibility</x-slot>
                             <div>
-                                <select wire:model.live='visibility_id' class="form-select w-full">
+                                <select wire:model.live='visibility_id' class="form-select text-lg md:text-xl w-full">
                                     @foreach ($visibilities as $visibility)
                                     <option value="{{ $visibility->id }}">
                                         {{ ucfirst($visibility->name) }}

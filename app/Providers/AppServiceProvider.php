@@ -19,8 +19,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // bonus XP time thresholds in seconds
-        // define('HIGH_THRESHOLD_SECONDS', 300);
-        // define('MEDIUM_THRESHOLD_SECONDS', 600);
+        //
     }
 }

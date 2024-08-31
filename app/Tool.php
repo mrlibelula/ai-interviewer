@@ -108,7 +108,7 @@ class Tool
      * @param array $message_array
      * @return void
      */
-    public static function toastr(LivewireComponent|ViewComponent $component, string $type = 'info', array $message_array): void
+    public static function toastr(LivewireComponent|ViewComponent $component, array $message_array, string $type = 'info'): void
     {
         $component->dispatch($type, [ 
             'title' => $message_array['title'] ?? '',
@@ -695,8 +695,8 @@ class Tool
     }
 
     /**
-     * Search for 'separator/s' and append part/s to the main prompt array of strings
-     * If no parts given, will be obtained from DB enviro prompt blueprint
+     * Search for 'separator/s' and append part/s to the main prompt array of strings. 
+     * If no parts given, will be obtained from DB enviro prompt blueprint. 
      * Returns prompt parts
      *
      * @param array|null $parts
@@ -806,7 +806,7 @@ class Tool
     }
 
     /**
-     * Returns all Challenges count
+     * Returns all Challenges count on db
      *
      * @return integer
      */
@@ -871,6 +871,111 @@ class Tool
             ->select('challenges.id', 'challenges.title', 'bonus_xp', 'extra_bonus')
             ->orderBy('title', 'asc')
             ->get();
+    }
+
+    /**
+     * Number of User solved challenges
+     *
+     * @param User $user
+     * @return integer
+     */
+    public static function nbUserSolvedChallenges(User $user): int
+    {
+        return $user->loadCount(['challenges as solved_challenges_count' => function ($query) {
+            $query->whereNotNull('solved_at');
+        }])->solved_challenges_count;
+    }
+
+    /**
+     * Metrics - User Performance
+     * Solved challenges (paginated)
+     *
+     * @param User $user
+     * @param integer $per_page
+     * @param boolean $ordered
+     * @param \Illuminate\Database\Query\Builder|null $builder
+     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
+     */
+    public static function userSolvedChallengesMetrics(User $user, int $per_page = 3, bool $ordered = false, \Illuminate\Database\Query\Builder|null $builder = null): \Illuminate\Contracts\Pagination\LengthAwarePaginator
+    {
+        if (!$builder) $builder = self::userSolvedChallengesBuilder($user);
+        
+        $ordered 
+            ? $builder->orderBy('challenges.title', 'asc')
+            : $builder->orderBy('challenge_solver.solved_at', 'asc');
+        
+        return $builder->paginate($per_page);
+    }
+
+    /**
+     * Metrics - User Performance
+     * Solved challenges
+     *
+     * @param User $user
+     * @param boolean $ordered
+     * @return \Illuminate\Support\Collection
+     */
+    // public static function userSolvedChallengesMetrics(User $user, bool $ordered = false): \Illuminate\Support\Collection
+    // {
+    //     $builder = self::userSolvedChallengesBuilder($user);
+    //     $ordered 
+    //         ? $builder->orderBy('challenges.title', 'asc')
+    //         : $builder->orderBy('challenge_solver.solved_at', 'asc');
+        
+    //     return $builder->get();
+    // }
+
+    /**
+     * User solved challenges builder
+     *
+     * @param User $user
+     * @return \Illuminate\Database\Query\Builder
+     */
+    public static function userSolvedChallengesBuilder(User $user): \Illuminate\Database\Query\Builder
+    {
+        return DB::table('challenge_solver')
+            ->join('challenges', 'challenge_solver.challenge_id', '=', 'challenges.id')
+            ->join('difficulties', 'challenges.difficulty_id', '=', 'difficulties.id')
+            ->join('statuses', 'challenges.status_id', '=', 'statuses.id')
+            ->join('challenge_topic', 'challenges.id', '=', 'challenge_topic.challenge_id')
+            ->join('topics', 'challenge_topic.topic_id', '=', 'topics.id')
+            ->leftJoin('challenge_language', 'challenges.id', '=', 'challenge_language.challenge_id')
+            ->leftJoin('languages', 'challenge_language.language_id', '=', 'languages.id')
+            ->whereNotNull('challenge_solver.solved_at')
+            ->where('challenge_solver.user_id', '=', $user->id)
+            ->select(
+                'challenges.id',
+                'challenges.title',
+                'challenges.description',
+                'challenges.challenge_slug',
+                'topics.id as topic_id',
+                'topics.name as topic_name',
+                'difficulties.id as difficulty_id',
+                'difficulties.name as difficulty_name',
+                'statuses.id as status_id',
+                'statuses.name as status_name',
+                'languages.id as language_id',
+                'languages.name as language_name',
+                'challenges.time_limit',
+                'challenge_solver.solved_at',
+                'challenge_solver.solved_time_seconds',
+                'challenge_solver.attempts',
+                'challenge_solver.bonus_xp',
+                'challenge_solver.extra_bonus',
+                'challenge_solver.solution_code',
+                DB::raw('challenge_solver.bonus_xp + challenge_solver.extra_bonus as total_bonus')
+            );
+    }
+
+    /**
+     * Seconds to 'H:i:s'
+     *
+     * @param integer $solved_time_seconds
+     * @return string
+     */
+    public static function secondsToString(int $solved_time_seconds): string
+    {
+        return Carbon::createFromFormat('H:i:s', gmdate('H:i:s', $solved_time_seconds))->format('H:i:s');
     }
 
     /**
@@ -965,5 +1070,95 @@ class Tool
             ->where('user_id', $user_id)
             ->first()
             ->total_bonus ?? 0;
+    }
+
+    /**
+     * Update User options on DB
+     *
+     * @param User $user
+     * @param stdClass $updated_user_options_tree
+     * @return bool
+     */
+    public static function updateUserOptions(User $user, stdClass $updated_user_options_tree): bool
+    {
+        $user->options = json_encode($updated_user_options_tree);
+        return $user->save();
+    }
+
+    /**
+     * Returns the feedback_history data structure
+     *
+     * @param integer $id
+     * @param integer $nb_solved_challenges
+     * @param string $prompt
+     * @param string $ai_feedback
+     * @param string|null $created_at
+     * @return array
+     */
+    public static function feedbackHistoryDataStructure(int $id, int $nb_solved_challenges, string $prompt, string $ai_feedback, string|null $created_at = null): array
+    {
+        return [
+            'id' => $id,
+            'nb_solved_challenges' => $nb_solved_challenges,
+            'enc_prompt' => self::encode($prompt),
+            'ai_feedback' => $ai_feedback,
+            'created_at' => isset($created_at) ? $created_at : date('Y-m-d H:i:s'),
+        ];
+    }
+
+    /**
+     * Append an A.I. feedback to the User options
+     *
+     * @param User $user
+     * @param string $feedback_type
+     * @param mixed $feedback
+     * @return mixed
+     */
+    public static function addFeedback(User $user, string $feedback_type, mixed $feedback): mixed
+    {
+        $history_type = 'ai_' . $feedback_type . '_feedback_history';
+        $user->appendToMetricsPerformanceFeedbackHistoryArray($history_type, $feedback);
+        return $feedback;
+    }
+
+    /**
+     * Get User feedback history.
+     * Return all types if !$feedback_type
+     *
+     * @param User $user
+     * @param string|null|null $feedback_type
+     * @return Collection
+     */
+    public static function userFeedbackHistory(User $user, string|null $feedback_type = null): Collection
+    {
+        $performance = $user->options()->metrics->performance;
+        if (!$feedback_type) {
+            return collect($performance);  // returns all perfomance feedback types
+        }
+
+        switch ($feedback_type) {
+            case 'problem_specific':
+                return collect($performance->ai_problem_specific_feedback_history);
+            
+            case 'optimization':
+                return collect($performance->ai_optimization_feedback_history);
+            
+            case 'best_practices':
+                return collect($performance->ai_best_practices_feedback_history);
+            
+            default:
+                return collect($performance);
+        }
+    }
+
+    /**
+     * Returns topic_id from Topic name
+     *
+     * @param string $topic_name
+     * @return integer
+     */
+    public static function getTopicIdFromName(string $topic_name): int
+    {
+        return Topic::select('id')->where('name', 'like', '%' . $topic_name .'%')->first()->id;
     }
 }
