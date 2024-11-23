@@ -14,7 +14,9 @@
             this.msg = new SpeechSynthesisUtterance()
             this.msg.lang = 'en-US'
             this.msg.text = $wire.entangle('last_chatbot_message').initialValue
-            this.msg.voice = this.femaleChatVoice ? window.speechSynthesis.getVoices()[2] : window.speechSynthesis.getVoices()[0]
+            this.msg.voice = this.femaleChatVoice 
+                ? window.speechSynthesis.getVoices()[2] 
+                : window.speechSynthesis.getVoices()[0]
             this.msg.volume = 1
             this.msg.rate = 1
             this.msg.pitch = 1

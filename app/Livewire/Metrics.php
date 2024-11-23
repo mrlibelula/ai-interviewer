@@ -16,7 +16,7 @@ class Metrics extends Component
     protected \Illuminate\Contracts\Pagination\LengthAwarePaginator $user_solved_challenges;
     protected Collection $user_solved_challenges_all;
     public int $challenges_count = 0;
-    public int|string $per_page = 3;
+    public int|string $perPage = 3;
     public int $success_rate = 0;
     public int $total_user_bonus_xp = 0;
     public string $ai_feedback = 'You must solve at least one challenge in order to get some A.I. feedback.';
@@ -152,7 +152,7 @@ class Metrics extends Component
     {
         $this->user_solved_challenges_builder = Tool::userSolvedChallengesBuilder(auth()->user());
         $this->user_solved_challenges_all = $this->user_solved_challenges_builder->get();
-        $this->user_solved_challenges = Tool::userSolvedChallengesMetrics(auth()->user(), $this->per_page, false, $this->user_solved_challenges_builder);
+        $this->user_solved_challenges = Tool::userSolvedChallengesMetrics(auth()->user(), $this->perPage, false, $this->user_solved_challenges_builder);
     }
 
     public function successRate()
@@ -174,9 +174,13 @@ class Metrics extends Component
             $feedback_branch_str = 'ai_' . $feedback_type . '_feedback_history';
             $feedbacks = collect($user_options->metrics->performance->$feedback_branch_str);
             $last_feedback = $feedbacks->last();
-            $feedback_nb_solved_challenges = isset($last_feedback->nb_solved_challenges) ? $last_feedback->nb_solved_challenges : -1;
+            $feedback_nb_solved_challenges = isset($last_feedback->nb_solved_challenges) 
+                ? $last_feedback->nb_solved_challenges 
+                : -1;
             $db_nb_solved_challenges = $this->user_solved_challenges_all->count();
-            $this->new_feedback[$feedback_type] = $feedback_nb_solved_challenges === $db_nb_solved_challenges ? false : true;
+            $this->new_feedback[$feedback_type] = $feedback_nb_solved_challenges === $db_nb_solved_challenges 
+                ? false 
+                : true;
         }
     }
 

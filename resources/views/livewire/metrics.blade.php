@@ -11,7 +11,7 @@
     <x-container>
         
         @livewire('metrics-nav')
-        
+
         <!-- graphs -->
         <div class="flex flex-col gap-y-10 lg:flex-row lg:gap-y-0 items-center gap-x-[4rem] xl:gap-x-[1rem] py-4">
             <!-- progress circles -->
@@ -33,7 +33,7 @@
             <div class="w-full lg:w-[60%] relative">
                 <!-- feedback nav -->
                 <div class="flex items-center gap-x-4 py-4 text-base justify-between leading-tight">
-                    <div 
+                    <button 
                         wire:click='toggleFeedbackNav("problem_specific")' 
                         @click.prevent="$dispatch('feedback-loader-on'); $dispatch('toggled-feedback-nav', { feedback_type: 'problem_specific' })"
                         class="link relative {{ $feedback_nav['problem_specific'] ? 'dark:text-emerald-200 font-semibold' : '' }} _dark:text-gray-500"
@@ -44,8 +44,8 @@
                         <span class="absolute w-2 h-2 -right-[0.7rem] top-0 bg-rose-400 rounded-full opacity-75 animate-ping"></span>
                         <span class="absolute w-2 h-2 -right-[0.7rem] top-0 bg-rose-700 rounded-full"></span>
                         @endif
-                    </div>
-                    <div 
+                    </button>
+                    <button 
                         wire:click='toggleFeedbackNav("optimization")' 
                         @click.prevent="$dispatch('feedback-loader-on'); $dispatch('toggled-feedback-nav', { feedback_type: 'optimization' })"
                         class="link relative {{ $feedback_nav['optimization'] ? 'dark:text-emerald-200 font-semibold' : '' }} _dark:text-gray-500"
@@ -56,8 +56,8 @@
                         <span class="absolute w-2 h-2 -right-[0.7rem] top-0 bg-rose-400 rounded-full opacity-75 animate-ping"></span>
                         <span class="absolute w-2 h-2 -right-[0.7rem] top-0 bg-rose-700 rounded-full"></span>
                         @endif
-                    </div>
-                    <div 
+                    </button>
+                    <button 
                         wire:click='toggleFeedbackNav("best_practices")' 
                         @click.prevent="$dispatch('feedback-loader-on'); $dispatch('toggled-feedback-nav', { feedback_type: 'best_practices' })"
                         class="link relative {{ $feedback_nav['best_practices'] ? 'dark:text-emerald-200 font-semibold' : '' }} _dark:text-gray-500"
@@ -68,7 +68,7 @@
                         <span class="absolute w-2 h-2 -right-[0.7rem] top-0 bg-rose-400 rounded-full opacity-75 animate-ping"></span>
                         <span class="absolute w-2 h-2 -right-[0.7rem] top-0 bg-rose-700 rounded-full"></span>
                         @endif
-                    </div>
+                    </button>
                 </div>
                 <!-- ai feedback -->
                 <div class="flex flex-col-reverse gap-y-8 lg:gap-y-0 lg:flex-row items-start gap-x-[4rem] py-5 px-7 dark:bg-emerald-500/10 border-2 border-dotted border-emerald-500/60 bg-emerald-300/20 dark:border-emerald-200/40 w-full rounded-xl text-lg text-emerald-700 dark:text-emerald-300/70">
@@ -120,7 +120,7 @@
             </div>
         </div>
 
-        <x-table2 color="black">
+        <x-table2 color="gray">
             @php
                 $page = $solved_challenges->currentPage(); // Current page number
                 $perPage = $solved_challenges->perPage(); // Items per page

@@ -6,6 +6,9 @@
         Difficulty
     </x-dashboard-item-emerald>
     <x-dashboard-item-emerald :active="false" href="/">
+        Hint Usage
+    </x-dashboard-item-emerald>
+    <x-dashboard-item-emerald :active="false" href="/">
         Topic
     </x-dashboard-item-emerald>
     <x-dashboard-item-emerald :active="false" href="/">
@@ -19,8 +22,5 @@
     </x-dashboard-item-emerald>
     <x-dashboard-item-emerald :active="false" href="/">
         Comparison
-    </x-dashboard-item-emerald>
-    <x-dashboard-item-emerald :active="false" href="/">
-        Reports
     </x-dashboard-item-emerald>
 </div>

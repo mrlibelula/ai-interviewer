@@ -3,6 +3,8 @@
 namespace App\Livewire;
 
 use App\Tool;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Query\Builder;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -10,12 +12,42 @@ class MetricsDifficulty extends Component
 {
     use WithPagination;
     
-    protected \Illuminate\Database\Query\Builder $builder;
-    protected \Illuminate\Contracts\Pagination\LengthAwarePaginator $tableChallenges;
+    protected Builder $builder;
+    protected LengthAwarePaginator $tableChallenges;
     public $challenges;
     public int $nbChallenges = 0;
-    public int $per_page = 3;
+    public int $perPage = 3;
     public string $selectedDifficulty = 'easy';
+
+    public float $easySuccessRate = 0;
+    public float $mediumSuccessRate = 0;
+    public float $hardSuccessRate = 0;
+
+    public float $easyAverageTime = 0;
+    public float $mediumAverageTime = 0;
+    public float $hardAverageTime = 0;
+
+    private function calculateSuccessRates(): void
+    {
+        $easyChallenges = Tool::userSolvedChallengesBuilder(auth()->user())
+            ->where('difficulties.name', '=', 'easy')
+            ->get();
+        $nbEasyChallenges = Tool::challengesCountByDifficultyLevel('easy');
+        $this->easySuccessRate = number_format(($easyChallenges->count() * 100) / ($nbEasyChallenges ?? 1), 0);
+
+        $mediumChallenges = Tool::userSolvedChallengesBuilder(auth()->user())
+            ->where('difficulties.name', '=', 'medium')
+            ->get();
+        $nbMediumChallenges = Tool::challengesCountByDifficultyLevel('medium');
+        $this->mediumSuccessRate = number_format(($mediumChallenges->count() * 100) / ($nbMediumChallenges ?? 1), 0);
+
+        $hardChallenges = Tool::userSolvedChallengesBuilder(auth()->user())
+            ->where('difficulties.name', '=', 'hard')
+            ->get();
+        $nbHardChallenges = Tool::challengesCountByDifficultyLevel('hard');
+        $this->hardSuccessRate = number_format(($hardChallenges->count() * 100) / ($nbHardChallenges ?? 1), 0);
+
+    }
 
     public function getChallengesByDifficulty(): void
     {
@@ -23,7 +55,7 @@ class MetricsDifficulty extends Component
             ->orderBy('title', 'ASC')
             ->orderBy('difficulty_id')
             ->where('difficulties.name', '=', $this->selectedDifficulty)
-            ->paginate($this->per_page);
+            ->paginate($this->perPage);
         
         $this->challenges = $this->builder
             ->get()
@@ -55,6 +87,50 @@ class MetricsDifficulty extends Component
         $this->queryBuilder();
         $this->getChallengesByDifficulty('easy');
         $diffChallenges = $this->tableChallenges;
+        $this->calculateSuccessRates();
+        $this->calculateAvarageTimes();
         return view('livewire.metrics-difficulty', compact(['diffChallenges']));
+    }
+
+    private function calculateAvarageTimes(): void
+    {
+        $this->easyAverageTime = $this->calculateAvarageTime('easy');
+        $this->mediumAverageTime = $this->calculateAvarageTime('medium');
+        $this->hardAverageTime = $this->calculateAvarageTime('hard');
+    }
+
+    /**
+     * Calculate the average time to solve a challenge in minutes
+     * @param string $difficulty
+     * @return float
+     */
+    private function calculateAvarageTime(string $difficulty = 'easy'): float
+    {
+        $solvedTimes = Tool::userSolvedChallengesBuilder(auth()->user())
+            ->where('difficulties.name', '=', $difficulty)
+            ->get()
+            ->pluck('solved_time_seconds');
+        return $solvedTimes->count() > 0 
+            ? (float)number_format(($solvedTimes->sum() / $solvedTimes->count()) / 60, 2) 
+            : 0;
+    }
+
+    public function getChartData(): array
+    {
+        return [
+            'easy' => $this->easyAverageTime,
+            'medium' => $this->mediumAverageTime,
+            'hard' => $this->hardAverageTime
+        ];
+    }
+
+    public function updatedPage()
+    {
+        $this->dispatch('difficulty-data-updated');
+    }
+
+    public function updatedPerPage()
+    {
+        $this->dispatch('difficulty-data-updated');
     }
 }

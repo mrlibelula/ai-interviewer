@@ -1,7 +1,7 @@
 @props(['label' => 'per page', 'size' => 'text-base'])
 <div class="flex items-center gap-x-2 w-full {{ $size }}">
     <div>
-        <select {{ $attributes->merge(['wire:model.live' => 'per_page', 'class' => 'form-select2 ' . $size]) }}>
+        <select {{ $attributes->merge(['wire:model.live' => 'perPage', 'class' => 'form-select2 ' . $size]) }}>
             @if (isset($slot) && trim($slot) !== '')
                 {{ $slot }}
             @else

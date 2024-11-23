@@ -170,13 +170,10 @@ class User extends Authenticatable
     {
         $options = $this->options();
 
-        // Check if the branch exists and is an array
-        if (isset($options->metrics->performance->$branch) && is_array($options->metrics->performance->$branch)) {
-            $options->metrics->performance->$branch[] = $value;
-        } else {
-            // Initialize the branch as an array if it doesn't exist
-            $options->metrics->performance->$branch = [$value];
-        }
+        // Check if the branch exists and its an array
+        isset($options->metrics->performance->$branch) && is_array($options->metrics->performance->$branch)
+            ? $options->metrics->performance->$branch[] = $value
+            : $options->metrics->performance->$branch = [$value]; // Initialize the branch as an array if it doesn't exist
 
         // Encode the updated options back to JSON and update the database
         $this->options = json_encode($options);

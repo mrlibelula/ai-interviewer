@@ -9,7 +9,6 @@
         'sky' => 'shadow-sky-900/15 dark:shadow-sky-700/10 border-sky-200 dark:border-sky-700/40',
         'green' => 'shadow-green-900/15 dark:shadow-green-700/10 border-green-200 dark:border-green-700/40',
         'emerald' => 'shadow-emerald-900/15 dark:shadow-emerald-700/10 border-emerald-200 dark:border-emerald-700/40',
-        'dark-blue' => 'shadow-dark-blue-900/15 dark:shadow-dark-blue-700/10 border-dark-blue-200 dark:border-dark-blue-700/40',
         'blue' => 'shadow-blue-900/15 dark:shadow-blue-700/10 border-blue-200 dark:border-blue-700/40',
         'indigo' => 'shadow-indigo-900/15 dark:shadow-indigo-700/10 border-indigo-200 dark:border-indigo-700/40',
         'purple' => 'shadow-purple-900/15 dark:shadow-purple-700/10 border-purple-200 dark:border-purple-700/40',
@@ -35,6 +34,7 @@
         'indigo' => 'bg-indigo-300 dark:bg-indigo-700/40 text-gray-600 dark:text-gray-400',
         'purple' => 'bg-purple-300 dark:bg-purple-700/40 text-gray-600 dark:text-gray-400',
         'pink' => 'bg-pink-300 dark:bg-pink-700/40 text-gray-600 dark:text-gray-400',
+        'red' => 'bg-red-300 dark:bg-red-700/40 text-gray-600 dark:text-gray-400',
         'amber' => 'bg-amber-300 dark:bg-amber-700/40 text-gray-600 dark:text-gray-400',
         'lime' => 'bg-lime-300 dark:bg-lime-700/40 text-gray-600 dark:text-gray-400',
         'cyan' => 'bg-cyan-300 dark:bg-cyan-700/40 text-gray-600 dark:text-gray-400',
@@ -61,6 +61,7 @@
         'lime' => 'bg-lime-300/30 dark:bg-lime-800/20',
         'cyan' => 'bg-cyan-300/30 dark:bg-cyan-800/20',
         'violet' => 'bg-violet-300/30 dark:bg-violet-800/20',
+        'red' => 'bg-red-300/30 dark:bg-red-800/20',
         'fuchsia' => 'bg-fuchsia-300/30 dark:bg-fuchsia-800/20',
         'dark-blue' => 'bg-dark-blue-300/30 dark:bg-dark-blue-800/20',
     ];
@@ -70,7 +71,7 @@
     $table_bg_color = $table_bg_colors[$color] ?? $table_bg_colors['gray'];
 
 @endphp
-<div class="w-full overflow-hidden overflow-x-auto shadow-xl rounded-[0.63rem] border-2 {{ $bg_color }}">
+<div class="w-full overflow-hidden overflow-x-auto shadow-md_ rounded-[0.63rem] border-2 {{ $bg_color }}">
     <table class="w-full text-sm">
         <thead>
             <tr class=" text-xs {{ $header_color }} leading-none whitespace-nowrap">

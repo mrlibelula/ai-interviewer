@@ -42,8 +42,7 @@
 
     <body 
         class="font-sans antialiased relative cursor-default dark:text-gray-400 text-xl bg-white dark:bg-gray-900 h-screen"
-        @if (request()->routeIs('profile.show')
-        )
+        @if (request()->routeIs('profile.show'))
         :class="{ 'pattern-color-dark': darkMode, 'pattern-squares-light': !darkMode }"
         @endif
         style="background-attachment: fixed;"
@@ -148,6 +147,8 @@
 
 
         </script>
+
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     </body>
     

@@ -89,28 +89,28 @@ class Start extends Component
         $this->bonus_xp = 0;
     }
 
-    public function sendMessage(string $chat_message)
+    public function sendMessage(string $chatMessage)
     {
         // validate chat input
-        if (!strlen($chat_message) || strlen($chat_message) < 3) {
-            $error_message = 'Chat message must be at least 3 characters long';
+        if (!strlen($chatMessage) || strlen($chatMessage) < 3) {
+            $errorMessage = 'Chat message must be at least 3 characters long';
             Tool::toastr($this, [
-                'message' => $error_message,
+                'message' => $errorMessage,
             ], 'error');
             $this->dispatch('chatbot-loader-off');
             $this->dispatch('chatbot-error-true', [
-                'error_message' => $error_message,
+                'error_message' => $errorMessage,
             ]);
             return;
         }
-        if (strlen($chat_message) > 150) {
-            $error_message = 'Chat message must be less than 150 characters long';
+        if (strlen($chatMessage) > 150) {
+            $errorMessage = 'Chat message must be less than 150 characters long';
             Tool::toastr($this, [
-                'message' => $error_message,
+                'message' => $errorMessage,
             ], 'error');
             $this->dispatch('chatbot-loader-off');
             $this->dispatch('chatbot-error-true', [
-                'error_message' => $error_message,
+                'error_message' => $errorMessage,
             ]);
             return;
         }
@@ -123,7 +123,7 @@ class Start extends Component
 
         $this->openai_chat_settings['messages'][] = [
             'role' => 'user',
-            'content' => $chat_message,
+            'content' => $chatMessage,
         ];
 
         // append chat message
