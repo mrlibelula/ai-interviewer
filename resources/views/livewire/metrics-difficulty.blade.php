@@ -218,18 +218,10 @@
             </div>
         </div>
 
-        <ul style="list-style-type: square;" class="flex flex-col gap-y-4">
-            <li>
-                Hint Usage by Difficulty: Track how often users request hints or help at each difficulty level, providing insights into where they struggle most.
-            </li>
-            <li>
-                AI Evaluation of Difficulty: Use AI to assess the complexity of code solutions and provide feedback on whether a challenge was appropriately difficult for the user’s skill level.
-            </li>
-        </ul>
     </x-container>
 
     <script>
-        const formatTime = (minutes) => {
+        var formatTime = (minutes) => {
             const hours = Math.floor(minutes / 60);
             const mins = Math.floor(minutes % 60);
             const secs = Math.floor((minutes * 60) % 60);

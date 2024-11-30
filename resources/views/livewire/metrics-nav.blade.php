@@ -5,7 +5,7 @@
     <x-dashboard-item-emerald :active="request()->routeIs('metrics-difficulty')" href="/metrics/difficulty">
         Difficulty
     </x-dashboard-item-emerald>
-    <x-dashboard-item-emerald :active="false" href="/">
+    <x-dashboard-item-emerald :active="request()->routeIs('metrics-hint-usage')" href="/metrics/hint-usage">
         Hint Usage
     </x-dashboard-item-emerald>
     <x-dashboard-item-emerald :active="false" href="/">
