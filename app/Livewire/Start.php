@@ -89,7 +89,7 @@ class Start extends Component
         $this->bonus_xp = 0;
     }
 
-    public function sendMessage(string $chatMessage)
+    public function sendMessage(string $chatMessage = '')
     {
         // validate chat input
         if (!strlen($chatMessage) || strlen($chatMessage) < 3) {

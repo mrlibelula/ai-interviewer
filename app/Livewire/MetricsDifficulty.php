@@ -33,19 +33,25 @@ class MetricsDifficulty extends Component
             ->where('difficulties.name', '=', 'easy')
             ->get();
         $nbEasyChallenges = Tool::challengesCountByDifficultyLevel('easy');
-        $this->easySuccessRate = number_format(($easyChallenges->count() * 100) / ($nbEasyChallenges ?? 1), 0);
+        $this->easySuccessRate = $nbEasyChallenges > 0 
+            ? number_format(($easyChallenges->count() * 100) / $nbEasyChallenges, 0)
+            : 0;
 
         $mediumChallenges = Tool::userSolvedChallengesBuilder(auth()->user())
             ->where('difficulties.name', '=', 'medium')
             ->get();
         $nbMediumChallenges = Tool::challengesCountByDifficultyLevel('medium');
-        $this->mediumSuccessRate = number_format(($mediumChallenges->count() * 100) / ($nbMediumChallenges ?? 1), 0);
+        $this->mediumSuccessRate = $nbMediumChallenges > 0
+            ? number_format(($mediumChallenges->count() * 100) / $nbMediumChallenges, 0)
+            : 0;
 
         $hardChallenges = Tool::userSolvedChallengesBuilder(auth()->user())
             ->where('difficulties.name', '=', 'hard')
             ->get();
         $nbHardChallenges = Tool::challengesCountByDifficultyLevel('hard');
-        $this->hardSuccessRate = number_format(($hardChallenges->count() * 100) / ($nbHardChallenges ?? 1), 0);
+        $this->hardSuccessRate = $nbHardChallenges > 0
+            ? number_format(($hardChallenges->count() * 100) / $nbHardChallenges, 0)
+            : 0;
 
     }
 
