@@ -29,7 +29,7 @@
         <input wire:model="query" wire:change="search" placeholder="Search challenges" class="form-input dark:bg-gray-800 h-[2.25rem] w-[70%] text-sm placeholder-gray-500 placeholder:text-sm " />
     </div>
     <!-- search results -->
-    @if ($searchResults)
+    @if (count($searchResults))
     <div @click.away="$wire.clearSearch()" class="absolute z-40 top-[3.7rem] left-0 sm:left-20 w-full sm:w-[94%] bg-gray-100 dark:bg-gray-800 rounded-lg shadow-lg border-2 border-gray-200 dark:border-gray-700 h-[11.5rem] overflow-y-auto overflow-hidden">
         @foreach ($searchResults as $challenge)
         <a wire:navigate href="{{ route('interview-start', [
