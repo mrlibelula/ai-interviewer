@@ -17,6 +17,27 @@ class Welcome extends Component
     public $topics;
     public $available_ai_models = [];
     public $ai_models_last_updated = '';
+    public $performance = [
+        'success_rate' => 75,
+        'completion_rate' => 60,
+        'accuracy' => 85,
+        'speed' => 40
+    ];
+    public $badges = [
+        // Add your badges data
+    ];
+    public $recommended_challenges = [
+        // Add your recommended challenges
+    ];
+    public $learning_resources = [
+        // Add your learning resources
+    ];
+    public $community_stats = [
+        'forum_posts' => 12,
+        'solutions_shared' => 5,
+        'forum_activity' => 65,
+        'contribution_rate' => 40
+    ];
 
     public function getAiModels()
     {
