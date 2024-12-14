@@ -26,7 +26,7 @@
                 <div class="flex-none">
                     <select 
                         wire:model.live="timeRange"
-                        class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+                        class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
                     >
                         <option value="all">All Time</option>
                         <option value="week">Last Week</option>
@@ -69,7 +69,7 @@
                     </thead>
                     <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                         @foreach ($users as $user)
-                            <tr class="{{ $user->id === auth()->id() ? 'bg-blue-50 dark:bg-blue-900/20' : '' }}">
+                            <tr class="{{ $user->id === auth()->id() ? 'bg-emerald-50 dark:bg-emerald-900/20' : '' }}">
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="flex items-center">
                                         <div class="flex-shrink-0 h-10 w-10">
@@ -81,7 +81,7 @@
                                             <div class="text-sm font-medium text-gray-900 dark:text-gray-100">
                                                 {{ $user->name }}
                                                 @if ($user->id === auth()->id())
-                                                    <span class="ml-2 text-xs text-blue-600 dark:text-blue-400">(You)</span>
+                                                    <span class="ml-2 text-xs text-emerald-600 dark:text-emerald-400">(You)</span>
                                                 @endif
                                             </div>
                                         </div>
@@ -102,7 +102,7 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
-                                        <div class="bg-blue-600 h-2.5 rounded-full" style="width: {{ \App\Tool::percentageSolved($user->solved_challenges, $totalChallenges) }}%"></div>
+                                        <div class="bg-emerald-600 h-2.5 rounded-full" style="width: {{ \App\Tool::percentageSolved($user->solved_challenges, $totalChallenges) }}%"></div>
                                     </div>
                                     <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
                                         {{ \App\Tool::percentageSolved($user->solved_challenges, $totalChallenges) }}%

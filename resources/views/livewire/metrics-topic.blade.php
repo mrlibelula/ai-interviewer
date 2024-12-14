@@ -8,7 +8,7 @@
     <x-container>
         @livewire('metrics-nav')
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+        <div class="grid grid-cols-1 gap-4 mt-6">
             <!-- Challenges by Topics -->
             <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
                 <h3 class="text-lg font-semibold mb-4">Challenges by Topics</h3>
@@ -22,7 +22,7 @@
             </div>
 
             <!-- Average Completion Time -->
-            <div class="bg-white dark:bg-gray-800 col-span-2 p-4 rounded-lg shadow">
+            <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
                 <h3 class="text-lg font-semibold mb-4">Average Completion Time</h3>
                 <canvas id="timeChart"></canvas>
             </div>
