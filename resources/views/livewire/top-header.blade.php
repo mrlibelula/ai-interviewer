@@ -26,9 +26,30 @@
         &nbsp;
     </div>
     <div class="hidden sm:block w-full px-3">
-        <input placeholder="Search challenges" class="form-input dark:bg-gray-800 h-[2.25rem] w-full text-sm placeholder-gray-500 placeholder:text-sm " />
+        <input wire:model="query" wire:change="search" placeholder="Search challenges" class="form-input dark:bg-gray-800 h-[2.25rem] w-[70%] text-sm placeholder-gray-500 placeholder:text-sm " />
     </div>
-    <div class=" hidden md:flex border-r border-gray-200 dark:border-gray-700">
+    <!-- search results -->
+    @if ($searchResults)
+    <div @click.away="$wire.clearSearch()" class="absolute z-40 top-[3.7rem] left-0 sm:left-20 w-full sm:w-[94%] bg-gray-100 dark:bg-gray-800 rounded-lg shadow-lg border-2 border-gray-200 dark:border-gray-700 h-[11.5rem] overflow-y-auto overflow-hidden">
+        @foreach ($searchResults as $challenge)
+        <a wire:navigate href="{{ route('interview-start', [
+            'enc_selected_difficulty' => \App\Tool::encode($challenge->difficulty->name),
+            'enc_selected_topic_id' => \App\Tool::encode($challenge->topics->first()->id),
+            'enc_challenge_id' => \App\Tool::encode($challenge->id),
+            'challenge_slug' => $challenge->challenge_slug,
+        ]) }}" class="group">
+            <div class="p-4 flex items-center justify-between group-hover:bg-gray-200 dark:group-hover:bg-gray-700 smooth-300 cursor-pointer">
+                <div>
+                    <span class="font-mono font-semibold px-2 text-lg bg-gray-200 dark:bg-gray-700 rounded-xl">Challenge</span> <span class="px-4">{{ $challenge->title }}</span>
+                </div>
+                <div class="font-mono font-semibold px-2 text-lg bg-gray-200 dark:bg-gray-700 rounded-xl">{{ $challenge->topics->first()->name }}</div>
+            </div>
+        </a>
+        @endforeach
+    </div>
+    @endif
+
+    <div class="hidden md:flex border-r border-gray-200 dark:border-gray-700">
         &nbsp;
     </div>
     <div class="flex justify-end items-center gap-x-4 w-full sm:w-fit">
