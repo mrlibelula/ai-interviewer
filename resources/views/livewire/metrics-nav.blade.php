@@ -11,16 +11,16 @@
     <x-dashboard-item-emerald :active="request()->routeIs('metrics-topic')" href="/metrics/topic">
         Topic
     </x-dashboard-item-emerald>
-    <x-dashboard-item-emerald :active="false" href="/">
+    <x-dashboard-item-emerald :active="request()->routeIs('metrics-attempts')" href="/metrics/attempts">
         Attempts
     </x-dashboard-item-emerald>
-    <x-dashboard-item-emerald :active="false" href="/">
+    <x-dashboard-item-emerald :active="request()->routeIs('metrics-time-based')" href="/metrics/time-based">
         Time-based
     </x-dashboard-item-emerald>
-    <x-dashboard-item-emerald :active="false" href="/">
+    <x-dashboard-item-emerald :active="request()->routeIs('metrics-leaderboard')" href="/metrics/leaderboard">
         Leaderboard
     </x-dashboard-item-emerald>
-    <x-dashboard-item-emerald :active="false" href="/">
+    <x-dashboard-item-emerald :active="request()->routeIs('metrics-comparison')" href="/metrics/comparison">
         Comparison
     </x-dashboard-item-emerald>
 </div>

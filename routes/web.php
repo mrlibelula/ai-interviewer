@@ -7,12 +7,20 @@ use App\Livewire\Admin\Prompt;
 use App\Livewire\Interview;
 use App\Livewire\Landing;
 use App\Livewire\Metrics;
+use App\Livewire\MetricsAttempts;
+use App\Livewire\MetricsComparison;
 use App\Livewire\MetricsDifficulty;
 use App\Livewire\MetricsHintUsage;
+use App\Livewire\MetricsLeaderboard;
+use App\Livewire\MetricsTimeBased;
 use App\Livewire\MetricsTopic;
 use App\Livewire\Start;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
+
+
+
+
 
 
 
@@ -46,6 +54,10 @@ Route::middleware([
     Route::get('/metrics/difficulty', MetricsDifficulty::class)->name('metrics-difficulty');
     Route::get('/metrics/hint-usage', MetricsHintUsage::class)->name('metrics-hint-usage');
     Route::get('/metrics/topic', MetricsTopic::class)->name('metrics-topic');
+    Route::get('/metrics/attempts', MetricsAttempts::class)->name('metrics-attempts');
+    Route::get('/metrics/time-based', MetricsTimeBased::class)->name('metrics-time-based');
+    Route::get('/metrics/leaderboard', MetricsLeaderboard::class)->name('metrics-leaderboard');
+    Route::get('/metrics/comparison', MetricsComparison::class)->name('metrics-comparison');
 });
 
 Route::middleware([
