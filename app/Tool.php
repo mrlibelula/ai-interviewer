@@ -1161,4 +1161,29 @@ class Tool
     {
         return Topic::select('id')->where('name', 'like', '%' . $topic_name .'%')->first()->id;
     }
+
+    /**
+     * Get the size of a variable
+     *
+     * @param mixed $data
+     * @return array
+     */
+    public static function getVariableSize(mixed $data): array
+    {
+        // Serialize the data
+        $serializedData = serialize($data);
+    
+        // Get the size in bytes
+        $sizeInBytes = strlen($serializedData);
+    
+        // Convert to KB and MB
+        $sizeInKB = $sizeInBytes / 1024;
+        $sizeInMB = $sizeInKB / 1024;
+    
+        return [
+            'bytes' => $sizeInBytes,
+            'kilobytes' => $sizeInKB,
+            'megabytes' => $sizeInMB,
+        ];
+    }
 }

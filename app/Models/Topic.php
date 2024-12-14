@@ -46,6 +46,19 @@ class Topic extends Model
     }
 
     /**
+     * Returns just the first level of topics
+     *
+     * @return mixed
+     */
+    public static function getFirstLevel()
+    {
+        return static::with('challenges:id,title')
+            ->withCount('challenges')
+            ->whereNull('parent_id')
+            ->get();
+    }
+
+    /**
      * Returns the recursive children of a specific Topic model
      *
      * @return mixed

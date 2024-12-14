@@ -9,9 +9,11 @@ use App\Livewire\Landing;
 use App\Livewire\Metrics;
 use App\Livewire\MetricsDifficulty;
 use App\Livewire\MetricsHintUsage;
+use App\Livewire\MetricsTopic;
 use App\Livewire\Start;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
+
 
 
 /*
@@ -43,6 +45,7 @@ Route::middleware([
     Route::get('/metrics', Metrics::class)->name('metrics');
     Route::get('/metrics/difficulty', MetricsDifficulty::class)->name('metrics-difficulty');
     Route::get('/metrics/hint-usage', MetricsHintUsage::class)->name('metrics-hint-usage');
+    Route::get('/metrics/topic', MetricsTopic::class)->name('metrics-topic');
 });
 
 Route::middleware([
