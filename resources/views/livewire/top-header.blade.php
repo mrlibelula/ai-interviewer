@@ -26,11 +26,11 @@
         &nbsp;
     </div>
     <div class="hidden sm:block w-full px-3">
-        <input wire:model="query" wire:change="search" placeholder="Search challenges" class="form-input dark:bg-gray-800 h-[2.25rem] w-[70%] text-sm placeholder-gray-500 placeholder:text-sm " />
+        <input wire:model="query" wire:change="search" placeholder="Search challenges" class="form-input dark:bg-gray-800 h-[2.25rem] w-full text-sm placeholder-gray-500 placeholder:text-sm " />
     </div>
     <!-- search results -->
     @if (count($searchResults))
-    <div @click.away="$wire.clearSearch()" class="absolute z-40 top-[3.7rem] left-0 sm:left-20 w-full sm:w-[94%] bg-gray-100 dark:bg-gray-800 rounded-lg shadow-lg border-2 border-gray-200 dark:border-gray-700 h-[11.5rem] overflow-y-auto overflow-hidden">
+    <div @click.away="$wire.clearSearch()" class="absolute z-[80] top-[3.7rem] left-0 sm:left-20 w-full sm:w-[94%] bg-gray-100 dark:bg-gray-800 rounded-lg shadow-lg shadow-gray-800/80 dark:shadow-gray-900/80 border-2 border-gray-200 dark:border-gray-700 h-[11.5rem] overflow-y-auto overflow-hidden">
         @foreach ($searchResults as $challenge)
         <a wire:navigate href="{{ route('interview-start', [
             'enc_selected_difficulty' => \App\Tool::encode($challenge->difficulty->name),
@@ -39,10 +39,11 @@
             'challenge_slug' => $challenge->challenge_slug,
         ]) }}" class="group">
             <div class="p-4 flex items-center justify-between group-hover:bg-gray-200 dark:group-hover:bg-gray-700 smooth-300 cursor-pointer">
-                <div>
-                    <span class="font-mono font-semibold px-2 text-lg bg-gray-200 dark:bg-gray-700 rounded-xl">Challenge</span> <span class="px-4">{{ $challenge->title }}</span>
+                <div class=" hidden md:block">
+                    <span class="font-mono font-semibold px-2 text-lg bg-gray-200 dark:bg-gray-700 rounded-xl">Challenge</span> 
                 </div>
-                <div class="font-mono font-semibold px-2 text-lg bg-gray-200 dark:bg-gray-700 rounded-xl">{{ $challenge->topics->first()->name }}</div>
+                <div class="px-4 w-full text-left">{{ $challenge->title }}</div>
+                <div class=" hidden md:block font-mono font-semibold px-2 text-lg bg-gray-200 dark:bg-gray-700 rounded-xl">{{ $challenge->topics->first()->name }}</div>
             </div>
         </a>
         @endforeach
@@ -60,65 +61,65 @@
     </div>
 
     <!-- options context menu -->
-    <form method="POST" action="{{ route('logout') }}" x-data>
-        @csrf
-        <x-context x-show="isContextOpen" @click.away="isContextOpen = false">
     
-            <x-context-item class="md:hidden bg-gray-300 dark:bg-gray-500">
-                Full-Stack Software Engineer
-            </x-context-item>
-            <x-context-item class="sm:hidden">
-                <input placeholder="Search challenges" class="form-input h-[2.25rem] w-full text-sm placeholder-gray-500 placeholder:text-sm " />
-            </x-context-item>
-            <x-context-item wire:navigate href="{{ route('dashboard') }}">
-                <x-slot name="icon"><x-icon-squares /></x-slot>
-                My progress
-            </x-context-item>
+    <x-context x-show="isContextOpen" @click.away="isContextOpen = false">
 
-            <x-context-item wire:navigate href="{{ route('metrics') }}">
-                <x-slot name="icon"><x-icon-progress /></x-slot>
-                Metrics
-            </x-context-item>
-    
-            <x-context-item>
-                <x-slot name="icon"><x-icon-chat /></x-slot>
-                Interviews
-            </x-context-item>
+        <x-context-item class="md:hidden bg-gray-300 dark:bg-gray-500">
+            Full-Stack Software Engineer
+        </x-context-item>
+        <x-context-item class="sm:hidden">
+            <input wire:model="query" wire:change="search" placeholder="Search challenges" class="form-input h-[2.25rem] w-full text-sm placeholder-gray-500 placeholder:text-sm " />
+        </x-context-item>
+        <x-context-item wire:navigate href="{{ route('dashboard') }}">
+            <x-slot name="icon"><x-icon-squares /></x-slot>
+            My progress
+        </x-context-item>
 
-            <x-context-item>
-                <x-slot name="icon"><x-icon-queue-list /></x-slot>
-                Challenges
-            </x-context-item>
-            
-            <x-context-item>
-                <x-slot name="icon"><x-icon-list /></x-slot>
-                Topics
-            </x-context-item>
+        <x-context-item wire:navigate href="{{ route('metrics') }}">
+            <x-slot name="icon"><x-icon-progress /></x-slot>
+            Metrics
+        </x-context-item>
 
-            {{-- <x-context-item>
-                <x-slot name="icon"><x-icon-cog /></x-slot>
-                Options
-            </x-context-item> --}}
+        <x-context-item>
+            <x-slot name="icon"><x-icon-chat /></x-slot>
+            Interviews
+        </x-context-item>
 
-            <!-- admin -->
-            @if (auth()->user()->hasRole('admin') || auth()->user()->hasRole('recruiter'))
-            <x-context-divider />
+        <x-context-item>
+            <x-slot name="icon"><x-icon-queue-list /></x-slot>
+            Challenges
+        </x-context-item>
+        
+        <x-context-item>
+            <x-slot name="icon"><x-icon-list /></x-slot>
+            Topics
+        </x-context-item>
 
-            <x-context-item wire:navigate href="{{ route('admin-dashboard') }}">
-                <x-slot name="icon"><x-icon-cog /></x-slot>
-                Administrative options
-            </x-context-item>
-            @endif
-            
-    
-            <x-context-divider />
-    
+        {{-- <x-context-item>
+            <x-slot name="icon"><x-icon-cog /></x-slot>
+            Options
+        </x-context-item> --}}
+
+        <!-- admin -->
+        @if (auth()->user()->hasRole('admin') || auth()->user()->hasRole('recruiter'))
+        <x-context-divider />
+
+        <x-context-item wire:navigate href="{{ route('admin-dashboard') }}">
+            <x-slot name="icon"><x-icon-cog /></x-slot>
+            Administrative options
+        </x-context-item>
+        @endif
+        
+
+        <x-context-divider />
+
+        <form method="POST" action="{{ route('logout') }}" x-data>
+            @csrf
             <x-context-item @click.prevent="$root.submit();">
                 <x-slot name="icon"><x-icon-logout /></x-slot>
                 Sign out
             </x-context-item>
-    
-            
-        </x-context>
-    </form>
+        </form>
+        
+    </x-context>
 </div>
