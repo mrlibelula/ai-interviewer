@@ -40,10 +40,10 @@
         ]) }}" class="group">
             <div class="p-4 flex items-center justify-between group-hover:bg-gray-200 dark:group-hover:bg-gray-700 smooth-300 cursor-pointer">
                 <div class=" hidden md:block">
-                    <span class="font-mono font-semibold px-2 text-lg bg-gray-200 dark:bg-gray-700 rounded-xl">Challenge</span> 
+                    <span class="font-mono font-semibold px-2 text-sm md:text-base xl:text-lg bg-gray-200 dark:bg-gray-700 rounded-xl">Challenge</span> 
                 </div>
-                <div class="px-4 w-full text-left">{{ $challenge->title }}</div>
-                <div class=" hidden md:block font-mono font-semibold px-2 text-lg bg-gray-200 dark:bg-gray-700 rounded-xl">{{ $challenge->topics->first()->name }}</div>
+                <div class="px-4 w-full text-left text-sm md:text-base xl:text-lg">{{ $challenge->title }}</div>
+                <div class=" hidden md:block font-mono font-semibold px-2 text-sm md:text-base xl:text-lg bg-gray-200 dark:bg-gray-700 rounded-xl">{{ $challenge->topics->first()->name }}</div>
             </div>
         </a>
         @endforeach
@@ -53,7 +53,7 @@
     <div class="hidden md:flex border-r border-gray-200 dark:border-gray-700">
         &nbsp;
     </div>
-    <div class="flex justify-end items-center gap-x-4 w-full sm:w-fit">
+    <div class="flex justify-end items-center gap-x-4 w-full sm:w-fit mr-[1rem]">
         <x-theme-switcher />
         <button @click="isContextOpen = !isContextOpen" class="text-gray-900 dark:text-gray-400 hover:text-gray-500 dark:hover:text-gray-200 smooth-300 cursor-pointer">
             <x-icon-ellipsis-vertical class="h-7 w-7" />
