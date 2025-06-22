@@ -36,15 +36,8 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return 'SUCCESS! Laravel is working. Time: ' . date('Y-m-d H:i:s');
-});
-
-Route::get('/login', function () {
+    // return redirect()->route('login');
     return view('auth.login');
-})->name('login');
-
-Route::get('/test-debug', function () {
-    return 'Debug route works! Laravel version: ' . app()->version();
 });
 
 Route::middleware([
