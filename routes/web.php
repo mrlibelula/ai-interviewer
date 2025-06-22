@@ -36,17 +36,15 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return 'Laravel is working! PHP version: ' . phpversion() . ' | Time: ' . now();
+    return 'SUCCESS! Laravel is working. Time: ' . date('Y-m-d H:i:s');
 });
 
+Route::get('/login', function () {
+    return view('auth.login');
+})->name('login');
+
 Route::get('/test-debug', function () {
-    return response()->json([
-        'status' => 'working',
-        'php_version' => phpversion(),
-        'laravel_version' => app()->version(),
-        'environment' => app()->environment(),
-        'time' => now()
-    ]);
+    return 'Debug route works! Laravel version: ' . app()->version();
 });
 
 Route::middleware([
