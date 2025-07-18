@@ -19,6 +19,9 @@
         <!-- icons -->
         <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
+        <!-- Favicon -->
+		<link rel="shortcut icon" href="https://www.onlygfx.com/wp-content/uploads/2022/04/brain-icon-3.png">
+
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
 

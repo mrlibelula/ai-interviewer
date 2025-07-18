@@ -1,10 +1,11 @@
 <x-guest-layout>
     <x-authentication-card>
         <x-slot name="logo">
-            <div class="flex items-center justify-center gap-x-4">
-                <a href="https://libe.dev" target="_other_libedev">
+            <div class="flex flex-col items-center justify-center gap-x-4">
+                {{-- <a href="https://libe.dev" target="_other_libedev">
                     <x-logo class="h-[2rem]" />
-                </a>
+                </a> --}}
+                <img class="w-8 py-[0.195rem] opacity-75 hover:opacity-100 smooth-300 invert hover:invert-0 animate-pulse mb-2" src="https://www.onlygfx.com/wp-content/uploads/2022/04/brain-icon-3.png" alt="">
                 <div class=" font-semibold text-2xl">
                     A.I. Interviewer
                 </div>
