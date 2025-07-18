@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\LoginController;
 use App\Livewire\Admin\Challenge;
 use App\Livewire\Admin\Challenges;
 use App\Livewire\Admin\Dashboard;
@@ -36,9 +37,12 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    // return redirect()->route('login');
     return view('auth.login');
 });
+
+// oauth2
+Route::get('/login/google', [LoginController::class, 'redirectToGoogle'])->name('login.google');
+Route::get('/login/google/redirect', [LoginController::class, 'handleGoogleCallback'])->name('login.google.callback');
 
 Route::middleware([
     'auth:sanctum',

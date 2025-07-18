@@ -51,5 +51,12 @@
                 </x-button>
             </div>
         </form>
+
+        <a href="{{ route('login.google') }}" class="group flex mt-8 mb-2 justify-center items-center gap-x-2">
+            <div class="flex justify-center items-center gap-x-4 border border-gray-300 dark:border-gray-300 bg-gray-100 dark:bg-gray-300 group-hover:bg-gray-200 px-6 py-3 rounded-full text-gray-800 group-hover:text-black cursor-pointer transition-all duration-300 ease-in-out">
+                <img class="w-6 h-6" src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/768px-Google_%22G%22_logo.svg.png" alt="">
+                Sign in with Google
+            </div>
+        </a>
     </x-authentication-card>
 </x-guest-layout>
