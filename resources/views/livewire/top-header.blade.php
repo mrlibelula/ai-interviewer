@@ -1,10 +1,12 @@
 <div x-data="{ isContextOpen: false }" class=" relative flex items-center gap-x-4 justify-between py-3 bg-white dark:bg-gray-900 border-b border-gray-200/70 dark:border-gray-700/50 w-full sm:-ml-[4rem]">
     <!-- hamburger -->
-    <div class="sm:hidden ml-[1rem]">
+    {{-- <div class="sm:hidden ml-[1rem]">
         <svg class="h-7 w-7 text-gray-900 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-200 smooth-300 cursor-pointer" class="text-gray-200" data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12"></path>
         </svg>
-    </div>
+    </div> --}}
+
+    <img wire:navigate href="{{ route('landing') }}" class="sm:hidden ml-[1rem] w-7 py-[0.195rem] opacity-75 hover:opacity-100 smooth-300 invert hover:invert-0 cursor-pointer animate-pulse" src="https://www.onlygfx.com/wp-content/uploads/2022/04/brain-icon-3.png" alt="">
     
     <!-- back button -->
     <button @click="window.history.back()" class="sm:ml-[5rem] p-1">
@@ -80,7 +82,7 @@
             Metrics
         </x-context-item>
 
-        <x-context-item>
+        {{-- <x-context-item>
             <x-slot name="icon"><x-icon-chat /></x-slot>
             Interviews
         </x-context-item>
@@ -93,7 +95,7 @@
         <x-context-item>
             <x-slot name="icon"><x-icon-list /></x-slot>
             Topics
-        </x-context-item>
+        </x-context-item> --}}
 
         {{-- <x-context-item>
             <x-slot name="icon"><x-icon-cog /></x-slot>

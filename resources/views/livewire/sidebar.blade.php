@@ -1,7 +1,7 @@
 <form method="POST" action="{{ route('logout') }}" x-data class="hidden sm:flex flex-col items-center h-full overflow-hidden">
     @csrf
     <div class="flex flex-col items-center w-[4rem] h-full overflow-hidden text-gray-700 dark:text-gray-500 bg-gray-100 dark:bg-gray-800/30">
-        <a wire:navigate class="flex items-center justify-center mt-3" href="/">
+        <a wire:navigate class="flex items-center justify-center mt-3" href="{{ route('landing') }}">
             {{-- <div class="material-icons my-auto text-3xl text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-rose-500 to-sky-400"> headset_mic </div> --}}
             {{-- <img class="w-9" src="https://cdn-icons-png.flaticon.com/512/4600/4600333.png" alt=""> --}}
             {{-- <img class="w-7" src="https://www.favicon.cc/logo3d/807099.png" alt=""> --}}
