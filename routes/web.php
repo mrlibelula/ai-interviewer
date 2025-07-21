@@ -18,12 +18,7 @@ use App\Livewire\MetricsTopic;
 use App\Livewire\Start;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
-
-
-
-
-
-
+use Illuminate\Support\Facades\Storage;
 
 /*
 |--------------------------------------------------------------------------
@@ -78,6 +73,6 @@ Route::middleware([
 });
 
 Route::get('/embed-editor', function () {
-    $response = Http::get('https://iframes.libe.dev/editor.html');
-    return response($response->body())->header('Content-Type', 'text/html');
+    $editor = Storage::get('code-editor/editor.html');
+    return response($editor)->header('Content-Type', 'text/html');
 })->name('embed-editor');

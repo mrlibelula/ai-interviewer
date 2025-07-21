@@ -1,3 +1,5 @@
 *
 !public/
 !.gitignore
+!code-editor/
+!code-editor/editor.html

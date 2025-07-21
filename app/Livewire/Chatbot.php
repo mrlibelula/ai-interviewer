@@ -157,8 +157,8 @@ class Chatbot extends Component
         $content = trim($content_parts[0]) ?? '';
         $solved = filter_var(strtolower(trim($content_parts[1] ?? 'false')), FILTER_VALIDATE_BOOLEAN);
 
-        info('Chatbot::userCode(string $code) at line 143');
-        info([$this->challenge->title . ' (' . $this->challenge->id . ')' => ['user' => auth()->user()->email, 'solved' => $solved]]);
+        // info('Chatbot::userCode(string $code) at line 143');
+        // info([$this->challenge->title . ' (' . $this->challenge->id . ')' => ['user' => auth()->user()->email, 'solved' => $solved]]);
         if ($solved) $this->dispatch('challengeSolved');
 
         array_push($this->messages, [
