@@ -1,62 +1,171 @@
-<div align="center" style="
-    display: flex; 
-    justify-content: center; 
-    align-items: center; 
-    column-gap: 1rem;
-    font-size: 1.5rem;
-    line-height: 2rem;
-">
-    <div>
-        <a href="https://libe.dev" target="_blank">
-            <img src="https://libe.dev/images/libesoft.io_inv.png" width="50" style="border-radius: 0.5rem;" alt="Libe.dev Logo">
-        </a>
-    </div>
-    <div>AI Interviewer</div>
+<div align="center">
+
+[![Libe.dev](https://libe.dev/images/libesoft.io_inv.png)](https://libe.dev)
+
+# AI Interviewer
+
+**AI-powered technical interviews for hiring teams — built before structured AI responses existed.**
+
+[Portfolio](https://libe.dev) · [Read the build story](https://libe.dev/blog/an-ai-interviewer-built-before-structured-output-existed) · [Technical docs](./TECH_STACK.md)
+
 </div>
 
+---
 
-## AI Interviewer Project
+## Who this is for
 
-Companies are burning cash by wasting time on bad hires. Whether its different time zones, distracted interviewees, connectivity issues or just having a qualified remote candidate in front of you, if you're hiring, the old way of doing things is quickly becoming obsolete. AI Interviewer is an all-in-one, AI powered video recruitment software, that allows candidates to answer specific questions on recorded videos, so the software can analyze **key success factors**, such as:
+**Recruiters**, **engineering managers**, and **founders** who need a faster, fairer way to screen technical talent — especially when interviews are remote, async-friendly, or hard to schedule across time zones.
 
-- Sociability.
-- Professionalism.
-- Energy level.
-- Communication skills.
+This is not a generic chatbot wrapper. It is a full interview workflow: curated coding challenges, timed sessions, an in-session AI assistant, automated solution review, and performance analytics your team can actually use in hiring decisions.
 
-This can help you in saving you time to focus only in top candidates.
+> **Historical note:** This app was built when LLMs returned free-form text only — no JSON schema, no structured outputs, no guaranteed parseable fields. Every AI integration in this repo was engineered around that constraint.
 
-By automating where appropriate and integrating AI for a more efficient approach to the many hoops that are a part of the hiring process, AI Interviewer is helping businesses ease into a new era of recruitment. 
+---
 
-In turn, the burden is also taken off of candidates, they need only create a job interview and share the link on their career page, social media, or jobs site, and the AI Interviewer platform takes care of the rest. Creating symbiosis between employees and employers, AI Interviewer will help turn a page on the “Great Resignation” and write a new chapter for hiring.
+## Built before structured AI responses
 
-## App Features
+When this project started, you could not ask an API for a typed, validated response. To generate challenges, evaluate code, and power the in-session chatbot, the app had to **coax structure out of prose**:
 
-- Conduct interviews
-- Provide feedback
-- Answer user questions
+- **Prompt blueprints** with wildcards (`??topics`, `??languages`, `??difficulty_level`) filled from live database data
+- **Custom separators** (`OPENAI_CODE_SEPARATOR`) to split JSON metadata from solution code in a single completion
+- **JSON repair logic** to fix truncated brackets and trailing commas when the model drifted
+- **Boolean parsing from text** — e.g. `solved: true|false` embedded in a natural-language reply after code analysis
+
+That is the engineering story behind the repo — and why it remains a useful reference for teams integrating LLMs into real products, not just demos.
+
+**[→ Full write-up: An AI Interviewer Built Before Structured Output Existed](https://libe.dev/blog/an-ai-interviewer-built-before-structured-output-existed)**
+
+---
+
+## The problem
+
+Technical hiring is expensive and slow:
+
+- Senior engineers spend hours on first-round screens that could be standardized
+- Live coding interviews are hard to schedule and easy to bias
+- Take-home assignments often go unreviewed or lack consistent rubrics
+- Remote candidates drop off when the process feels opaque or repetitive
+
+**AI Interviewer** compresses the early funnel: candidates work through real challenges while the platform captures attempts, timing, code, chat context, and AI-assisted feedback — so your team reviews signal, not noise.
+
+---
+
+## What it does
+
+| Capability | What hiring teams get |
+|------------|----------------------|
+| **Challenge library** | Topic- and difficulty-based coding challenges (PHP, JavaScript, Laravel, algorithms, and more) |
+| **Timed interview sessions** | Countdown timers, attempt tracking, and completion timestamps per candidate |
+| **AI interviewer chatbot** | Context-aware hints and Q&A during the challenge — without giving away the answer |
+| **Automated code review** | GPT evaluates submitted solutions and marks challenges solved when criteria are met |
+| **Gamification & leaderboards** | XP, speed bonuses, and rankings to keep candidates engaged |
+| **Metrics dashboards** | Performance by difficulty, topic, hints used, attempts, time, and comparisons |
+| **Admin challenge generation** | Recruiters/admins can generate new challenges from prompt templates via OpenAI |
+| **Role-based access** | `admin` / `recruiter` gates for content management; candidates see scrubbed solutions |
+
+---
+
+## How a candidate session works
+
+```
+Login → Pick difficulty & topic → Start challenge
+  → Code in editor + ask AI assistant
+  → Submit solution for AI review
+  → Earn XP / view progress → Next challenge or metrics
+```
+
+Behind the scenes, every session persists rich data on the `challenge_solver` pivot: attempts, elapsed time, solution code, chat transcript, bonus XP, and solve timestamp — the raw material for shortlists and debriefs.
+
+For architecture diagrams and flow charts, see [TECH_STACK.md](./TECH_STACK.md).
+
+---
+
+## Why this repo exists
+
+A production-minded experiment in **LLM-assisted hiring** — shipped at a time when structured AI responses did not exist. No schema enforcement, no native JSON mode you could trust in production. The team had to design reliability into prompts, parsers, and admin tooling instead.
+
+The blog post covers the full arc: what broke, what we patched, and what we would do differently now that structured outputs are available.
+
+Built by [Libe.dev](https://libe.dev) — portfolio and case studies for founders and hiring leaders evaluating technical partners.
+
+---
+
+## Stack (at a glance)
+
+| Layer | Technologies |
+|-------|----------------|
+| Backend | Laravel 10, PHP 8.1, Jetstream, Livewire 3, Sanctum |
+| AI | OpenAI GPT (chat completions), optional DALL·E banners |
+| Auth | Email/password, Google OAuth, Spatie roles (`admin`, `recruiter`) |
+| Frontend | Blade, Tailwind CSS, Vite |
+| Data | Eloquent, rich pivot tables, soft deletes |
+
+Full package list, data model, and session flows: **[TECH_STACK.md](./TECH_STACK.md)**  
+Feature inventory: **[PROJECT_FEATURES.md](./PROJECT_FEATURES.md)**
+
+---
+
+## For engineering leaders evaluating the codebase
+
+- **Pre-structured-output LLM patterns** — separator splitting, JSON repair (`Tool::fixJsonString`), and wildcard prompt injection in `App\Tool` — the glue that made unreliable completions usable
+- **Real-time UI without a heavy SPA** — Livewire 3 drives interview sessions, timers, and chat
+- **Prompt ops in the database** — `Enviro` table stores blueprints; wildcards inject topics, languages, and existing challenge titles at runtime
+- **Defense in depth** — solution code hidden from candidates; role middleware on admin routes; encoded route params
+- **Observable hiring signal** — metrics components aggregate solve rate, hint usage, time-to-complete, and leaderboard data
+
+---
+
+## Quick start (developers)
+
+```bash
+composer install
+npm install
+cp .env.example .env
+php artisan key:generate
+php artisan migrate --seed
+
+npm run dev          # Vite
+php artisan serve    # http://127.0.0.1:8000
+```
+
+**Required environment variables:**
+
+```env
+OPENAI_API_KEY=
+OPENAI_MODEL=gpt-4
+OPENAI_CODE_SEPARATOR=%%%CODE%%%
+DB_*=...
+GOOGLE_CLIENT_ID=...      # optional, for OAuth
+GOOGLE_CLIENT_SECRET=...
+```
+
+---
+
+## UI reference
+
+Design inspiration: [Intervio — AI Interview Dashboard (Dribbble)](https://dribbble.com/shots/22237746-Intervio-AI-Interview-Dashboard#)
+
+---
 
 ## Resources
 
-- [UI model](https://dribbble.com/shots/22237746-Intervio-AI-Interview-Dashboard#)
-- [OpenAI Client repo](https://github.com/openai-php/client)
+- [Libe.dev — Portfolio](https://libe.dev)
+- [Blog: How this app was built](https://libe.dev/blog/an-ai-interviewer-built-before-structured-output-existed)
+- [OpenAI PHP client](https://github.com/openai-php/client)
 - [OpenAI for Laravel](https://laravel-news.com/openai-for-laravel)
-- [Laracasts OpenAI](https://laracasts.com/series/fun-with-openai-and-laravel/episodes/1)
+- [Laracasts: Fun with OpenAI and Laravel](https://laracasts.com/series/fun-with-openai-and-laravel/episodes/1)
 
-## Bugs
+---
 
-- in "chatcmpl-90VIqIxcWaTSM81Yg7p2Pkt6wqYvm" (TALL Stack CRUD Application) the solution code (html) is being executed inside code frame (see screenshot 33)
-- Selected topic: "Git", doesn't comply requirements for completion 🙈.
+## License
 
-## Next task
+MIT
 
-- Add "read" and timestamps to chatbot messages.
-- Add the user name to the chatbot memory.
-- When importing new challenge, put an editor near so we can proof the code.
-- How can we determine if a text is code (any language) or just a string.
-- [ok?] When placing the wildcard for topic/s, include also the selected topic subtree.
-- Incase of response error, search for another challange.
-- Wildcards cutomization in prompt buildChallengePrompt().
-- JSON cutomization in prompt loadBlueprintDataAndStoreToDB(), buildJson(), and also affected buildJsonArrays() that depends on $this->build_json.
-- Code component word-wrap toggle feature.
-- Will consider implementing Sparkle with RAG (retrieval augmented generation) features for getting up-to-date challenges by augmenting LLM knowledge with additional data.
+---
+
+<div align="center">
+
+**Questions about adopting or extending this for your hiring pipeline?**  
+Visit [libe.dev](https://libe.dev) or open an issue.
+
+</div>
