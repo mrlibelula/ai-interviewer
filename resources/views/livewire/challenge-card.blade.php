@@ -1,4 +1,4 @@
-<div class="flex flex-col gap-y-4 overflow-hidden">
+<div class="flex flex-col gap-y-4 min-w-0">
 
     <!-- code highlight theme selection -->
     <template x-if="darkMode">

@@ -655,6 +655,15 @@ html.interview-ide .interview-workspace:not(.workspace-classic) .workspace-body,
     font-size: 1rem; /* match chatbot text-base */
     line-height: 1.5;
     padding: 1rem;
+    /* Keep scrollbar usable in Chromium/Firefox (thin track was nearly invisible) */
+    scrollbar-gutter: stable;
+    scrollbar-width: thin;
+}
+
+/* Challenge card must keep content height so this panel — not the card — scrolls */
+.workspace-ide .panel-problem-scroll > * {
+    flex-shrink: 0;
+    min-height: min-content;
 }
 
 /* Challenge card keeps large Reader typography; normalize in IDE only */

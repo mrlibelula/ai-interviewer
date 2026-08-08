@@ -146,7 +146,7 @@
             <div class="ide-panel-header" x-show="layout === 'ide'" x-cloak>
                 <span>Challenge</span>
             </div>
-            <div class="panel-problem-body panel-problem-scroll flex flex-col gap-y-4">
+            <div class="panel-problem-body panel-problem-scroll">
                 @livewire('challenge-card', [
                     'challenge' => $challenge,
                     'header' => false,
