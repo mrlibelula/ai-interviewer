@@ -92,15 +92,22 @@
         x-cloak
         class="ide-titlebar flex items-center justify-between gap-x-3 px-3 sm:px-4 py-1.5 border-b border-gray-200/70 dark:border-gray-700/60 bg-white/50 dark:bg-gray-900/40 backdrop-blur-sm"
     >
-        <div class="min-w-0 flex items-center gap-x-2 sm:gap-x-3 leading-none">
-            <div class="hidden sm:flex items-center gap-x-2 shrink-0">
+        <div class="min-w-0 flex items-center gap-x-2 sm:gap-x-3">
+            <div class="hidden sm:inline-flex items-center h-7 gap-x-2 shrink-0">
                 @foreach ($challenge->languages as $language)
                 <span class="text-emerald-500 dark:text-emerald-400 font-semibold leading-none">{{ $language->name }}</span>
                 @endforeach
             </div>
-            <span class="min-w-0 truncate font-semibold text-gray-900 dark:text-gray-100 leading-none">
+            <span class="inline-flex items-center h-7 min-w-0 truncate font-semibold text-gray-900 dark:text-gray-100 leading-none">
                 {{ $challenge->title ?? 'n/a' }}
             </span>
+            @if (count($challenge->tags))
+            <div class="ide-titlebar-tags hidden sm:inline-flex items-center h-7 gap-x-1.5 min-w-0 truncate">
+                @foreach ($challenge->tags as $tag)
+                <span class="text-xs font-medium italic text-gray-500 dark:text-gray-400/70 leading-none">#{{ ucfirst(Str::camel($tag->name)) }}</span>
+                @endforeach
+            </div>
+            @endif
         </div>
         <div class="flex items-center gap-x-2 sm:gap-x-3 shrink-0">
             <span class="inline-flex items-center h-7 text-[0.7rem] uppercase font-semibold tracking-wide text-gray-500 dark:text-gray-400 leading-none">
@@ -112,25 +119,53 @@
                 {{ $topic->name }}{{ !$loop->last ? ', ' : '' }}
                 @endforeach
             </x-pill>
-            <x-workspace-layout-toggle />
+            <x-workspace-layout-toggle compact class="lg:hidden" />
+            <x-workspace-layout-toggle class="hidden lg:inline-flex" />
             <div x-show="isChallengeSolved" x-cloak class="group w-7 h-7 flex items-center justify-center">
                 <x-icon-shield class="w-full h-full group-hover:animate-spin-y" />
             </div>
         </div>
     </div>
 
-    {{-- Mobile IDE tabs --}}
+    {{-- Mobile / tablet status strip (timer always visible while solving) --}}
     <div
         x-show="layout === 'ide'"
         x-cloak
-        class="ide-mobile-tabs md:hidden items-stretch border-b border-gray-200/70 dark:border-gray-700/60 bg-gray-100/70 dark:bg-gray-800/50"
+        class="ide-mobile-status lg:hidden flex items-center justify-between gap-x-3 px-3 py-1.5 border-b border-gray-200/70 dark:border-gray-700/60"
     >
-        <button type="button" @click="mobileTab = 'problem'" class="flex-1 py-2 text-xs font-semibold tracking-wide uppercase smooth-300"
-            :class="mobileTab === 'problem' ? 'text-emerald-600 dark:text-emerald-400 border-b-2 border-emerald-500' : 'text-gray-500 dark:text-gray-400'">Problem</button>
-        <button type="button" @click="mobileTab = 'code'" class="flex-1 py-2 text-xs font-semibold tracking-wide uppercase smooth-300"
-            :class="mobileTab === 'code' ? 'text-emerald-600 dark:text-emerald-400 border-b-2 border-emerald-500' : 'text-gray-500 dark:text-gray-400'">Code</button>
-        <button type="button" @click="mobileTab = 'chat'" class="flex-1 py-2 text-xs font-semibold tracking-wide uppercase smooth-300"
-            :class="mobileTab === 'chat' ? 'text-emerald-600 dark:text-emerald-400 border-b-2 border-emerald-500' : 'text-gray-500 dark:text-gray-400'">Chat</button>
+        <div class="flex items-center gap-x-2 min-w-0">
+            <span class="relative flex h-2 w-2 shrink-0">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60"></span>
+                <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            </span>
+            <span class="font-mono text-sm font-semibold tabular-nums text-emerald-600 dark:text-emerald-400 tracking-wider" x-text="timerDisplay">--:--:--</span>
+        </div>
+        <div class="flex items-center gap-x-3 text-xs font-semibold text-gray-500 dark:text-gray-400 shrink-0">
+            <span class="tabular-nums">
+                <span class="opacity-70">XP</span>
+                +<span x-text="stats.total_bonus">{{ $total_bonus }}</span>
+            </span>
+            <span class="tabular-nums">
+                <span x-text="stats.solved_challenges_count">{{ $solved_challenges_count }}</span>/<span x-text="stats.total_challenges_count">{{ $total_challenges_count }}</span>
+            </span>
+            <span class="tabular-nums opacity-80">
+                #<span x-text="stats.attempts">{{ $attempts }}</span>
+            </span>
+        </div>
+    </div>
+
+    {{-- Mobile / tablet IDE tabs --}}
+    <div
+        x-show="layout === 'ide'"
+        x-cloak
+        class="ide-mobile-tabs lg:hidden items-stretch border-b border-gray-200/70 dark:border-gray-700/60 bg-gray-100/70 dark:bg-gray-800/50"
+    >
+        <button type="button" @click="setMobileTab('problem')" class="ide-mobile-tab flex-1 py-2.5 text-xs font-semibold tracking-wide uppercase smooth-300"
+            :class="mobileTab === 'problem' ? 'is-active text-emerald-600 dark:text-emerald-400 border-b-2 border-emerald-500' : 'text-gray-500 dark:text-gray-400'">Problem</button>
+        <button type="button" @click="setMobileTab('code')" class="ide-mobile-tab flex-1 py-2.5 text-xs font-semibold tracking-wide uppercase smooth-300"
+            :class="mobileTab === 'code' ? 'is-active text-emerald-600 dark:text-emerald-400 border-b-2 border-emerald-500' : 'text-gray-500 dark:text-gray-400'">Code</button>
+        <button type="button" @click="setMobileTab('chat')" class="ide-mobile-tab flex-1 py-2.5 text-xs font-semibold tracking-wide uppercase smooth-300"
+            :class="mobileTab === 'chat' ? 'is-active text-emerald-600 dark:text-emerald-400 border-b-2 border-emerald-500' : 'text-gray-500 dark:text-gray-400'">Session</button>
     </div>
 
     <div
@@ -143,7 +178,7 @@
             class="panel-problem ide-panel"
             :class="mobileTab === 'problem' ? 'is-mobile-active' : ''"
         >
-            <div class="ide-panel-header" x-show="layout === 'ide'" x-cloak>
+            <div class="ide-panel-header hidden lg:flex" x-show="layout === 'ide'" x-cloak>
                 <span>Challenge</span>
             </div>
             <div class="panel-problem-body panel-problem-scroll">
@@ -163,7 +198,7 @@
             class="panel-editor-col ide-panel relative"
             :class="mobileTab === 'code' ? 'is-mobile-active' : ''"
         >
-            <div class="ide-panel-header" x-show="layout === 'ide'" x-cloak>
+            <div class="ide-panel-header hidden lg:flex" x-show="layout === 'ide'" x-cloak>
                 <span>Solution</span>
                 <span class="normal-case tracking-normal font-mono text-[10px] opacity-60">Monaco</span>
             </div>
@@ -202,7 +237,7 @@
             class="panel-meta ide-panel"
             :class="mobileTab === 'chat' ? 'is-mobile-active' : ''"
         >
-            <div class="ide-panel-header" x-show="layout === 'ide'" x-cloak>
+            <div class="ide-panel-header hidden lg:flex" x-show="layout === 'ide'" x-cloak>
                 <span>Session</span>
             </div>
             <div class="panel-meta-body panel-meta-scroll flex flex-col items-center gap-y-10">
@@ -211,21 +246,36 @@
                     <div class="session-timer-row col-span-2">
                         <x-countdown-timer time_limit="{{ $challenge->time_limit }}" class="w-full" />
                     </div>
-                    <x-pill-xp label="Bonus XP">+<span x-text="stats.total_user_bonus_xp">{{ $total_user_bonus_xp }}</span></x-pill-xp>
-                    <x-pill-xp label="Extra Bonus">+<span x-text="stats.total_user_extra_xp">{{ $total_user_extra_xp }}</span></x-pill-xp>
-                    <x-pill-xp label="Solved">
-                        <div class="flex items-center gap-x-2 justify-between w-full">
-                            <div x-show="isChallengeSolved" x-cloak class="w-5 h-5">
-                                <x-icon-star class="w-full h-full text-amber-300" fill="currentColor" />
+                    <button
+                        type="button"
+                        x-show="layout === 'ide'"
+                        x-cloak
+                        class="session-xp-toggle lg:hidden col-span-2 flex items-center justify-between px-2.5 py-2 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400"
+                        @click="sessionStatsOpen = !sessionStatsOpen"
+                    >
+                        <span>Session stats</span>
+                        <span class="normal-case tracking-normal opacity-80" x-text="sessionStatsOpen ? 'Hide' : 'Show'"></span>
+                    </button>
+                    <div
+                        class="session-xp-details contents"
+                        :class="sessionStatsOpen ? 'is-open' : ''"
+                    >
+                        <x-pill-xp label="Bonus XP">+<span x-text="stats.total_user_bonus_xp">{{ $total_user_bonus_xp }}</span></x-pill-xp>
+                        <x-pill-xp label="Extra Bonus">+<span x-text="stats.total_user_extra_xp">{{ $total_user_extra_xp }}</span></x-pill-xp>
+                        <x-pill-xp label="Solved">
+                            <div class="flex items-center gap-x-2 justify-between w-full">
+                                <div x-show="isChallengeSolved" x-cloak class="w-5 h-5">
+                                    <x-icon-star class="w-full h-full text-amber-300" fill="currentColor" />
+                                </div>
+                                <span>
+                                    <span x-text="stats.solved_challenges_count">{{ $solved_challenges_count }}</span>/<span x-text="stats.total_challenges_count">{{ $total_challenges_count }}</span>
+                                </span>
                             </div>
-                            <span>
-                                <span x-text="stats.solved_challenges_count">{{ $solved_challenges_count }}</span>/<span x-text="stats.total_challenges_count">{{ $total_challenges_count }}</span>
-                            </span>
-                        </div>
-                    </x-pill-xp>
-                    <x-pill-xp label="Attempts"><span x-text="stats.attempts">{{ $attempts }}</span></x-pill-xp>
-                    <x-pill-xp class=" col-span-2" label="Total XP gained in this challenge">+<span x-text="stats.total_bonus">{{ $total_bonus }}</span></x-pill-xp>
-                    <x-pill-xp class=" col-span-2 dark:bg-gray-900/50" label="Overall Total XP">+<span x-text="stats.total_user_bonus">{{ $total_user_bonus }}</span></x-pill-xp>
+                        </x-pill-xp>
+                        <x-pill-xp label="Attempts"><span x-text="stats.attempts">{{ $attempts }}</span></x-pill-xp>
+                        <x-pill-xp class=" col-span-2" label="Total XP gained in this challenge">+<span x-text="stats.total_bonus">{{ $total_bonus }}</span></x-pill-xp>
+                        <x-pill-xp class=" col-span-2 dark:bg-gray-900/50" label="Overall Total XP">+<span x-text="stats.total_user_bonus">{{ $total_user_bonus }}</span></x-pill-xp>
+                    </div>
                 </div>
 
                 <div class="chatbot-panel w-full flex flex-col min-h-0 flex-1">
@@ -253,7 +303,7 @@
         <div
             x-show="layout === 'ide'"
             x-cloak
-            class="ide-splitter ide-splitter-v hidden md:block"
+            class="ide-splitter ide-splitter-v hidden lg:block"
             :style="'left: var(--ide-left, 26%)'"
             @pointerdown="startDrag('left', $event)"
             @dblclick="resetPanels()"
@@ -262,7 +312,7 @@
         <div
             x-show="layout === 'ide'"
             x-cloak
-            class="ide-splitter ide-splitter-v hidden md:block"
+            class="ide-splitter ide-splitter-v hidden lg:block"
             :style="'right: var(--ide-right, 26%)'"
             @pointerdown="startDrag('right', $event)"
             @dblclick="resetPanels()"

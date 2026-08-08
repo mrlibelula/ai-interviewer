@@ -158,6 +158,8 @@ window.createInterviewWorkspace = function createInterviewWorkspace(initial = {}
     return {
         layout: window.InterviewWorkspace.get(),
         mobileTab: 'code',
+        sessionStatsOpen: false,
+        timerDisplay: '--:--:--',
         left: panels.left,
         right: panels.right,
         bottom: panels.bottom,
@@ -171,6 +173,7 @@ window.createInterviewWorkspace = function createInterviewWorkspace(initial = {}
         _onUp: null,
         _onExternal: null,
         _onSessionStats: null,
+        _onTimerTick: null,
 
         init() {
             this.layout = window.InterviewWorkspace.get();
@@ -213,6 +216,13 @@ window.createInterviewWorkspace = function createInterviewWorkspace(initial = {}
             };
             window.addEventListener('session-stats-updated', this._onSessionStats);
 
+            this._onTimerTick = (e) => {
+                const tick = e.detail || {};
+                if (tick.hours == null) return;
+                this.timerDisplay = `${tick.hours}:${tick.minutes}:${tick.seconds}`;
+            };
+            window.addEventListener('interview-timer-tick', this._onTimerTick);
+
             this.$watch('layout', (value) => {
                 this.ensureEditorVisible();
                 try {
@@ -224,6 +234,10 @@ window.createInterviewWorkspace = function createInterviewWorkspace(initial = {}
                 window.dispatchEvent(
                     new CustomEvent('workspace-layout-changed', { detail: { layout: value } }),
                 );
+                this.$nextTick(() => this.notifyResize());
+            });
+
+            this.$watch('mobileTab', () => {
                 this.$nextTick(() => this.notifyResize());
             });
 
@@ -241,12 +255,21 @@ window.createInterviewWorkspace = function createInterviewWorkspace(initial = {}
             if (this._onSessionStats) {
                 window.removeEventListener('session-stats-updated', this._onSessionStats);
             }
+            if (this._onTimerTick) {
+                window.removeEventListener('interview-timer-tick', this._onTimerTick);
+            }
             this.stopDrag();
             queueMicrotask(() => {
                 if (!document.querySelector('.interview-workspace')) {
                     document.documentElement.classList.remove('interview-ide');
                 }
             });
+        },
+
+        setMobileTab(tab) {
+            const next = tab === 'problem' || tab === 'chat' ? tab : 'code';
+            this.mobileTab = next;
+            this.$nextTick(() => this.notifyResize());
         },
 
         ensureEditorVisible() {

@@ -56,7 +56,7 @@
 
     @if ($tags)
         @if (count($challenge->tags))
-            <div class="flex items-center -mt-1 z-[35] gap-x-2 text-base text-wrap font-semibold text-gray-500/70 dark:text-gray-400/60 italic">
+            <div class="challenge-card-tags flex items-center -mt-1 z-[35] gap-x-2 text-base text-wrap font-semibold text-gray-500/70 dark:text-gray-400/60 italic">
             @foreach ($challenge->tags as $tag)
                 <div>#{{ ucfirst(Str::camel($tag->name)) }}</div>
             @endforeach

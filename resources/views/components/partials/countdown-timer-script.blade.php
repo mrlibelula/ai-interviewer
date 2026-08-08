@@ -13,6 +13,16 @@
                 startTimer() {
                     const totalSeconds = initialHours * 3600 + initialMinutes * 60 + initialSeconds
                     let remainingSeconds = totalSeconds
+                    const publishTick = () => {
+                        const tick = {
+                            hours: this.hours,
+                            minutes: this.minutes,
+                            seconds: this.seconds,
+                        }
+                        window.dispatchEvent(new CustomEvent('interview-timer-tick', { detail: tick }))
+                        Livewire.dispatch('currentElapsedTime', tick)
+                    }
+                    publishTick()
                     timerInterval = setInterval(() => {
                         remainingSeconds--
                         this.hours = Math.floor(remainingSeconds / 3600).toString().padStart(2, '0')
@@ -24,11 +34,7 @@
                             window.dispatchEvent(new Event('timeLimitEnded'))
                         }
 
-                        Livewire.dispatch('currentElapsedTime', {
-                            hours: this.hours,
-                            minutes: this.minutes,
-                            seconds: this.seconds,
-                        })
+                        publishTick()
                     }, 1000)
                 }
             }

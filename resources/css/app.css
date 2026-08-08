@@ -532,6 +532,12 @@ html.interview-ide .interview-workspace:not(.workspace-classic),
     border-bottom-color: rgba(55, 65, 81, 0.4) !important;
 }
 
+/* Tags live in the IDE titlebar — hide the duplicate row in the problem panel */
+html.interview-ide .interview-workspace:not(.workspace-classic) .challenge-card-tags,
+.workspace-ide .challenge-card-tags {
+    display: none !important;
+}
+
 html.interview-ide .interview-workspace:not(.workspace-classic) .workspace-body,
 .workspace-ide .workspace-body {
     position: relative;
@@ -655,9 +661,56 @@ html.interview-ide .interview-workspace:not(.workspace-classic) .workspace-body,
     font-size: 1rem; /* match chatbot text-base */
     line-height: 1.5;
     padding: 1rem;
-    /* Keep scrollbar usable in Chromium/Firefox (thin track was nearly invisible) */
     scrollbar-gutter: stable;
+}
+
+/*
+ * Monaco-matched scrollbars (light thumb #c1c1c0 / dark #313d47)
+ * — challenge panel + chatbot message list
+ */
+.workspace-ide .panel-problem-scroll,
+.chatbot-messages {
     scrollbar-width: thin;
+    scrollbar-color: #c1c1c0 transparent;
+}
+
+.dark .workspace-ide .panel-problem-scroll,
+.dark .chatbot-messages {
+    scrollbar-color: #313d47 transparent;
+}
+
+.workspace-ide .panel-problem-scroll::-webkit-scrollbar,
+.chatbot-messages::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+}
+
+.workspace-ide .panel-problem-scroll::-webkit-scrollbar-track,
+.chatbot-messages::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.workspace-ide .panel-problem-scroll::-webkit-scrollbar-thumb,
+.chatbot-messages::-webkit-scrollbar-thumb {
+    background-color: #c1c1c0;
+    border-radius: 6px;
+    border: 3px solid transparent;
+    background-clip: padding-box;
+}
+
+.workspace-ide .panel-problem-scroll::-webkit-scrollbar-thumb:hover,
+.chatbot-messages::-webkit-scrollbar-thumb:hover {
+    background-color: #a8a8a7;
+}
+
+.dark .workspace-ide .panel-problem-scroll::-webkit-scrollbar-thumb,
+.dark .chatbot-messages::-webkit-scrollbar-thumb {
+    background-color: #313d47;
+}
+
+.dark .workspace-ide .panel-problem-scroll::-webkit-scrollbar-thumb:hover,
+.dark .chatbot-messages::-webkit-scrollbar-thumb:hover {
+    background-color: #3d4d59;
 }
 
 /* Challenge card must keep content height so this panel — not the card — scrolls */
@@ -917,33 +970,72 @@ html.interview-ide .interview-workspace:not(.workspace-classic) .workspace-body,
     display: none;
 }
 
-.workspace-ide .ide-mobile-tabs {
+.workspace-ide .ide-mobile-tabs,
+.workspace-ide .ide-mobile-status {
     display: none;
 }
 
-/* Stack to tabs only on small phones/tablets — keep 3 columns when DevTools is open on desktop */
-@media (max-width: 767px) {
+html.interview-ide,
+html.interview-ide body {
+    overflow: hidden;
+}
+
+/* Phones + tablets (portrait/landscape under lg): single-panel tabs. Desktop ≥1024 keeps 3 columns. */
+@media (max-width: 1023px) {
+    html.interview-ide .interview-workspace:not(.workspace-classic),
+    .workspace-ide {
+        height: calc(100vh - 3.8rem);
+    }
+
+    html.interview-ide .interview-workspace:not(.workspace-classic) .workspace-body,
     .workspace-ide .workspace-body {
         display: flex;
         flex-direction: column;
         grid-template-columns: none;
+        padding: 0;
+        gap: 0;
     }
 
     .workspace-ide .ide-splitter {
         display: none !important;
     }
 
+    /* Tabs replace panel chrome on small screens */
+    .workspace-ide .ide-panel-header {
+        display: none !important;
+    }
+
+    .workspace-ide .ide-mobile-status {
+        display: flex;
+        flex-shrink: 0;
+        background: rgba(255, 255, 255, 0.4);
+        backdrop-filter: blur(10px);
+    }
+
+    .dark .workspace-ide .ide-mobile-status {
+        background: rgba(17, 24, 39, 0.4);
+    }
+
     .workspace-ide .ide-mobile-tabs {
         display: flex;
+        flex-shrink: 0;
+    }
+
+    .workspace-ide .ide-titlebar {
+        padding-top: 0.35rem;
+        padding-bottom: 0.35rem;
+        font-size: 0.95rem;
     }
 
     .workspace-ide .panel-problem,
     .workspace-ide .panel-editor-col,
     .workspace-ide .panel-meta {
         display: none;
-        flex: 1;
+        flex: 1 1 0%;
         width: 100%;
+        min-height: 0;
         border: none;
+        border-radius: 0;
         grid-column: auto;
         grid-row: auto;
     }
@@ -954,7 +1046,114 @@ html.interview-ide .interview-workspace:not(.workspace-classic) .workspace-body,
         display: flex;
     }
 
+    .workspace-ide .panel-problem.ide-panel,
+    .dark .workspace-ide .panel-problem.ide-panel,
+    .workspace-ide .panel-editor-col,
+    .workspace-ide .panel-meta.ide-panel {
+        background: transparent;
+        border: none;
+        box-shadow: none;
+        backdrop-filter: none;
+    }
+
+    .workspace-ide .panel-problem-scroll {
+        padding: 0.85rem 1rem 1.25rem;
+    }
+
+    .workspace-ide .panel-meta-scroll {
+        padding: 0.5rem 0.75rem 0.75rem;
+        gap: 0.5rem;
+        overflow: hidden;
+    }
+
+    /* Timer lives in the sticky status strip on small screens */
+    .workspace-ide .session-timer-row {
+        display: none !important;
+    }
+
+    .workspace-ide .session-xp-toggle {
+        display: flex;
+    }
+
+    .workspace-ide .session-xp-details:not(.is-open) > * {
+        display: none !important;
+    }
+
+    .workspace-ide .session-xp {
+        gap: 0.25rem;
+    }
+
+    .workspace-ide .code-editor-toolbar {
+        padding-left: 0.35rem;
+        padding-right: 0.35rem;
+    }
+
+    .workspace-ide .editor-nav {
+        gap: 0.35rem;
+    }
+
+    .workspace-ide .editor-nav-actions {
+        flex: 1 1 auto;
+        justify-content: flex-end;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+
+    .workspace-ide .editor-nav-actions::-webkit-scrollbar {
+        display: none;
+    }
+
+    .workspace-ide .editor-nav-btn {
+        font-size: 0.8rem;
+        padding-left: 0.55rem;
+        padding-right: 0.55rem;
+        padding-top: 0.35rem;
+        padding-bottom: 0.35rem;
+        min-height: 2rem;
+    }
+
     .workspace-ide .code-editor-terminal {
-        height: 28%;
+        flex: 0 0 30%;
+        height: 30%;
+        min-height: 5.5rem;
+        max-height: 40%;
+    }
+
+    .workspace-ide .code-editor-iframe {
+        min-height: 0;
+    }
+
+    .workspace-ide .chatbot-panel {
+        min-height: 0;
+    }
+
+    .workspace-ide .chatbot-messages {
+        padding-left: 0.5rem !important;
+        padding-right: 0.5rem !important;
+    }
+
+    /* Classic reader also gets tighter mobile spacing */
+    .workspace-classic .workspace-body-classic {
+        padding: 1rem 0.75rem 1.5rem;
+        gap: 1.5rem;
+    }
+
+    .workspace-classic .code-editor-iframe {
+        height: 45vh;
+        min-height: 16rem;
+    }
+
+    .workspace-classic .editor-nav-actions {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+}
+
+@supports (height: 100dvh) {
+    @media (max-width: 1023px) {
+        html.interview-ide .interview-workspace:not(.workspace-classic),
+        .workspace-ide {
+            height: calc(100dvh - 3.8rem);
+        }
     }
 }
