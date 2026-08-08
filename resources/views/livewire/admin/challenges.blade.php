@@ -23,10 +23,6 @@
                 OpenAI API connection test
             </a>
             <x-dot class="breadcrumb-dot" />
-            <a href="#jump-auto" class="link">
-                Automated LLM challenge/s completion
-            </a>
-            <x-dot class="breadcrumb-dot" />
             <a href="#jump-manually" class="link">
                 Manually get LLM challenge/s completion
             </a>
@@ -117,19 +113,30 @@
 
         <x-descr-list>
             <div class="flex items-center gap-x-10">
-                <x-secondary-button>Test OPENAI connection</x-secondary-button>
+                <x-secondary-button
+                    wire:click="testOpenAiConnection"
+                    wire:loading.attr="disabled"
+                    wire:target="testOpenAiConnection"
+                >
+                    <span wire:loading.remove wire:target="testOpenAiConnection">Test OPENAI connection</span>
+                    <span wire:loading wire:target="testOpenAiConnection" class="inline-flex items-center gap-x-2">
+                        <x-spinner class="w-5 h-5" />
+                        Testing…
+                    </span>
+                </x-secondary-button>
                 <div>
-                    Connection: <x-bold class=" text-green-600 dark:text-green-400">Established</x-bold>
+                    Connection:
+                    @if ($openaiConnectionStatus === 'established')
+                        <x-bold class=" text-green-600 dark:text-green-400">Established</x-bold>
+                    @elseif ($openaiConnectionStatus === 'failed')
+                        <x-bold class=" text-red-600 dark:text-red-400">Failed</x-bold>
+                        @if ($openaiConnectionError)
+                            <span class="ml-2 text-sm text-red-600 dark:text-red-400">{{ $openaiConnectionError }}</span>
+                        @endif
+                    @else
+                        <x-bold class=" text-gray-500 dark:text-gray-400">Not tested</x-bold>
+                    @endif
                 </div>
-            </div>
-        </x-descr-list>
-
-        <x-h5 id="jump-auto">Automated LLM challenge/s completion</x-h5>
-
-        <x-descr-list>
-            <div class="flex items-center gap-x-4">
-                <x-secondary-button>Setup</x-secondary-button>
-                <x-secondary-button>Schedule</x-secondary-button>
             </div>
         </x-descr-list>
 

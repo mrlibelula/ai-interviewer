@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin;
 
 use App\Tool;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Isolate;
 use Livewire\Component;
@@ -19,6 +20,9 @@ class Challenges extends Component
     public array $sessionNewChallengeIds = [];
     public int $quantity = 1;
     public int $remaining = 0;
+    /** untested|established|failed */
+    public string $openaiConnectionStatus = 'untested';
+    public ?string $openaiConnectionError = null;
     public array $requirements = [
         'llm_prompt' => false, 
         'selected_topic' => false, 
@@ -26,6 +30,46 @@ class Challenges extends Component
         'selected_difficulty' => false, 
         'wildcards' => false, 
     ];
+
+    /**
+     * Live-check OpenAI by listing models (same probe used elsewhere in the app).
+     */
+    public function testOpenAiConnection(): void
+    {
+        $this->openaiConnectionError = null;
+
+        try {
+            $models = Tool::getOpenAIModelsCompletion();
+            $ok = is_array($models) && count($models) > 0;
+
+            $this->openaiConnectionStatus = $ok ? 'established' : 'failed';
+            Session::put('openai_status', $ok);
+
+            if (!$ok) {
+                $this->openaiConnectionError = 'OpenAI returned no models.';
+                Tool::toastr($this, [
+                    'title' => 'OpenAI connection failed',
+                    'message' => $this->openaiConnectionError,
+                ], 'error');
+                return;
+            }
+
+            Tool::toastr($this, [
+                'title' => 'OpenAI connection',
+                'message' => 'Connection established',
+            ], 'success');
+        } catch (Throwable $e) {
+            info(['testOpenAiConnection' => $e->getMessage()]);
+            $this->openaiConnectionStatus = 'failed';
+            $this->openaiConnectionError = $e->getMessage();
+            Session::put('openai_status', false);
+
+            Tool::toastr($this, [
+                'title' => 'OpenAI connection failed',
+                'message' => $e->getMessage(),
+            ], 'error');
+        }
+    }
 
     /**
      * Starts a batch: one Livewire request per challenge (avoids nginx 504s).
@@ -195,7 +239,8 @@ class Challenges extends Component
 
     public function mount()
     {
-        $this->current_route_name = request()->route()->getName();    // tackles livewire route name problem (livewire.update)
+        // tackles livewire route name problem (livewire.update)
+        $this->current_route_name = request()->route()?->getName() ?? 'admin-challenges';
         $this->setEnviro();
         $this->checkRequirements();
     }
