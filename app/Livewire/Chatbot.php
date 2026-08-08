@@ -170,19 +170,9 @@ class Chatbot extends Component
         $completion_role = $completion->choices[0]->message->role;
         $completion_content = $completion->choices[0]->message->content;
 
-        $parsed = json_decode($completion_content, true);
-        $content = '';
-        $solved = false;
-
-        if (is_array($parsed) && array_key_exists('feedback', $parsed)) {
-            $content = trim((string) $parsed['feedback']);
-            $solved = filter_var($parsed['solved'] ?? false, FILTER_VALIDATE_BOOLEAN);
-        } else {
-            // Legacy separator fallback
-            $content_parts = explode('%%%%%', $completion_content);
-            $content = trim($content_parts[0] ?? '');
-            $solved = filter_var(strtolower(trim($content_parts[1] ?? 'false')), FILTER_VALIDATE_BOOLEAN);
-        }
+        $analysis = Tool::parseCodeAnalysisResponse((string) $completion_content);
+        $content = $analysis['feedback'];
+        $solved = $analysis['solved'];
 
         if ($solved) {
             $this->dispatch('challengeSolved');
