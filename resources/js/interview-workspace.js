@@ -165,6 +165,8 @@ window.createInterviewWorkspace = function createInterviewWorkspace(initial = {}
         hasNextChallenge: !!initial.hasNextChallenge,
         stats,
         dragging: null,
+        _pointerId: null,
+        _captureEl: null,
         _onMove: null,
         _onUp: null,
         _onExternal: null,
@@ -288,12 +290,46 @@ window.createInterviewWorkspace = function createInterviewWorkspace(initial = {}
 
         startDrag(axis, event) {
             if (this.layout !== 'ide') return;
+            // Already dragging — ignore secondary pointers / double starts
+            if (this.dragging) return;
             event.preventDefault();
+            event.stopPropagation();
+
             this.dragging = axis;
-            this._onMove = (e) => this.onDrag(e);
-            this._onUp = () => this.stopDrag();
-            window.addEventListener('pointermove', this._onMove);
-            window.addEventListener('pointerup', this._onUp);
+            this._pointerId = event.pointerId;
+            this._captureEl = event.currentTarget || event.target;
+
+            // Keep events on the splitter even when the cursor crosses iframes (Monaco / output).
+            try {
+                this._captureEl?.setPointerCapture?.(event.pointerId);
+            } catch {
+                /* ignore — older browsers / already captured */
+            }
+
+            this._onMove = (e) => {
+                if (this._pointerId != null && e.pointerId !== this._pointerId) return;
+                this.onDrag(e);
+            };
+            this._onUp = (e) => {
+                // blur has no pointerId — still end the drag
+                if (
+                    e &&
+                    e.type !== 'blur' &&
+                    this._pointerId != null &&
+                    e.pointerId !== this._pointerId
+                ) {
+                    return;
+                }
+                this.stopDrag();
+            };
+
+            // Capture phase on document so release is seen even if something stops bubbling.
+            document.addEventListener('pointermove', this._onMove, true);
+            document.addEventListener('pointerup', this._onUp, true);
+            document.addEventListener('pointercancel', this._onUp, true);
+            document.addEventListener('lostpointercapture', this._onUp, true);
+            window.addEventListener('blur', this._onUp);
+
             document.body.classList.add('ide-dragging');
             if (axis === 'bottom') document.body.classList.add('ide-dragging-row');
         },
@@ -316,11 +352,40 @@ window.createInterviewWorkspace = function createInterviewWorkspace(initial = {}
         },
 
         stopDrag() {
+            if (!this.dragging && !this._onMove && !this._onUp) return;
+
+            const onMove = this._onMove;
+            const onUp = this._onUp;
+            const captureEl = this._captureEl;
+            const pointerId = this._pointerId;
+
+            // Clear first so nested lostpointercapture / blur can't re-enter cleanup.
             this.dragging = null;
-            if (this._onMove) window.removeEventListener('pointermove', this._onMove);
-            if (this._onUp) window.removeEventListener('pointerup', this._onUp);
+            this._pointerId = null;
+            this._captureEl = null;
             this._onMove = null;
             this._onUp = null;
+
+            if (onMove) {
+                document.removeEventListener('pointermove', onMove, true);
+            }
+            if (onUp) {
+                document.removeEventListener('pointerup', onUp, true);
+                document.removeEventListener('pointercancel', onUp, true);
+                document.removeEventListener('lostpointercapture', onUp, true);
+                window.removeEventListener('blur', onUp);
+            }
+
+            if (captureEl && pointerId != null && captureEl.releasePointerCapture) {
+                try {
+                    if (captureEl.hasPointerCapture?.(pointerId)) {
+                        captureEl.releasePointerCapture(pointerId);
+                    }
+                } catch {
+                    /* ignore */
+                }
+            }
+
             document.body.classList.remove('ide-dragging', 'ide-dragging-row');
             this.notifyResize();
         },

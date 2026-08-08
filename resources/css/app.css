@@ -394,6 +394,10 @@ body.ide-dragging {
 body.ide-dragging.ide-dragging-row {
     cursor: row-resize !important;
 }
+/* Iframes (Monaco / output) steal pointerup mid-drag — disable hit-testing while resizing */
+body.ide-dragging iframe {
+    pointer-events: none !important;
+}
 
 html.interview-ide footer {
     display: none !important;
