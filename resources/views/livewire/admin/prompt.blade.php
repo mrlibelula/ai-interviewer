@@ -35,7 +35,7 @@
                 <div>
                     Full blueprint prompt
                 </div>
-                <textarea disabled class="form-textarea w-full h-[7rem] font-mono">{{ env('OPENAI_PROMPT_BASE_TEXT') ?? 'n/a' }}</textarea>
+                <textarea disabled class="form-textarea w-full h-[7rem] font-mono">{{ \App\Tool::promptTemplate('challenge_generation') ?: 'n/a' }}</textarea>
             </div>
             <div class="flex items-center gap-x-4">
                 <div wire:click="loadBlueprintDataAndStoreToDB(true)" class="flex flex-col items-start">

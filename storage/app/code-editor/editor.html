@@ -13,7 +13,8 @@
         }
     </script>
 
-    <script async="async" type="text/javascript" src="https://cdn.jsdelivr.net/npm/monaco-editor/min/vs/editor/editor.main.js"></script><link rel="stylesheet" type="text/css" data-name="vs/editor/editor.main" href="https://cdn.jsdelivr.net/npm/monaco-editor/min/vs/editor/editor.main.css"><script async="async" type="text/javascript" src="https://cdn.jsdelivr.net/npm/monaco-editor/min/vs/editor/editor.main.nls.js"></script>
+    <!-- Single Monaco load path (AMD). Do not also preload editor.main.js — that raced and caused intermittent blank editors. -->
+    <link rel="stylesheet" type="text/css" data-name="vs/editor/editor.main" href="https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/min/vs/editor/editor.main.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/alpinejs/2.3.0/alpine.js" integrity="sha512-nIwdJlD5/vHj23CbO2iHCXtsqzdTTx3e3uAmpTm4x2Y8xCIFyWu4cSIV8GaGe2UNVq86/1h9EgUZy7tn243qdA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
     <style>
@@ -105,9 +106,13 @@
     <!-- *************************************************************************** -->
 
 
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/monaco-editor/min/vs/loader.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/min/vs/loader.js"></script>
 
     <div class="wrapper">
+        <div id="editorLoadError" style="display:none;padding:1rem;color:#fca5a5;font-family:sans-serif;text-align:center;">
+            Editor failed to load.
+            <button type="button" id="editorRetryBtn" style="margin-left:0.5rem;padding:0.4rem 0.8rem;cursor:pointer;">Retry</button>
+        </div>
         <div class="editor">
             <div class="editor__code">
                 <div id="editorCode"></div>
@@ -181,9 +186,15 @@ const sayHello = (name) => {
 console.log(sayHello('Bob'));
 `
 
-        // Monaco loader
+        // Monaco loader (pinned version; single AMD path)
+        const MONACO_VS = "https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/min/vs"
         require.config({
-            paths: { vs: "https://cdn.jsdelivr.net/npm/monaco-editor/min/vs" } })
+            paths: { vs: MONACO_VS }
+        })
+
+        document.getElementById('editorRetryBtn')?.addEventListener('click', () => {
+            window.location.reload()
+        })
             
         if (encSolverCode.length) {
             decodeString(encSolverCode)
@@ -978,7 +989,8 @@ console.log(sayHello('Bob'));
                     sendUserCodeForExecution(editor.getValue(), true)
                 }
             })
-            
+
+            return editor
         }
 
         function sendUserCodeForExecution(code, runCode = true) {
@@ -999,13 +1011,33 @@ console.log(sayHello('Bob'));
                 getWorkerUrl: function (workerId, label) {
                     return `data:text/javascript;charset=utf-8,${encodeURIComponent(`
                         self.MonacoEnvironment = {
-                            baseUrl: 'https://cdn.jsdelivr.net/npm/monaco-editor/min/'
+                            baseUrl: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/min/'
                         };
-                        importScripts('https://cdn.jsdelivr.net/npm/monaco-editor/min/vs/base/worker/workerMain.js');`, { type: 'text/javascript' })}`;} };
-            
+                        importScripts('https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/min/vs/base/worker/workerMain.js');`, { type: 'text/javascript' })}`;} };
+
             // Monaco init
             require(["vs/editor/editor.main"], function () {
-                createEditor(editorCode)
+                try {
+                    const editor = createEditor(editorCode)
+                    // Re-layout when parent accordion/iframe becomes visible (Monaco blank if created at 0 size)
+                    if (editor && typeof ResizeObserver !== 'undefined') {
+                        const ro = new ResizeObserver(() => {
+                            try { editor.layout() } catch (e) {}
+                        })
+                        ro.observe(editorCode)
+                    }
+                    setTimeout(() => {
+                        try { editor && editor.layout() } catch (e) {}
+                    }, 100)
+                } catch (err) {
+                    console.error('Monaco create failed', err)
+                    const errEl = document.getElementById('editorLoadError')
+                    if (errEl) errEl.style.display = 'block'
+                }
+            }, function (err) {
+                console.error('Monaco AMD load failed', err)
+                const errEl = document.getElementById('editorLoadError')
+                if (errEl) errEl.style.display = 'block'
             })
         }
 

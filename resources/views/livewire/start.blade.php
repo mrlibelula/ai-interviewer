@@ -70,11 +70,11 @@
                         'title' => false,
                         'footer' => false, 
                         'creators' => false, 
-                    ], key(uniqid()))
+                    ], key('challenge-card-'.$challenge->id))
                     
                     <x-h-accordion x-data="{ isOpen: true }" title="Try a solution">
-                        <div class="mt-2">
-                            <!-- code editor-->
+                        <div class="mt-2" wire:ignore>
+                            <!-- code editor: wire:ignore prevents Livewire morph from tearing down Monaco iframe -->
                             <x-code-editor solverCode="{{ $challenge_attributes['solution_code'] ?? '' }}" />
                         </div>
                     </x-h-accordion>

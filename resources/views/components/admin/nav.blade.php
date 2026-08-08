@@ -22,8 +22,8 @@
             <x-admin.dashboard-item :active="$currentRoute === 'admin-challenge'" href="/admin/challenge">
                 Challenge settings
             </x-admin.dashboard-item>
-            <x-admin.dashboard-item :active="$currentRoute === 'admin-topics'">
-                Manage Topics
+            <x-admin.dashboard-item :active="$currentRoute === 'admin-ai-settings'" href="/admin/ai-settings">
+                AI admin settings
             </x-admin.dashboard-item>
         </div>
     </x-container>

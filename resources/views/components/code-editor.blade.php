@@ -95,8 +95,6 @@
         }
 
         function runJsCode(code) {
-            //window.parent.postMessage({ code: code }, '*')
-
             var outputFrame = document.getElementById('output-frame')
             outputFrame.contentDocument.open()
             outputFrame.contentDocument.write(`<!DOCTYPE html>
@@ -115,20 +113,30 @@
 </html>`)
             outputFrame.contentDocument.close()
 
+            var frameWindow = outputFrame.contentWindow
             var outputDiv = outputFrame.contentDocument.getElementById('output')
-            
-             // Intercept 'console.log' outputs and redirect them to the output div
-            var consoleLog = console.log
-            console.log = function(message) {
-                outputDiv.textContent += message + '\n'
-                consoleLog.apply(console, arguments)
+
+            function formatLogArg(arg) {
+                if (typeof arg === 'string') return arg
+                if (typeof arg === 'undefined') return 'undefined'
+                if (typeof arg === 'object' && arg !== null) {
+                    try { return JSON.stringify(arg) } catch (e) { return String(arg) }
+                }
+                return String(arg)
+            }
+
+            // Capture console output inside the sandbox iframe only (do not print eval return values —
+            // appending those is what produced a trailing "undefined", especially when trailing
+            // // comments swallowed an injected "return ''").
+            frameWindow.console.log = function () {
+                var parts = Array.prototype.map.call(arguments, formatLogArg)
+                outputDiv.textContent += parts.join(' ') + '\n'
             }
 
             try {
-                var result = new Function(code + '; return "";')()  // avoids returning 'undefined' at the end of code execution
-                outputDiv.innerHTML += result
+                // Run in the iframe scope; ignore the return value so "undefined" is never echoed.
+                ;(new frameWindow.Function(code))()
             } catch (error) {
-                // Display error message if code execution fails
                 outputDiv.textContent = "Error: " + error.message
             }
         }

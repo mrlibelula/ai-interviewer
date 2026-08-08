@@ -104,7 +104,7 @@ class Metrics extends Component
                 'feedback_type' => $feedback_type_str,
             ]);
     
-            $blueprint_problem_specific = env('OPENAI_FEEDBACK_BASE_TEXT');
+            $blueprint_problem_specific = Tool::promptTemplate('feedback');
             $blueprint_problem_specific = Tool::replaceWildcards($blueprint_problem_specific, $wildcards);
             
             // verify if its not the same prompt with .env blueprint to determine connection to openai api

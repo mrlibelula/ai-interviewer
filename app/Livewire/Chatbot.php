@@ -23,11 +23,26 @@ class Chatbot extends Component
     public string $user_code;
 
     protected $listeners = [
-        'appended-chat-message' => 'appendedChatMessage', 
-        'userCode', 
-        'saveUserCode', 
+        'appended-chat-message' => 'appendedChatMessage',
+        'userCode',
+        'saveUserCode',
         'complexityCode'
     ];
+
+    /**
+     * Normalize pivot openai_chat_settings to array (cast or legacy JSON string).
+     */
+    protected function chatSettingsArray(mixed $settings): array
+    {
+        if (is_array($settings)) {
+            return $settings;
+        }
+        if (is_string($settings) && $settings !== '') {
+            return json_decode($settings, true) ?? ['messages' => []];
+        }
+
+        return ['messages' => []];
+    }
 
     /**
      * For 'user code' persisting purposes
@@ -69,7 +84,7 @@ class Chatbot extends Component
             'content' => 'auto-generated: "analyze the time/space complexity (big-O notation) of my code"',
         ];
 
-        $blueprint = env('OPENAI_COMPLEXITY_ANALYSIS_USER_CODE_PROMPT_BASE_TEXT');
+        $blueprint = Tool::promptTemplate('complexity_analysis');
         $prompt = Tool::replaceWildcards($blueprint, collect([
             'user_code' => $code,
             'challenge' => $this->challenge->title . ' (' . $this->challenge->description . ')',
@@ -125,7 +140,7 @@ class Chatbot extends Component
             'content' => 'auto-generated: "analyze my solution code"',
         ];
 
-        $blueprint = env('OPENAI_ANALYZE_USER_CODE_PROMPT_BASE_TEXT');
+        $blueprint = Tool::promptTemplate('analyze_user_code');
         $prompt = Tool::replaceWildcards($blueprint, collect([
             'user_code' => $code,
             'challenge' => $this->challenge->title . ' (' . $this->challenge->description . ')',
@@ -140,7 +155,10 @@ class Chatbot extends Component
         $this->openai_chat_settings['messages'] = $this->messages;
         auth()->user()->updateChallenge($this->challenge, ['openai_chat_settings' => $this->openai_chat_settings]);
 
-        $completion = Tool::getLLMCompletion($this->messages);
+        $completion = Tool::getLLMCompletion(
+            $this->messages,
+            Tool::jsonSchemaResponseFormat('code_analysis', Tool::codeAnalysisOutputSchema())
+        );
 
         if (!$completion instanceof \OpenAI\Responses\Chat\CreateResponse) {
             Tool::toastr($this, [
@@ -152,14 +170,13 @@ class Chatbot extends Component
         $completion_role = $completion->choices[0]->message->role;
         $completion_content = $completion->choices[0]->message->content;
 
-        $content_parts = explode('%%%%%', $completion_content);
-        
-        $content = trim($content_parts[0]) ?? '';
-        $solved = filter_var(strtolower(trim($content_parts[1] ?? 'false')), FILTER_VALIDATE_BOOLEAN);
+        $analysis = Tool::parseCodeAnalysisResponse((string) $completion_content);
+        $content = $analysis['feedback'];
+        $solved = $analysis['solved'];
 
-        // info('Chatbot::userCode(string $code) at line 143');
-        // info([$this->challenge->title . ' (' . $this->challenge->id . ')' => ['user' => auth()->user()->email, 'solved' => $solved]]);
-        if ($solved) $this->dispatch('challengeSolved');
+        if ($solved) {
+            $this->dispatch('challengeSolved');
+        }
 
         array_push($this->messages, [
             'role' => $completion_role,
@@ -176,8 +193,9 @@ class Chatbot extends Component
 
     public function appendedChatMessage(array $openai_chat_settings)
     {
-        $this->messages = $openai_chat_settings['messages'];
-        auth()->user()->updateChallenge($this->challenge, ['openai_chat_settings' => $openai_chat_settings]);
+        $this->openai_chat_settings = $this->chatSettingsArray($openai_chat_settings);
+        $this->messages = $this->openai_chat_settings['messages'] ?? [];
+        auth()->user()->updateChallenge($this->challenge, ['openai_chat_settings' => $this->openai_chat_settings]);
 
         $challenge = Challenge::select('id', 'title', 'description', 'difficulty_id')
             ->with(['topics:name', 'difficulty', 'languages:name'])
@@ -186,13 +204,13 @@ class Chatbot extends Component
 
         // get OpenAI completion
         if (count($this->messages) === 1) {
-            $blueprint = env('OPENAI_CHALLENGE_PROMPT_BASE_TEXT');
+            $blueprint = Tool::promptTemplate('challenge_system');
 
             $prompt = Tool::replaceWildcards($blueprint, collect([
                 'challenge' => '(' . $challenge->title . '), ' . $challenge->description,
-                'topic' => $challenge->topics->first()->name,
-                'difficulty_level' => $challenge->difficulty->name,
-                'language' => $challenge->languages->first()->name,
+                'topic' => $challenge->topics->first()->name ?? 'general',
+                'difficulty_level' => $challenge->difficulty->name ?? 'medium',
+                'language' => $challenge->languages->first()->name ?? 'javascript',
                 'user' => auth()->user()->name,
             ]));
 
@@ -205,10 +223,17 @@ class Chatbot extends Component
         // Instructions to OpenAI API response. Use the phrase "Auto-generated message" before the main text
         $this->messages[] = [
             'role' => 'system',
-            'content' => env('OPENAI_CHATBOT_RECOMMENDATIONS_TO_INTERVIEWER'),
+            'content' => Tool::promptTemplate('recommendations'),
         ];
 
         $completion = Tool::getLLMCompletion($this->messages);
+
+        if (!$completion instanceof \OpenAI\Responses\Chat\CreateResponse) {
+            Tool::toastr($this, [
+                'message' => is_string($completion) ? $completion : 'Chat completion failed',
+            ], 'error');
+            return;
+        }
         
         $completion_role = $completion->choices[0]->message->role;
         $completion_content = $completion->choices[0]->message->content;
@@ -227,6 +252,7 @@ class Chatbot extends Component
 
     public function mount()
     {
+        $this->openai_chat_settings = $this->chatSettingsArray($this->openai_chat_settings);
         $this->messages = $this->openai_chat_settings['messages'] ?? [];
     }
 
@@ -239,7 +265,7 @@ class Chatbot extends Component
     {
         $this->last_chatbot_message = count($this->messages) 
             ? end($this->messages)['content'] ?? ''
-            : 'Hi ' . auth()->user()->name . ', ' . env('OPENAI_CHATBOT_WELCOME_MESSAGE');
+            : 'Hi ' . auth()->user()->name . ', ' . Tool::promptTemplate('welcome');
     }
 
     public function render()

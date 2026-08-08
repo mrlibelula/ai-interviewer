@@ -26,9 +26,9 @@ class Challenge extends Component
     public $tags;
     public $statuses;
     public $visibilities;
-    public int $hours;
-    public int $minutes;
-    public int $seconds;
+    public int $hours = 0;
+    public int $minutes = 0;
+    public int $seconds = 0;
     public int $status_id;
     public int $difficulty_id;
     public int $visibility_id;
@@ -83,13 +83,20 @@ class Challenge extends Component
         if ($this->challenge_id !== -1) {
             $this->loadChallenge();
             // for setting up difficulty, status, visibility, time limit
-            $this->difficulty_id = $this->challenge->difficulty_id;
-            $this->status_id = $this->challenge->status_id;
-            $this->visibility_id = $this->challenge->visibility_id;
-            $parts = explode(':', $this->challenge->time_limit);
-            $this->hours = $parts[0];
-            $this->minutes = $parts[1];
-            $this->seconds = $parts[2];
+            $this->difficulty_id = (int) $this->challenge->difficulty_id;
+            $this->status_id = (int) $this->challenge->status_id;
+            $this->visibility_id = (int) $this->challenge->visibility_id;
+
+            $normalized = Tool::normalizeTimeLimit($this->challenge->time_limit);
+            if ((string) $this->challenge->time_limit !== $normalized) {
+                $this->challenge->time_limit = $normalized;
+                $this->challenge->save();
+            }
+
+            $parts = Tool::timeLimitParts($normalized);
+            $this->hours = $parts['hours'];
+            $this->minutes = $parts['minutes'];
+            $this->seconds = $parts['seconds'];
         } else {
             $this->challenge = null;
         }

@@ -200,13 +200,230 @@ class Tool
      * @param array $messages
      * @return \OpenAI\Responses\Chat\CreateResponse|string
      */
-    public static function getLLMCompletion(array $messages = ['role' => 'user', 'content' => 'hi']): \OpenAI\Responses\Chat\CreateResponse|string
+    public const PROMPT_TEMPLATE_KEYS = [
+        'welcome',
+        'recommendations',
+        'challenge_system',
+        'analyze_user_code',
+        'complexity_analysis',
+        'feedback',
+        'dalle',
+        'challenge_generation',
+    ];
+
+    /**
+     * Resolve a prompt template: Enviro.prompt_templates → config/openai_prompts (includes .env).
+     */
+    public static function promptTemplate(string $key): string
+    {
+        $enviro = Enviro::first();
+        $templates = $enviro?->prompt_templates;
+
+        if (is_array($templates) && isset($templates[$key]) && is_string($templates[$key]) && $templates[$key] !== '') {
+            $prompt = $templates[$key];
+        } else {
+            $prompt = (string) config('openai_prompts.' . $key, '');
+        }
+
+        if ($key === 'analyze_user_code') {
+            return self::sanitizeAnalyzeUserCodePrompt($prompt);
+        }
+
+        return $prompt;
+    }
+
+    /**
+     * Default prompt templates for admin seeding / AI settings UI.
+     */
+    public static function defaultPromptTemplates(): array
+    {
+        $defaults = [];
+        foreach (self::PROMPT_TEMPLATE_KEYS as $key) {
+            $defaults[$key] = (string) config('openai_prompts.' . $key, '');
+        }
+
+        return $defaults;
+    }
+
+    /**
+     * JSON schema for structured challenge generation (includes solution_code).
+     */
+    public static function challengeOutputSchema(): array
+    {
+        return [
+            'type' => 'object',
+            'additionalProperties' => false,
+            'properties' => [
+                'title' => ['type' => 'string'],
+                'challenge' => ['type' => 'string'],
+                'difficulty_level' => ['type' => 'string', 'enum' => ['easy', 'medium', 'hard']],
+                'time_limit' => [
+                    'type' => 'string',
+                    'description' => 'Interview time limit in H:i:s format only, e.g. 00:30:00',
+                ],
+                'hints' => ['type' => 'string'],
+                'test_cases' => [
+                    'type' => 'array',
+                    'items' => ['type' => 'string'],
+                ],
+                'topics' => [
+                    'type' => 'array',
+                    'items' => ['type' => 'string'],
+                ],
+                'tags' => [
+                    'type' => 'array',
+                    'items' => ['type' => 'string'],
+                ],
+                'languages' => [
+                    'type' => 'array',
+                    'items' => ['type' => 'string'],
+                ],
+                'frameworks' => [
+                    'type' => 'array',
+                    'items' => ['type' => 'string'],
+                ],
+                'packages' => [
+                    'type' => 'array',
+                    'items' => ['type' => 'string'],
+                ],
+                'solution_code' => ['type' => 'string'],
+            ],
+            'required' => [
+                'title',
+                'challenge',
+                'difficulty_level',
+                'time_limit',
+                'hints',
+                'test_cases',
+                'topics',
+                'tags',
+                'languages',
+                'frameworks',
+                'packages',
+                'solution_code',
+            ],
+        ];
+    }
+
+    /**
+     * JSON schema for code analysis (feedback + solved flag).
+     */
+    public static function codeAnalysisOutputSchema(): array
+    {
+        return [
+            'type' => 'object',
+            'additionalProperties' => false,
+            'properties' => [
+                'feedback' => ['type' => 'string'],
+                'solved' => ['type' => 'boolean'],
+            ],
+            'required' => ['feedback', 'solved'],
+        ];
+    }
+
+    /**
+     * Strip legacy "%%%%%true|false" instructions from analyze prompts.
+     * Older .env / enviro templates still tell the model to append a separator,
+     * which then leaks into structured-output `feedback` text.
+     */
+    public static function sanitizeAnalyzeUserCodePrompt(string $prompt): string
+    {
+        $prompt = preg_replace(
+            '/Immediat(?:e)?ly after your answer,\s*put a\s*["\']?%{4,}["\']?\s*\([^)]*\)\s*separator[^.]*\.\s*/i',
+            '',
+            $prompt
+        ) ?? $prompt;
+
+        $prompt = preg_replace(
+            '/put a\s*["\']?%{4,}["\']?\s*\([^)]*\)\s*separator[^.]*\.\s*/i',
+            '',
+            $prompt
+        ) ?? $prompt;
+
+        $prompt = preg_replace(
+            '/If the user has solved the challenge return\s*["\']?true["\']?,?\s*otherwise return\s*["\']?false["\']?\.?\s*/i',
+            '',
+            $prompt
+        ) ?? $prompt;
+
+        $suffix = ' Put the approval verdict only in the JSON boolean field "solved". Never append a legacy separator trailer or bare true/false after the feedback text. Respond using the required structured JSON schema (feedback + solved).';
+
+        if (!preg_match('/Never append a legacy separator|Put the approval verdict only in the JSON boolean/i', $prompt)) {
+            $prompt = rtrim($prompt) . $suffix;
+        } elseif (!preg_match('/required structured JSON schema/i', $prompt)) {
+            $prompt = rtrim($prompt) . ' Respond using the required structured JSON schema (feedback + solved).';
+        }
+
+        return trim(preg_replace('/[ \t]{2,}/', ' ', $prompt) ?? $prompt);
+    }
+
+    /**
+     * Parse code-analysis completion: structured JSON preferred, legacy separator fallback.
+     * Always strips a leaked "%%%%%true|false" trailer from feedback text.
+     *
+     * @return array{feedback: string, solved: bool}
+     */
+    public static function parseCodeAnalysisResponse(string $completionContent): array
+    {
+        $separator = (string) env('OPENAI_CODE_SEPARATOR', '%%%%%');
+        $feedback = '';
+        $solved = false;
+
+        $parsed = json_decode($completionContent, true);
+
+        if (is_array($parsed) && array_key_exists('feedback', $parsed)) {
+            $feedback = trim((string) $parsed['feedback']);
+            $solved = filter_var($parsed['solved'] ?? false, FILTER_VALIDATE_BOOLEAN);
+        } else {
+            $parts = $separator !== ''
+                ? explode($separator, $completionContent, 2)
+                : [$completionContent];
+            $feedback = trim($parts[0] ?? '');
+            $solved = filter_var(strtolower(trim($parts[1] ?? 'false')), FILTER_VALIDATE_BOOLEAN);
+        }
+
+        if ($separator !== '' && str_contains($feedback, $separator)) {
+            $parts = explode($separator, $feedback, 2);
+            $feedback = trim($parts[0] ?? '');
+            if (isset($parts[1]) && preg_match('/^\s*(true|false)\s*$/i', $parts[1])) {
+                $solved = filter_var(strtolower(trim($parts[1])), FILTER_VALIDATE_BOOLEAN);
+            }
+        }
+
+        return [
+            'feedback' => $feedback,
+            'solved' => (bool) $solved,
+        ];
+    }
+
+    /**
+     * Structured-output response_format wrapper for json_schema.
+     */
+    public static function jsonSchemaResponseFormat(string $name, array $schema): array
+    {
+        return [
+            'type' => 'json_schema',
+            'json_schema' => [
+                'name' => $name,
+                'strict' => true,
+                'schema' => $schema,
+            ],
+        ];
+    }
+
+    public static function getLLMCompletion(array $messages = ['role' => 'user', 'content' => 'hi'], ?array $responseFormat = null): \OpenAI\Responses\Chat\CreateResponse|string
     {
         try {
-            return OpenAI::chat()->create([
-                'model' => env('OPENAI_MODEL'), 
-                'messages' => $messages, 
-            ]);
+            $payload = [
+                'model' => env('OPENAI_MODEL'),
+                'messages' => $messages,
+            ];
+
+            if ($responseFormat) {
+                $payload['response_format'] = $responseFormat;
+            }
+
+            return OpenAI::chat()->create($payload);
         } catch (\OpenAI\Exceptions\ErrorException $ee) {
             info($ee->getMessage());
             $error = $ee->getMessage();
@@ -219,6 +436,261 @@ class Tool
     }
 
     /**
+     * Strip legacy "no newlines in solution_code" rules and require readable multi-line code.
+     * Older enviro prompts banned "\n" in every JSON value (including solution_code), which
+     * makes newer models minify solutions into one line that the codebox cannot format.
+     */
+    public static function sanitizeChallengeGenerationPrompt(string $prompt): string
+    {
+        $prompt = preg_replace(
+            '/None of the JSON values must contain line breaks\s*"\\\\n"\s*neither the solution code\.?\s*/i',
+            '',
+            $prompt
+        ) ?? $prompt;
+
+        $prompt = preg_replace(
+            '/None of the JSON values must contain line breaks[^.]*\.?\s*/i',
+            '',
+            $prompt
+        ) ?? $prompt;
+
+        $prompt = preg_replace(
+            '/No line breaks between JSON and solution_code\.?\s*/i',
+            '',
+            $prompt
+        ) ?? $prompt;
+
+        $prompt = preg_replace(
+            '/Do not include "solution_code" key in your JSON response[^.]*\.?\s*/i',
+            '',
+            $prompt
+        ) ?? $prompt;
+
+        $suffix = ' Important: Put solution_code in the JSON response as readable multi-line source with real newline characters and normal indentation. Never minify or collapse solution_code into a single line.';
+
+        if (!preg_match('/solution_code MUST be readable multi-line|Never minify or collapse solution_code/i', $prompt)) {
+            $prompt = rtrim($prompt) . $suffix;
+        }
+
+        return $prompt;
+    }
+
+    /**
+     * Normalize LLM solution_code for display (real newlines, expand minified brace-language code).
+     */
+    public static function normalizeSolutionCode(?string $code): string
+    {
+        $code = (string) ($code ?? '');
+        $code = str_replace(["\r\n", "\r"], "\n", $code);
+
+        // json_decode normally turns JSON "\n" into real newlines; guard double-escaped forms
+        if (substr_count($code, "\n") === 0 && str_contains($code, '\\n')) {
+            $code = str_replace(['\\n', '\\t'], ["\n", "\t"], $code);
+        }
+
+        $code = trim($code);
+
+        // Minified LLM output often starts with `// comment ... function foo(){...}` on one line.
+        // Without a break, `//` would comment out the entire solution.
+        $code = self::breakLineCommentBeforeStatement($code);
+
+        // Models sometimes still return a single dense line; expand C-like / JS-like source for the codebox.
+        if ($code !== '' && substr_count($code, "\n") === 0 && preg_match('/[{;}]/', $code)) {
+            $code = self::expandMinifiedBraceCode($code);
+        } elseif ($code !== '' && substr_count($code, "\n") > 0) {
+            // Comment was split onto its own line; still expand the remaining dense statement block.
+            $lines = explode("\n", $code);
+            $expanded = [];
+            foreach ($lines as $line) {
+                $trim = trim($line);
+                    if (
+                    $trim !== ''
+                    && !str_starts_with($trim, '//')
+                    && substr_count($trim, "\n") === 0
+                    && preg_match('/[{;}]/', $trim)
+                    && (strlen($trim) > 60 || substr_count($trim, '{') > 0)
+                ) {
+                    $expanded[] = self::expandMinifiedBraceCode($trim);
+                } else {
+                    $expanded[] = $line;
+                }
+            }
+            $code = implode("\n", $expanded);
+        }
+
+        return trim($code);
+    }
+
+    /**
+     * If a single-line blob starts with // and later has a statement keyword, break before it.
+     */
+    public static function breakLineCommentBeforeStatement(string $code): string
+    {
+        if ($code === '' || substr_count($code, "\n") > 0) {
+            return $code;
+        }
+
+        if (!str_starts_with(ltrim($code), '//')) {
+            return $code;
+        }
+
+        if (preg_match(
+            '/^(\/\/.*?)(?=\b(?:function|const|let|var|class|export|async|def|public|private|protected)\b)(.*)$/s',
+            $code,
+            $matches
+        )) {
+            return rtrim($matches[1]) . "\n" . ltrim($matches[2]);
+        }
+
+        return $code;
+    }
+
+    /**
+     * Lightweight pretty-printer for minified brace languages (JS, PHP-ish, C-like).
+     * Not a full formatter — enough to make admin codebox readable.
+     */
+    public static function expandMinifiedBraceCode(string $code): string
+    {
+        $out = '';
+        $indent = 0;
+        $paren = 0;
+        $len = strlen($code);
+        $inSingle = false;
+        $inDouble = false;
+        $inBacktick = false;
+        $inLineComment = false;
+        $inBlockComment = false;
+        $escape = false;
+
+        $newline = function () use (&$out, &$indent) {
+            $out = rtrim($out, " \t");
+            $out .= "\n" . str_repeat('  ', max(0, $indent));
+        };
+
+        for ($i = 0; $i < $len; $i++) {
+            $ch = $code[$i];
+            $next = $i + 1 < $len ? $code[$i + 1] : '';
+
+            if ($inLineComment) {
+                $out .= $ch;
+                if ($ch === "\n") {
+                    $inLineComment = false;
+                }
+                continue;
+            }
+
+            if ($inBlockComment) {
+                $out .= $ch;
+                if ($ch === '*' && $next === '/') {
+                    $out .= '/';
+                    $i++;
+                    $inBlockComment = false;
+                }
+                continue;
+            }
+
+            if ($inSingle || $inDouble || $inBacktick) {
+                $out .= $ch;
+                if ($escape) {
+                    $escape = false;
+                    continue;
+                }
+                if ($ch === '\\') {
+                    $escape = true;
+                    continue;
+                }
+                if ($inSingle && $ch === "'") {
+                    $inSingle = false;
+                } elseif ($inDouble && $ch === '"') {
+                    $inDouble = false;
+                } elseif ($inBacktick && $ch === '`') {
+                    $inBacktick = false;
+                }
+                continue;
+            }
+
+            if ($ch === '/' && $next === '/') {
+                $inLineComment = true;
+                $out .= '//';
+                $i++;
+                continue;
+            }
+
+            if ($ch === '/' && $next === '*') {
+                $inBlockComment = true;
+                $out .= '/*';
+                $i++;
+                continue;
+            }
+
+            if ($ch === "'") {
+                $inSingle = true;
+                $out .= $ch;
+                continue;
+            }
+            if ($ch === '"') {
+                $inDouble = true;
+                $out .= $ch;
+                continue;
+            }
+            if ($ch === '`') {
+                $inBacktick = true;
+                $out .= $ch;
+                continue;
+            }
+
+            if ($ch === '(') {
+                $paren++;
+                $out .= $ch;
+                continue;
+            }
+
+            if ($ch === ')') {
+                $paren = max(0, $paren - 1);
+                $out .= $ch;
+                continue;
+            }
+
+            if ($ch === '{') {
+                $out .= '{';
+                $indent++;
+                $newline();
+                continue;
+            }
+
+            if ($ch === '}') {
+                $indent = max(0, $indent - 1);
+                $newline();
+                $out .= '}';
+                if ($next === ';' || $next === ',') {
+                    $out .= $next;
+                    $i++;
+                    $newline();
+                } elseif ($next !== '' && $next !== ')' && $next !== ']' && $next !== ',') {
+                    $newline();
+                }
+                continue;
+            }
+
+            if ($ch === ';') {
+                $out .= ';';
+                // Keep for (;;;) headers on one line.
+                if ($paren === 0 && $next !== '}') {
+                    $newline();
+                }
+                continue;
+            }
+
+            $out .= $ch;
+        }
+
+        // Collapse excessive blank lines from consecutive breaks
+        $out = preg_replace("/\n{3,}/", "\n\n", $out) ?? $out;
+
+        return trim($out);
+    }
+
+    /**
      * Obtains a LLM completion response from given prompt
      *
      * @param string $prompt
@@ -227,52 +699,62 @@ class Tool
     public static function getLLMChallenge(string $prompt): stdClass
     {
         try {
+            $prompt = self::sanitizeChallengeGenerationPrompt($prompt);
+
             $messages = [
                 [
-                    'role' => 'user', 
+                    'role' => 'user',
                     'content' => $prompt,
-                ], 
-            ];
-
-            $completion = OpenAI::chat()->create([
-                'model' => env('OPENAI_MODEL'), 
-                'messages' => $messages, 
-            ]);
-            
-            $completion_text = $completion->choices[0]->message->content;
-
-            $completion_text_parts = explode(env('OPENAI_CODE_SEPARATOR'), $completion_text);
-            
-            // for debugging purposes
-            $info_debug_array = [
-                'in_observation' => [
-                    'completion_text_parts' => $completion_text_parts,
-                    'comment' => 'It\'s still producing bug, null given on [0]. \\App\\Tool::177, log at \\App\\Tool::191'
                 ],
             ];
 
-            $completion_text_parts[0] = Tool::fixJsonString($completion_text_parts[0]);  // try to fix JSON response problems
-            $challenge = json_decode($completion_text_parts[0] ?? 'n/a');
-            
-            // expected bug (usually openai timeout connections)
-            if (!$challenge) {
-                // $component->dispatch('spinner-off');
-                info($info_debug_array);
-                dump('Something went wrong while decoding challenge completion string. "$challenge" is null. Check app log. 🙊', $completion, $completion_text_parts, $completion_text_parts[0], $completion_text_parts[1], json_validate($completion_text_parts[0] ?? 'NULL'), json_decode($completion_text_parts[0] ?? 'n/a'), $challenge);
+            $completion = self::getLLMCompletion(
+                $messages,
+                self::jsonSchemaResponseFormat('llm_challenge', self::challengeOutputSchema())
+            );
+
+            if (!$completion instanceof \OpenAI\Responses\Chat\CreateResponse) {
+                throw new Exception(is_string($completion) ? $completion : 'LLM challenge completion failed');
             }
 
-            // emulated Challenge Model response property
+            $completion_text = $completion->choices[0]->message->content;
+            $challenge = json_decode($completion_text ?? '');
+
+            // Legacy fallback: separator + fixJsonString (pre-structured-output models / failures)
+            if (!$challenge && str_contains((string) $completion_text, (string) env('OPENAI_CODE_SEPARATOR', '%%%%%'))) {
+                $completion_text_parts = explode(env('OPENAI_CODE_SEPARATOR'), $completion_text);
+                $completion_text_parts[0] = Tool::fixJsonString($completion_text_parts[0] ?? '');
+                $challenge = json_decode($completion_text_parts[0] ?? 'n/a');
+                if ($challenge && empty($challenge->solution_code)) {
+                    $challenge->solution_code = $completion_text_parts[1] ?? '';
+                }
+            }
+
+            if (!$challenge) {
+                info([
+                    'getLLMChallenge' => 'Failed to decode structured challenge JSON',
+                    'completion_text' => $completion_text,
+                ]);
+                dump('Something went wrong while decoding challenge completion string. "$challenge" is null. Check app log.', $completion, $completion_text);
+            }
+
+            if ($challenge) {
+                $challenge->solution_code = self::normalizeSolutionCode($challenge->solution_code ?? '');
+            }
+
             $emulated_challenge_model = new Challenge;
             $emulated_challenge_model->title = $challenge->title ?? 'n/a';
             $emulated_challenge_model->description = $challenge->challenge ?? 'n/a';
             $emulated_challenge_model->challenge_slug = Str::slug($challenge->title ?? 'n/a');
-            $emulated_challenge_model->difficulty_id = Difficulty::where('name', 'like', '%' . $challenge->difficulty_level . '%')->first()->id;
-            $emulated_challenge_model->test_cases = json_encode($challenge->test_cases);
-            $emulated_challenge_model->hints = $challenge->hints;
-            $emulated_challenge_model->time_limit = $challenge->time_limit;
+            $emulated_challenge_model->difficulty_id = Difficulty::where('name', 'like', '%' . ($challenge->difficulty_level ?? '') . '%')->first()->id;
+            $emulated_challenge_model->test_cases = is_string($challenge->test_cases ?? null)
+                ? $challenge->test_cases
+                : json_encode($challenge->test_cases ?? []);
+            $emulated_challenge_model->hints = $challenge->hints ?? '';
+            $emulated_challenge_model->time_limit = self::normalizeTimeLimit($challenge->time_limit ?? null);
             $emulated_challenge_model->status_id = Status::where('name', 'like', '%active%')->first()->id;
             $emulated_challenge_model->visibility_id = Visibility::where('name', 'like', '%public%')->first()->id;
-            $emulated_challenge_model->solution_code = $completion_text_parts[1] ?? '';
+            $emulated_challenge_model->solution_code = self::normalizeSolutionCode($challenge->solution_code ?? '');
             $emulated_challenge_model->chatgpt_prompt = $prompt;
             $emulated_challenge_model->completion_id = $completion->id;
             $emulated_challenge_model->ai_model = $completion->model;
@@ -290,6 +772,8 @@ class Tool
             dump($ee->getMessage());
         } catch (\OpenAI\Exceptions\TransporterException $te) {
             dump($te->getMessage());
+        } catch (Exception $e) {
+            dump($e->getMessage());
         }
     }
 
@@ -308,7 +792,11 @@ class Tool
         $completion = $llm_challenge->completion;
         $prompt = $llm_challenge->prompt;
         $completion_text = $llm_challenge->completion_text;
-        $solution_code = $llm_challenge->emulated_challenge_model['solution_code'] ?? '';
+        $solution_code = self::normalizeSolutionCode(
+            $llm_challenge->emulated_challenge_model->solution_code
+                ?? $llm_challenge->challenge->solution_code
+                ?? ''
+        );
         $challenge_slug = Str::slug($challenge->title ?? '');
 
         // // generate an AI image (DALL-E) about the challenge
@@ -322,7 +810,7 @@ class Tool
             'difficulty_id' => Difficulty::select('id')->where('name', '=', $challenge->difficulty_level)->first()->id,
             'test_cases' => json_encode($challenge->test_cases),
             'hints' => $challenge->hints,
-            'time_limit' => $challenge->time_limit,
+            'time_limit' => self::normalizeTimeLimit($challenge->time_limit ?? null),
             'status_id' => Status::select('id')->where('name', '=', $status)->first()->id,
             'visibility_id' => Visibility::select('id')->where('name', '=', $visibility)->first()->id,
             'solution_code' => $solution_code,
@@ -446,7 +934,7 @@ class Tool
         $end_point = 'https://api.openai.com/v1/images/generations';
         
         try {
-            $prompt = Tool::replaceWildcards(env('OPENAI_DALLE_CHALLENGE_PROMPT_BASE_TEXT'), collect([
+            $prompt = Tool::replaceWildcards(self::promptTemplate('dalle'), collect([
                 'challenge_title' => $challenge_title,
                 'challenge_topic' => $challenge_topic,
                 'language' => $language,
@@ -531,7 +1019,15 @@ class Tool
         if ($enviro) {
             if ($key === 'root') return !$associative ? (object)$enviro->toArray() : $enviro->toArray();
             if (isset($enviro->$key)) {
-                return $associative ? json_decode($enviro->$key, true) : json_decode($enviro->$key);
+                $value = $enviro->$key;
+                if (is_array($value)) {
+                    return $associative ? $value : json_decode(json_encode($value));
+                }
+                if (is_string($value)) {
+                    return $associative ? json_decode($value, true) : json_decode($value);
+                }
+
+                return $associative ? (array) $value : (object) $value;
             }
         }
         return null;
@@ -681,15 +1177,15 @@ class Tool
     public static function updateEnviroPromptString(string $prompt): bool
     {
         $enviro = Enviro::first();
-        $enviro_prompt = json_decode($enviro->prompt, true);
-        $enviro->prompt = json_encode([
+        $enviro_prompt = is_array($enviro->prompt) ? $enviro->prompt : (json_decode($enviro->prompt, true) ?? []);
+        $enviro->prompt = [
             'parts' => self::searchSeparatorsAppendParts(),
             'string' => $prompt,
-            'selected_topic' => $enviro_prompt['selected_topic'],
-            'selected_difficulty' => $enviro_prompt['selected_difficulty'],
-            'selected_language' => $enviro_prompt['selected_language'],
-            'blueprint' => $enviro_prompt['blueprint'],
-        ]);
+            'selected_topic' => $enviro_prompt['selected_topic'] ?? 'all topics',
+            'selected_difficulty' => $enviro_prompt['selected_difficulty'] ?? 'easy',
+            'selected_language' => $enviro_prompt['selected_language'] ?? 'any',
+            'blueprint' => $enviro_prompt['blueprint'] ?? '',
+        ];
 
         return $enviro->save();
     }
@@ -824,7 +1320,78 @@ class Tool
     public static function validateTimeLimitString(string $time_limit): bool
     {
         $pattern = '/^(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d$/';
-        return preg_match($pattern, $time_limit);
+        return (bool) preg_match($pattern, $time_limit);
+    }
+
+    /**
+     * Normalize LLM / free-form time limits to "H:i:s".
+     * Accepts "00:30:00", "30 minutes", "45m", "1 hour", "1h 30m", or minutes as an integer string.
+     */
+    public static function normalizeTimeLimit(?string $timeLimit, string $default = '00:30:00'): string
+    {
+        $raw = trim((string) $timeLimit);
+        if ($raw === '') {
+            return $default;
+        }
+
+        if (preg_match('/^(?:[01]?\d|2[0-3]):[0-5]?\d(?::[0-5]?\d)?$/', $raw)) {
+            $parts = array_map('intval', explode(':', $raw));
+            $hours = $parts[0] ?? 0;
+            $minutes = $parts[1] ?? 0;
+            $seconds = $parts[2] ?? 0;
+            if ($hours <= 23 && $minutes <= 59 && $seconds <= 59) {
+                return sprintf('%02d:%02d:%02d', $hours, $minutes, $seconds);
+            }
+        }
+
+        if (preg_match('/^(\d+)\s*(?:h|hr|hrs|hour|hours)\s+(\d+)\s*(?:m|min|mins|minute|minutes)$/i', $raw, $match)) {
+            $hours = (int) $match[1];
+            $minutes = (int) $match[2];
+            if ($hours <= 23 && $minutes <= 59) {
+                return sprintf('%02d:%02d:00', $hours, $minutes);
+            }
+        }
+
+        if (preg_match('/^(\d+)\s*(?:h|hr|hrs|hour|hours)$/i', $raw, $match)) {
+            $hours = (int) $match[1];
+            if ($hours <= 23) {
+                return sprintf('%02d:00:00', $hours);
+            }
+        }
+
+        if (preg_match('/^(\d+)\s*(?:m|min|mins|minute|minutes)$/i', $raw, $match)) {
+            $totalMinutes = (int) $match[1];
+            $hours = intdiv($totalMinutes, 60);
+            $minutes = $totalMinutes % 60;
+            if ($hours <= 23) {
+                return sprintf('%02d:%02d:00', $hours, $minutes);
+            }
+        }
+
+        if (preg_match('/^\d+$/', $raw)) {
+            $totalMinutes = (int) $raw;
+            $hours = intdiv($totalMinutes, 60);
+            $minutes = $totalMinutes % 60;
+            if ($hours <= 23) {
+                return sprintf('%02d:%02d:00', $hours, $minutes);
+            }
+        }
+
+        return $default;
+    }
+
+    /**
+     * @return array{hours: int, minutes: int, seconds: int}
+     */
+    public static function timeLimitParts(?string $timeLimit): array
+    {
+        $parts = explode(':', self::normalizeTimeLimit($timeLimit));
+
+        return [
+            'hours' => (int) ($parts[0] ?? 0),
+            'minutes' => (int) ($parts[1] ?? 0),
+            'seconds' => (int) ($parts[2] ?? 0),
+        ];
     }
 
     /**
