@@ -57,6 +57,8 @@ class Start extends Component
             'minutes' => $minutes,
             'seconds' => $seconds,
         ];
+        // Avoid re-rendering the whole workspace every second (breaks Alpine IDE layout + nested Livewire snapshots)
+        $this->skipRender();
     }
 
     public function challengeSolved()

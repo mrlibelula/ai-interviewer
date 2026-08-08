@@ -64,7 +64,7 @@
         @endif
     @endif
 
-    <div class="text-xl md:text-2xl {{ !$title ? '' : 'py-4' }}">
+    <div class="challenge-description text-xl md:text-2xl {{ !$title ? '' : 'py-4' }}">
         {{ $challenge->description }}
     </div>
 
@@ -89,7 +89,7 @@
     @endif
 
     @if ($challenge->hints)
-    <x-h-accordion x-data="{ isOpen: true }">
+    <x-h-accordion x-data="{ isOpen: false }">
         <x-slot name="title">
             Hints
         </x-slot>

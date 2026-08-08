@@ -23,7 +23,7 @@
             window.speechSynthesis.speak(this.msg)
         }
     }, 
-}" x-init="listenChat" @speak="listenChat" class="flex flex-col items-center gap-y-4">
+}" x-init="listenChat" @speak="listenChat" class="chatbot-panel flex flex-col items-center gap-y-4 w-full min-h-0 flex-1">
     {{-- <div class="flex items-center gap-x-4 justify-between">
         <img title="Analyse my code" class=" w-1/6 grayscale hover:grayscale-0 hover:scale-125 smooth-300 cursor-pointer" src="https://ibuildings.com/img/blog/2019/07/img/Analyse_Your_Code_Static_Analysis_Gert_de_Pagter_0@500w.7f768d868c2b36494aa963f10913abc1.png" alt="">
         <img title="Analyse my code" class=" w-1/6 grayscale hover:grayscale-0 hover:scale-125 smooth-300 cursor-pointer" src="https://cdn-icons-png.freepik.com/512/5815/5815178.png" alt="">
@@ -43,7 +43,7 @@
     </div> --}}
 
     <!-- Feedback chatbot-->
-    <div class=" bg-gray-300/40 dark:bg-slate-700/30 flex justify-between shadow-xl shadow-white dark:shadow-slate-950 z-30 items-center gap-x-4 w-full -mb-4 rounded-t-lg px-4 py-2 text-base">
+    <div class="chatbot-header bg-gray-300/40 dark:bg-slate-700/30 flex justify-between shadow-xl shadow-white dark:shadow-slate-950 z-30 items-center gap-x-4 w-full -mb-4 rounded-t-lg px-4 py-2 text-base shrink-0">
         <div class="flex items-center gap-x-2 text-emerald-600 font-semibold dark:text-slate-300">
             <x-circle color="emerald" class=" animate-pulse" />
             A.I. feedback chatbot 
@@ -51,8 +51,6 @@
         <div class="flex items-center gap-x-4">
             <button @click="$dispatch('analyze-code'); $dispatch('chatbot-loader-on')" class="group cursor-pointer">
                 <img class="w-[1.55rem] h-[1.55rem] grayscale group-hover:grayscale-0 smooth-300" src="https://cdn4.iconfinder.com/data/icons/artificial-intelligence-35/64/laptop-artificial-intelligence-ai-robot-512.png" alt="" title="Analyze my code/answer">
-                {{-- <x-icon-dragonfly class="w-10 h-10 grayscale invert" /> --}}
-                {{-- <x-icon-bug class="w-5 h-5 text-gray-400" /> --}}
             </button>
             <div>
                 <template x-if="!listen">

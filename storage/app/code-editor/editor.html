@@ -974,6 +974,7 @@ console.log(sayHello('Bob'));
                 const runCode = event.data.runCode ?? false  // bool
                 const saveCode = event.data.saveCode ?? false  // bool
                 const complexity = event.data.complexity ?? false  // bool
+                const analyze = event.data.analyze ?? false  // bool
                 if (complexity) {
                     sendUserCodeForComplexity(editor.getValue())
                 }
@@ -986,15 +987,15 @@ console.log(sayHello('Bob'));
                 } 
                 if (runCode) {
                     //runJsCode(editor)
-                    sendUserCodeForExecution(editor.getValue(), true)
+                    sendUserCodeForExecution(editor.getValue(), true, analyze)
                 }
             })
 
             return editor
         }
 
-        function sendUserCodeForExecution(code, runCode = true) {
-            window.parent.postMessage({ code: code, runCode: runCode }, '*')
+        function sendUserCodeForExecution(code, runCode = true, analyze = false) {
+            window.parent.postMessage({ code: code, runCode: runCode, analyze: analyze }, '*')
         }
 
         function sendUserCode(code, saveCode = false) {

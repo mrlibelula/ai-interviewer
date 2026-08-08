@@ -1,7 +1,7 @@
-<form method="POST" action="{{ route('logout') }}" x-data class="hidden sm:flex flex-col items-center h-full overflow-hidden">
+<form method="POST" action="{{ route('logout') }}" x-data class="hidden sm:flex flex-col items-center h-full overflow-visible">
     @csrf
-    <div class="flex flex-col items-center w-[4rem] h-full overflow-hidden text-gray-700 dark:text-gray-500 bg-gray-100 dark:bg-gray-800/30">
-        <a wire:navigate class="flex items-center justify-center mt-3" href="{{ route('landing') }}">
+    <div class="flex flex-col items-center w-[4rem] h-full overflow-visible text-gray-700 dark:text-gray-500 bg-gray-100 dark:bg-gray-800/30">
+        <a wire:navigate class="sidebar-tip group relative flex items-center justify-center mt-3" href="{{ route('landing') }}" aria-label="Home">
             {{-- <div class="material-icons my-auto text-3xl text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-rose-500 to-sky-400"> headset_mic </div> --}}
             {{-- <img class="w-9" src="https://cdn-icons-png.flaticon.com/512/4600/4600333.png" alt=""> --}}
             {{-- <img class="w-7" src="https://www.favicon.cc/logo3d/807099.png" alt=""> --}}
@@ -10,7 +10,7 @@
             <img class="w-8 py-[0.195rem] opacity-75 hover:opacity-100 smooth-300 invert hover:invert-0 animate-pulse" src="https://www.onlygfx.com/wp-content/uploads/2022/04/brain-icon-3.png" alt="">
             {{-- <img class="w-8 h-9 py-0.5 opacity-75 hover:opacity-100 smooth-300 invert hover:invert-0 animate-pulse" src="https://www.onlygfx.com/wp-content/uploads/2022/04/brain-icon-1.png" alt=""> --}}
             {{-- <img class="w-8 py-[0.125rem] opacity-75 hover:opacity-100 smooth-300 invert hover:invert-0" src="https://cdn-icons-png.freepik.com/512/6969/6969728.png" alt=""> --}}
-            
+            <span class="sidebar-tooltip" role="tooltip">Home</span>
         </a>
         <div class="flex flex-col items-center mt-3 border-t border-gray-300 dark:border-gray-700">
             {{-- <a class="flex items-center justify-center w-12 h-12 mt-2 rounded hover:bg-gray-300 dark:hover:bg-gray-700" href="#">
@@ -20,11 +20,11 @@
             </a> --}}
 
             <!-- dashboard -->
-            <x-side-bar-item link="{{ route('dashboard') }}">
+            <x-side-bar-item link="{{ route('dashboard') }}" tooltip="Dashboard">
                 <x-icon-squares class="w-7 h-7 stroke-current" />
             </x-side-bar-item>
             <!-- stats -->
-            <x-side-bar-item link="{{ route('metrics') }}">
+            <x-side-bar-item link="{{ route('metrics') }}" tooltip="Metrics">
                 <x-icon-progress class="w-7 h-7" />
                 @if ($feedbacks['problem_specific'] || $feedbacks['optimization'] || $feedbacks['best_practices'])
                 <!--red dot-->
@@ -61,21 +61,27 @@
 
             <!-- admin -->
             @if (auth()->user()->hasRole('admin') || auth()->user()->hasRole('recruiter'))
-            <x-side-bar-item link="{{ route('admin-dashboard') }}">
+            <x-side-bar-item link="{{ route('admin-dashboard') }}" tooltip="Admin">
                 <x-icon-cog class="w-7 h-7" />
             </x-side-bar-item>
             @endif
             
             <!-- profile -->
-            <x-side-bar-item link="/user/profile">
+            <x-side-bar-item link="/user/profile" tooltip="Profile">
                 <svg class="w-7 h-7 stroke-current" data-slot="icon" fill="none" stroke-width="2" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"></path>
                 </svg>
             </x-side-bar-item>
             
         </div>
-        <a @click.prevent="$root.submit();" class="flex items-center justify-center w-16 h-16 mt-auto bg-gray-200 dark:bg-gray-800/50 hover:bg-gray-300 smooth-300" href="{{ route('logout') }}">
+        <a
+            @click.prevent="$root.submit();"
+            class="sidebar-tip group relative flex items-center justify-center w-16 h-16 mt-auto bg-gray-200 dark:bg-gray-800/50 hover:bg-gray-300 smooth-300"
+            href="{{ route('logout') }}"
+            aria-label="Log out"
+        >
             <x-icon-logout class="w-7 h-7 stroke-current" />
+            <span class="sidebar-tooltip" role="tooltip">Log out</span>
         </a>
     </div>
 </form>

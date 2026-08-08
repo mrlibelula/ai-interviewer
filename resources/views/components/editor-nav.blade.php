@@ -9,22 +9,26 @@
         </div>
     </div>
     <div class="flex flex-col md:flex-row items-center gap-y-2 md:gap-y-0 md:gap-x-2">
-        
-        <x-editor-nav-button class="w-full text-center whitespace-nowrap" 
-            @click="$dispatch('run-code'); $dispatch('chatbot-loader-on');"
+        <x-editor-nav-button
+            class="w-full text-center whitespace-nowrap"
+            @click="$dispatch('run-code')"
+        >
+            Run code
+        </x-editor-nav-button>
+        <x-editor-nav-button class="w-full text-center whitespace-nowrap"
+            @click="$dispatch('run-and-analyze'); $dispatch('chatbot-loader-on');"
         >
             Run and A.I. analyze
         </x-editor-nav-button>
         {{-- <x-editor-nav-button class="w-full text-center whitespace-nowrap" @click="$dispatch('analyze-code')">A.I. Analyzer</x-editor-nav-button> --}}
-        <x-editor-nav-button 
+        <x-editor-nav-button
             @click="$dispatch('complexity'); $dispatch('chatbot-loader-on');"
             class="w-full text-center whitespace-nowrap"
         >
             Analyze T/S Complexity
         </x-editor-nav-button>
-        
     </div>
-    <div id="fullscreenIcon" class="p-1 cursor-pointer group w-fit flex items-center gap-x-2">
+    <div class="fullscreen-icon p-1 cursor-pointer group w-fit flex items-center gap-x-2">
         <span class=" hidden md:block text-base group-hover:dark:text-emerald-400 smooth-300 leading-none">
             Fullscreen
         </span>

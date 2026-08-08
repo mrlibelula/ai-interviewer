@@ -1,33 +1,32 @@
 @props(['solverCode' => false])
-<div class="flex flex-col">
+<div class="code-editor-root flex flex-col min-h-0 w-full">
 
-    <x-editor-nav class=" border-b border-gray-300 dark:border-gray-600" />
+    <x-editor-nav class="code-editor-toolbar code-editor-toolbar-top shrink-0 border-b border-gray-300 dark:border-gray-600/80 px-2" />
 
     <iframe :dark-mode="darkMode" :solver-code="'{{ \App\Tool::encode($solverCode) }}'"
-        class=" h-[33vh] bg-white dark:bg-black border-gray-300 dark:border-gray-800 overflow-hidden overflow-y-hidden" 
-        src="{{ route('embed-editor') }}" 
-        width="100%" 
-        frameborder="0" 
+        class="code-editor-iframe bg-white dark:bg-black/80 border-gray-300 dark:border-gray-800 overflow-hidden overflow-y-hidden w-full min-h-0"
+        src="{{ route('embed-editor') }}"
+        width="100%"
+        frameborder="0"
         allowfullscreen
         id="codeIframe"
         scrolling="no"
     ></iframe>
 
-    <x-editor-nav class=" border-t border-gray-300 dark:border-gray-600" />
+    <x-editor-nav class="code-editor-toolbar code-editor-toolbar-bottom shrink-0 border-t border-gray-300 dark:border-gray-600/80 px-2" />
 
-    <div class="relative">
-        <iframe id="output-frame" class=" absolute bg-black rounded-md" frameborder="0" width="100%"></iframe>
-        <div class=" absolute px-4 py-2 text-gray-500 font-mono text-base">
-            Output terminal
+    <div class="code-editor-terminal relative shrink-0 overflow-hidden border-t border-gray-300 dark:border-gray-700/70 bg-black/90 dark:bg-black/70">
+        <div class="absolute z-10 left-0 top-0 px-3 py-1.5 text-gray-500 dark:text-gray-500 font-mono text-xs tracking-wider uppercase pointer-events-none">
+            Output
         </div>
+        <iframe id="output-frame" class="absolute inset-0 w-full h-full bg-black" frameborder="0" width="100%" height="100%"></iframe>
     </div>
 
     <script>
         var iframe = document.getElementById('codeIframe')
-        var fullscreenIcon = document.getElementById('fullscreenIcon')
+        var fullscreenIcons = document.querySelectorAll('.fullscreen-icon')
         var codeFromIframe
 
-        // Function to make the iframe fullscreen
         function toggleFullScreen() {
             if (!document.fullscreenElement) {
                 iframe.requestFullscreen().catch(err => {
@@ -40,38 +39,48 @@
             }
         }
 
-        function sendEventToIframe(message = { getCode: false, runCode: false, saveCode: false, complexity: false }) {
+        function sendEventToIframe(message = { getCode: false, runCode: false, saveCode: false, complexity: false, analyze: false }) {
             iframe.contentWindow.postMessage(message, '*')
         }
 
-        // Add click event listener to the iframe
-        fullscreenIcon.addEventListener('click', toggleFullScreen)
+        fullscreenIcons.forEach(function (el) {
+            el.addEventListener('click', toggleFullScreen)
+        })
 
         document.addEventListener('analyze-code', () => {
-            sendEventToIframe({ getCode: true, runCode: false, saveCode: false, complexity: false })
+            sendEventToIframe({ getCode: true, runCode: false, saveCode: false, complexity: false, analyze: false })
         })
 
         document.addEventListener('run-code', () => {
-            sendEventToIframe({ getCode: false, runCode: true, saveCode: false, complexity: false })
+            sendEventToIframe({ getCode: false, runCode: true, saveCode: false, complexity: false, analyze: false })
+        })
+
+        document.addEventListener('run-and-analyze', () => {
+            sendEventToIframe({ getCode: false, runCode: true, saveCode: false, complexity: false, analyze: true })
         })
 
         document.addEventListener('complexity', () => {
-            sendEventToIframe({ getCode: true, runCode: false, saveCode: true, complexity: true })
+            sendEventToIframe({ getCode: true, runCode: false, saveCode: true, complexity: true, analyze: false })
         })
 
         document.addEventListener('get-code', () => {
-            sendEventToIframe({ getCode: true, runCode: false, saveCode: true, complexity: false })
+            sendEventToIframe({ getCode: true, runCode: false, saveCode: true, complexity: false, analyze: false })
         })
 
         document.addEventListener('save-code', () => {
-            sendEventToIframe({ getCode: false, runCode: false, saveCode: true, complexity: false })
+            sendEventToIframe({ getCode: false, runCode: false, saveCode: true, complexity: false, analyze: false })
         })
 
-        // listen for messages from the sandboxed iframe
         window.addEventListener('message', event => {
             if (event.source === iframe.contentWindow) {
                 codeFromIframe = event.data.code
-                if (event.data.hasOwnProperty('runCode')) { if (event.data.runCode) runJsCode(codeFromIframe) }
+                if (event.data.hasOwnProperty('runCode') && event.data.runCode) {
+                    runJsCode(codeFromIframe)
+                    if (event.data.analyze) {
+                        sendCode(codeFromIframe, 'userCode')
+                    }
+                    return
+                }
                 var saveCodeFromIframe = event.data.saveCode ?? null
                 if (event.data.hasOwnProperty('complexity')) {
                     sendCodeForComplexity(codeFromIframe)
@@ -84,7 +93,6 @@
         })
 
         function sendCode(code, eventName) {
-            // send user code to backend
             const event = new CustomEvent(eventName, { detail: { code } })
             window.dispatchEvent(event)
         }
@@ -125,21 +133,17 @@
                 return String(arg)
             }
 
-            // Capture console output inside the sandbox iframe only (do not print eval return values —
-            // appending those is what produced a trailing "undefined", especially when trailing
-            // // comments swallowed an injected "return ''").
             frameWindow.console.log = function () {
                 var parts = Array.prototype.map.call(arguments, formatLogArg)
                 outputDiv.textContent += parts.join(' ') + '\n'
             }
 
             try {
-                // Run in the iframe scope; ignore the return value so "undefined" is never echoed.
                 ;(new frameWindow.Function(code))()
             } catch (error) {
                 outputDiv.textContent = "Error: " + error.message
             }
         }
-        
+
     </script>
 </div>

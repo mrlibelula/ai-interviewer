@@ -36,6 +36,17 @@
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
 
+        @if (request()->routeIs('interview-start'))
+        <script>
+            try {
+                // Default to IDE unless user explicitly chose Reader
+                if (localStorage.getItem('interviewWorkspaceLayout') !== 'classic') {
+                    document.documentElement.classList.add('interview-ide');
+                }
+            } catch (e) {}
+        </script>
+        @endif
+
         <!-- Styles -->
         @livewireStyles
     </head>
@@ -53,12 +64,12 @@
             || request()->routeIs('profile.show')
             || request()->routeIs('interview-start')
         )
-        <!-- bg effect -->
-        <svg viewBox="0 0 1024 1024" class="absolute hidden lg:block left-1/2_ -top-[5rem] xl:-top-[30rem] top-[40%]_ _top-2/3 -z-10 h-[75rem]_ w-[68rem] -translate-y-1/2 [mask-image:radial-gradient(closest-side,white,transparent)] sm:left-full_ sm:-ml-80 _xl:left-1/2 left-1/4 xl:ml-0 xl:-translate-x-1/2 xl:translate-y-0" aria-hidden="true">
+        <!-- bg effect — Reader grayscale radial fade (also shows through transparent IDE chrome) -->
+        <svg viewBox="0 0 1024 1024" class="interview-bg-glow absolute pointer-events-none hidden lg:block -top-[5rem] xl:-top-[30rem] -z-10 h-[75rem]_ w-[68rem] -translate-y-1/2 [mask-image:radial-gradient(closest-side,white,transparent)] left-1/4 xl:left-1/2 xl:ml-0 xl:-translate-x-1/2 xl:translate-y-0" aria-hidden="true">
             <circle cx="512" cy="512" r="512" fill="url(#759c1415-0410-454c-8f7c-9a820de03641)" fill-opacity="0.7" />
             <defs>
                 <radialGradient id="759c1415-0410-454c-8f7c-9a820de03641">
-                    <!-- gray: #e1e4e8 - green: #b5cece -->
+                    <!-- gray: #e1e4e8 - matches Reader light/dark grayscale fade -->
                     <stop :stop-color="darkMode ? '#434c5b' : '#dddee0'" />
                     <stop offset="1" :stop-color="darkMode ? '#434c5b' : '#dddee0'" />
                 </radialGradient>
@@ -78,7 +89,7 @@
                     @livewire('top-header')
                 </div>
 
-                <div class=" mt-[3.8rem]">
+                <div class="mt-[3.8rem] interview-content-wrap">
                     @if (isset($header))
                     <!-- Page Heading -->
                     <x-heading hasBg="{{ request()->routeIs('dashboard') ? false : false }}">

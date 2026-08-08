@@ -182,6 +182,33 @@
     @apply transition duration-300 ease-in-out;
 }
 
+/* Sidebar hover tooltips (light / dark) */
+.sidebar-tip {
+    @apply relative;
+}
+
+.sidebar-tooltip {
+    @apply pointer-events-none absolute left-full top-1/2 z-[60] ml-3 -translate-y-1/2
+        whitespace-nowrap rounded-md px-2.5 py-1.5 text-xs font-medium tracking-wide
+        opacity-0 translate-x-1 scale-95
+        shadow-lg ring-1 backdrop-blur-sm
+        bg-white/95 text-gray-800 ring-gray-200/90
+        dark:bg-gray-950/95 dark:text-gray-100 dark:ring-gray-600/70 dark:shadow-black/40
+        transition-all duration-200 ease-out delay-75;
+}
+
+.sidebar-tooltip::before {
+    content: '';
+    @apply absolute right-full top-1/2 -translate-y-1/2
+        border-[5px] border-transparent border-r-white/95
+        dark:border-r-gray-950/95;
+}
+
+.sidebar-tip:hover > .sidebar-tooltip,
+.sidebar-tip:focus-visible > .sidebar-tooltip {
+    @apply opacity-100 translate-x-0 scale-100 delay-100;
+}
+
 .smooth-500 {
     @apply transition duration-500 ease-in-out;
 }
@@ -265,8 +292,8 @@
 .loader-74 {
     width: 100%;
     height: 4.8px;
-    display: inline-block;
-    /* position: relative; */
+    display: block;
+    position: relative;
     overflow: hidden;
 }
 .loader-74::after {
@@ -279,6 +306,15 @@
     left: 0;
     -webkit-animation: hitZak 0.6s ease-in-out infinite alternate;
             animation: hitZak 0.6s ease-in-out infinite alternate;
+}
+
+/* Sit on the seam above the input (classic); IDE pins via .chatbot-loader */
+.chatbot-input-wrap > .chatbot-loader {
+    top: 0;
+    transform: translateY(-50%);
+}
+.workspace-ide .chatbot-input-wrap > .chatbot-loader {
+    transform: none;
 }
 @-webkit-keyframes hitZak {
     0% {
@@ -348,4 +384,531 @@
 #nprogress .spinner-icon {
     border-top-color: #2fd399 !important;
     border-left-color: #2fd399 !important;
+}
+
+/* ——— Interview workspace (classic + IDE) ——— */
+body.ide-dragging {
+    cursor: col-resize !important;
+    user-select: none !important;
+}
+body.ide-dragging.ide-dragging-row {
+    cursor: row-resize !important;
+}
+
+html.interview-ide footer {
+    display: none !important;
+}
+
+html.interview-ide .interview-content-wrap {
+    height: calc(100vh - 3.8rem);
+    overflow: hidden;
+    background: transparent;
+}
+
+html.interview-ide main {
+    background: transparent;
+}
+
+/* Amplify the same Reader grayscale glow behind the glass IDE */
+html.interview-ide .interview-bg-glow {
+    display: block !important;
+    width: min(90vw, 72rem);
+    height: auto;
+    top: 35%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 1;
+    z-index: 0;
+}
+
+html.interview-ide .interview-content-wrap,
+html.interview-ide .interview-workspace,
+html.interview-ide .workspace-ide {
+    position: relative;
+    z-index: 1;
+}
+
+/* Classic: two-column reading layout (problem+editor | meta) */
+.workspace-classic .workspace-body-classic {
+    display: grid;
+    grid-template-columns: minmax(0, 7fr) minmax(0, 3fr);
+    grid-template-areas:
+        "problem meta"
+        "editor meta";
+    gap: 2.5rem 2.5rem;
+    align-items: start;
+    max-width: 80rem;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 2rem 1rem 2.5rem;
+}
+
+@media (min-width: 640px) {
+    .workspace-classic .workspace-body-classic {
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+    }
+}
+
+@media (min-width: 1024px) {
+    .workspace-classic .workspace-body-classic {
+        padding-left: 2rem;
+        padding-right: 2rem;
+    }
+}
+
+@media (max-width: 1279px) {
+    .workspace-classic .workspace-body-classic {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+            "problem"
+            "editor"
+            "meta";
+        gap: 3rem;
+    }
+}
+
+.workspace-classic .panel-problem { grid-area: problem; }
+.workspace-classic .panel-editor-col { grid-area: editor; }
+.workspace-classic .panel-meta { grid-area: meta; }
+.workspace-classic .ide-splitter { display: none !important; }
+.workspace-classic .ide-panel-header { display: none !important; }
+
+.workspace-classic .code-editor-iframe {
+    height: 33vh;
+}
+
+.workspace-classic .code-editor-terminal {
+    height: 8rem;
+    margin-top: 0.25rem;
+    border-radius: 0.375rem;
+}
+
+.workspace-ide {
+    height: calc(100vh - 3.8rem);
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+    background: transparent;
+}
+
+.workspace-ide .ide-titlebar {
+    flex-shrink: 0;
+    font-size: 1rem; /* match chatbot text-base */
+    line-height: 1.5;
+    background: rgba(255, 255, 255, 0.35) !important;
+    border-bottom-color: rgba(209, 213, 219, 0.35) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+.dark .workspace-ide .ide-titlebar {
+    background: rgba(17, 24, 39, 0.28) !important;
+    border-bottom-color: rgba(55, 65, 81, 0.4) !important;
+}
+
+.workspace-ide .workspace-body {
+    flex: 1;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: var(--ide-left, 26%) minmax(0, 1fr) var(--ide-right, 26%);
+    grid-template-rows: minmax(0, 1fr);
+    gap: 0.35rem;
+    padding: 0.35rem;
+    background: transparent;
+}
+
+.workspace-ide .panel-problem {
+    grid-column: 1;
+    grid-row: 1;
+}
+
+.workspace-ide .panel-editor-col {
+    grid-column: 2;
+    grid-row: 1;
+}
+
+.workspace-ide .panel-meta {
+    grid-column: 3;
+    grid-row: 1;
+}
+
+.workspace-ide .panel-problem,
+.workspace-ide .panel-editor-col,
+.workspace-ide .panel-meta {
+    min-width: 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* Glass panels — Reader grayscale radial fade shows through */
+.workspace-ide .ide-panel {
+    background: rgba(255, 255, 255, 0.42);
+    border: 1px solid rgba(209, 213, 219, 0.35);
+    border-radius: 0.5rem;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    box-shadow: none;
+}
+
+.dark .workspace-ide .ide-panel {
+    background: rgba(17, 24, 39, 0.22);
+    border-color: rgba(75, 85, 99, 0.35);
+}
+
+/* Challenge (left) panel: transparent so the main color-face bg shows through */
+.workspace-ide .panel-problem.ide-panel,
+.dark .workspace-ide .panel-problem.ide-panel {
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border-color: transparent;
+    box-shadow: none;
+}
+
+.workspace-ide .panel-problem .ide-panel-header,
+.dark .workspace-ide .panel-problem .ide-panel-header {
+    background: transparent;
+}
+
+.workspace-ide .ide-panel-header {
+    @apply flex items-center justify-between gap-x-2 px-3 py-1.5 font-semibold tracking-wider uppercase text-gray-500 dark:text-gray-400 border-b shrink-0;
+    font-size: 1rem;
+    line-height: 1.5;
+    border-bottom-color: rgba(209, 213, 219, 0.35);
+    background: rgba(255, 255, 255, 0.25);
+}
+
+.dark .workspace-ide .ide-panel-header {
+    border-bottom-color: rgba(75, 85, 99, 0.35);
+    background: rgba(31, 41, 55, 0.25);
+}
+
+.workspace-ide .panel-editor-col {
+    border-left: none;
+    border-right: none;
+}
+
+.dark .workspace-ide .panel-editor-col {
+    border-left-color: transparent;
+    border-right-color: transparent;
+}
+
+/* Keep editor chrome slightly glassier; Monaco iframe stays solid for contrast */
+.workspace-ide .code-editor-toolbar {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(209, 213, 219, 0.3) !important;
+}
+
+.dark .workspace-ide .code-editor-toolbar {
+    background: rgba(17, 24, 39, 0.2);
+    border-color: rgba(75, 85, 99, 0.35) !important;
+}
+
+.workspace-ide .code-editor-iframe {
+    background: transparent !important;
+}
+
+.workspace-ide .ide-mobile-tabs {
+    background: rgba(255, 255, 255, 0.35) !important;
+    backdrop-filter: blur(10px);
+}
+
+.dark .workspace-ide .ide-mobile-tabs {
+    background: rgba(31, 41, 55, 0.35) !important;
+}
+
+.workspace-ide .panel-problem-scroll {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    font-size: 1rem; /* match chatbot text-base */
+    line-height: 1.5;
+}
+
+/* Challenge card keeps large Reader typography; normalize in IDE only */
+.workspace-ide .panel-problem-scroll .challenge-description {
+    font-size: 1rem !important;
+    line-height: 1.5 !important;
+}
+
+/* Session column: no outer scrollbar — chat messages scroll internally */
+.workspace-ide .panel-meta-scroll {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.5rem 0.65rem 0.65rem;
+}
+
+.workspace-ide .panel-meta-scroll .session-xp {
+    gap: 0.2rem;
+    padding: 0.2rem;
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+.workspace-ide .panel-meta-scroll .session-xp > div:not(.session-timer-row) {
+    padding-top: 0.4rem;
+    padding-bottom: 0.4rem;
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+.workspace-ide .panel-meta-scroll .session-xp > div:not(.session-timer-row) > div:first-child {
+    white-space: normal;
+    font-size: 1rem;
+}
+
+.workspace-ide .session-timer-label,
+.workspace-ide .session-timer-value {
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+/* Timer skins: one Alpine instance, two UIs */
+.workspace-classic .timer-inline-ui {
+    display: none !important;
+}
+
+.workspace-classic .timer-boxed-ui {
+    display: inline-flex !important;
+}
+
+.workspace-classic .session-timer-row {
+    margin-bottom: 0.35rem;
+    padding: 0.65rem 0.5rem;
+    display: flex;
+    justify-content: center;
+}
+
+.workspace-classic .timer-boxed-ui {
+    gap: 0.5rem;
+}
+
+.workspace-ide .timer-boxed-ui {
+    display: none !important;
+}
+
+.workspace-ide .timer-inline-ui {
+    display: flex !important;
+}
+
+.workspace-ide .session-timer-row {
+    margin: 0;
+    padding: 0;
+}
+
+.workspace-ide .code-editor-root {
+    flex: 1;
+    min-height: 0;
+    height: 100%;
+}
+
+.workspace-ide .code-editor-iframe {
+    flex: 1 1 auto;
+    height: auto !important;
+    min-height: 0;
+}
+
+.workspace-ide .code-editor-terminal {
+    height: var(--ide-bottom, 22%);
+    min-height: 4.5rem;
+    max-height: 50%;
+}
+
+.workspace-ide .ide-splitter {
+    position: absolute;
+    z-index: 20;
+    flex-shrink: 0;
+}
+
+.workspace-ide .ide-splitter-v {
+    top: 0;
+    bottom: 0;
+    width: 0;
+}
+
+.workspace-ide .ide-splitter-v::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: -3px;
+    width: 6px;
+    cursor: col-resize;
+    background: transparent;
+}
+
+.workspace-ide .ide-splitter-v:hover::after,
+.workspace-ide .ide-splitter-v:active::after {
+    background: rgba(16, 185, 129, 0.35);
+}
+
+.workspace-ide .ide-splitter-h {
+    height: 0;
+}
+
+.workspace-ide .ide-splitter-h::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: -3px;
+    height: 6px;
+    cursor: row-resize;
+    background: transparent;
+}
+
+.workspace-ide .ide-splitter-h:hover::after,
+.workspace-ide .ide-splitter-h:active::after {
+    background: rgba(16, 185, 129, 0.35);
+}
+
+.workspace-ide .chatbot-panel {
+    flex: 1 1 0;
+    min-height: 0;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch !important;
+    gap: 0 !important;
+}
+
+.workspace-ide .chatbot-panel > .chatbot-header {
+    flex-shrink: 0;
+    margin-bottom: 0 !important;
+    border-radius: 0.5rem 0.5rem 0 0;
+    padding-top: 0.4rem;
+    padding-bottom: 0.4rem;
+    font-size: 1rem;
+    box-shadow: none;
+}
+
+.workspace-ide .chatbot-panel > .chatbot-layout,
+.workspace-ide .chatbot-layout {
+    flex: 1 1 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.workspace-ide .chatbot-messages {
+    flex: 1 1 0 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    padding-top: 0.75rem !important;
+    padding-bottom: 0.75rem !important;
+}
+
+/* Keep input in normal flow so the column height adds up */
+.workspace-ide .chatbot-input-wrap {
+    position: relative;
+    flex-shrink: 0;
+    height: 2.75rem;
+    display: flex;
+    align-items: center;
+}
+
+.workspace-ide .chatbot-input-wrap .chatbot-textarea {
+    position: absolute;
+    inset: 0;
+    min-height: 0 !important;
+    height: 100% !important;
+    max-height: 100%;
+    resize: none;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    padding-left: 0.75rem !important;
+    padding-right: 2.75rem !important;
+    line-height: 2.75rem !important;
+    border-radius: 0 0 0.5rem 0.5rem;
+    display: flex;
+    align-items: center;
+}
+
+.workspace-ide .chatbot-input-wrap .chatbot-send {
+    position: absolute;
+    top: 50%;
+    right: 0.65rem;
+    transform: translateY(-50%);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    padding: 0;
+    margin: 0;
+    line-height: 0;
+}
+
+.workspace-ide .chatbot-input-wrap .chatbot-send svg {
+    display: block;
+    width: 1.15rem;
+    height: 1.15rem;
+}
+
+.workspace-ide .chatbot-layout > template,
+.workspace-ide .chatbot-layout .chatbot-error {
+    display: none;
+}
+
+.workspace-classic {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.workspace-ide .code-editor-toolbar-bottom {
+    display: none;
+}
+
+.workspace-ide .ide-mobile-tabs {
+    display: none;
+}
+
+/* Stack to tabs only on small phones/tablets — keep 3 columns when DevTools is open on desktop */
+@media (max-width: 767px) {
+    .workspace-ide .workspace-body {
+        display: flex;
+        flex-direction: column;
+        grid-template-columns: none;
+    }
+
+    .workspace-ide .ide-splitter {
+        display: none !important;
+    }
+
+    .workspace-ide .ide-mobile-tabs {
+        display: flex;
+    }
+
+    .workspace-ide .panel-problem,
+    .workspace-ide .panel-editor-col,
+    .workspace-ide .panel-meta {
+        display: none;
+        flex: 1;
+        width: 100%;
+        border: none;
+        grid-column: auto;
+        grid-row: auto;
+    }
+
+    .workspace-ide .panel-problem.is-mobile-active,
+    .workspace-ide .panel-editor-col.is-mobile-active,
+    .workspace-ide .panel-meta.is-mobile-active {
+        display: flex;
+    }
+
+    .workspace-ide .code-editor-terminal {
+        height: 28%;
+    }
 }
