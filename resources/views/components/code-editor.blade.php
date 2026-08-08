@@ -52,6 +52,40 @@
             restyleOutputFrame(isDark)
         }
 
+        /** Monaco / challenge / chat scrollbar thumbs — must live inside the iframe */
+        function outputScrollbarCss(isDark) {
+            var thumb = isDark ? '#313d47' : '#c1c1c0'
+            var thumbHover = isDark ? '#3d4d59' : '#a8a8a7'
+            var scheme = isDark ? 'dark' : 'light'
+            var bodyBg = isDark ? '#000' : '#e5e7eb'
+            return `
+html, body {
+    margin: 0;
+    height: 100%;
+    background: ${bodyBg};
+    color-scheme: ${scheme};
+    overflow: hidden;
+}
+#output-shell {
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    box-sizing: border-box;
+    scrollbar-width: thin;
+    scrollbar-color: ${thumb} transparent;
+}
+#output-shell::-webkit-scrollbar { width: 12px; height: 12px; }
+#output-shell::-webkit-scrollbar-track { background: transparent; }
+#output-shell::-webkit-scrollbar-thumb {
+    background-color: ${thumb};
+    border-radius: 6px;
+    border: 3px solid transparent;
+    background-clip: padding-box;
+}
+#output-shell::-webkit-scrollbar-thumb:hover { background-color: ${thumbHover}; }
+`
+        }
+
         function restyleOutputFrame(isDark) {
             var outputFrame = document.getElementById('output-frame')
             if (!outputFrame) return
@@ -64,6 +98,11 @@
                     ? 'w-full h-full py-9 px-4 bg-black text-gray-300 font-mono'
                     : 'w-full h-full py-9 px-4 bg-gray-200 text-gray-800 font-mono'
                 doc.body.style.background = isDark ? '#000' : '#e5e7eb'
+                var styleEl = doc.getElementById('output-scroll-theme')
+                if (styleEl) {
+                    styleEl.textContent = outputScrollbarCss(isDark)
+                }
+                doc.documentElement.style.colorScheme = isDark ? 'dark' : 'light'
             } catch (e) {}
         }
 
@@ -136,18 +175,17 @@
             var shellClass = isDark
                 ? 'w-full h-full py-9 px-4 bg-black text-gray-300 font-mono'
                 : 'w-full h-full py-9 px-4 bg-gray-200 text-gray-800 font-mono'
-            var bodyBg = isDark ? '#000' : '#e5e7eb'
 
             var outputFrame = document.getElementById('output-frame')
             outputFrame.contentDocument.open()
             outputFrame.contentDocument.write(`<!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="color-scheme: ${isDark ? 'dark' : 'light'}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sandboxed Script</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.0.3/dist/tailwind.min.css">
-    <style>html, body { margin: 0; height: 100%; background: ${bodyBg}; }</style>
+    <style id="output-scroll-theme">${outputScrollbarCss(isDark)}</style>
 </head>
 <body>
     <div id="output-shell" class="${shellClass}">
