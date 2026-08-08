@@ -157,7 +157,7 @@
             >
                 {{ __('Settings') }}
             </x-responsive-nav-link-no-anchor>
-            <x-responsive-nav-link-no-anchor @click="darkMode = !darkMode" 
+            <x-responsive-nav-link-no-anchor @click="darkMode = !darkMode; $dispatch('theme-changed')" 
                 {{-- :active="request()->routeIs('dashboard')" --}}
             >
                 {{ __('Dark mode') }}

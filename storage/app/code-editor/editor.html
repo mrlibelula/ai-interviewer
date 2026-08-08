@@ -173,10 +173,74 @@ console.log(sayHello('Bob'));
         const editorCopyButton = document.getElementById('editorCopyClipboard')
         const editorJsResult = document.getElementById('editorJsResult')
         
-        let isDarkMode = parent.document.querySelector('#codeIframe').getAttribute('dark-mode')
-        let theme = isDarkMode ? 'vs-dark' : 'vs'
+        let isDarkMode = false
+        let theme = 'vs'
+        let monacoEditorReady = false
+        let pendingThemeDark = null
 
-        let encSolverCode = parent.document.querySelector('#codeIframe').getAttribute('solver-code') ?? false
+        function parseParentDarkMode() {
+            try {
+                const iframeEl = parent.document.querySelector('#codeIframe')
+                const attr = iframeEl ? iframeEl.getAttribute('dark-mode') : null
+                // Alpine removes the attr when false; may set "" / "true" when true
+                if (attr !== null) {
+                    const v = String(attr).toLowerCase()
+                    if (v === 'false' || v === '0') return false
+                    if (v === 'true' || v === '1' || v === '') return true
+                }
+                if (parent.document.documentElement.classList.contains('dark')) return true
+                return parent.localStorage.getItem('dark') === 'true'
+            } catch (e) {
+                return false
+            }
+        }
+
+        function applyMonacoTheme(dark) {
+            isDarkMode = !!dark
+            theme = isDarkMode ? 'vs-dark' : 'vs'
+            if (typeof monaco === 'undefined' || !monaco.editor || !monacoEditorReady) {
+                pendingThemeDark = isDarkMode
+                return
+            }
+            try {
+                monaco.editor.setTheme(isDarkMode ? 'default' : 'vs')
+            } catch (e) {}
+        }
+
+        function handleParentThemeMessage(event) {
+            if (!event.data || typeof event.data !== 'object') return
+            if (event.data.type === 'data' && typeof event.data.data === 'boolean') {
+                applyMonacoTheme(event.data.data)
+                return
+            }
+            if (event.data.type === 'theme' && typeof event.data.darkMode === 'boolean') {
+                applyMonacoTheme(event.data.darkMode)
+            }
+        }
+
+        // Theme toggle from parent (theme-switcher posts { type: 'data', data: bool })
+        window.addEventListener('message', handleParentThemeMessage)
+
+        // Also react when Alpine updates :dark-mode on the iframe (covers all toggles)
+        try {
+            const iframeEl = parent.document.querySelector('#codeIframe')
+            if (iframeEl && typeof MutationObserver !== 'undefined') {
+                new MutationObserver(() => {
+                    applyMonacoTheme(parseParentDarkMode())
+                }).observe(iframeEl, { attributes: true, attributeFilter: ['dark-mode'] })
+            }
+        } catch (e) {}
+
+        isDarkMode = parseParentDarkMode()
+        theme = isDarkMode ? 'vs-dark' : 'vs'
+
+        let encSolverCode = (() => {
+            try {
+                return parent.document.querySelector('#codeIframe').getAttribute('solver-code') ?? false
+            } catch (e) {
+                return false
+            }
+        })()
 
         var CODE = `// Write your solution code here
 
@@ -305,8 +369,8 @@ console.log(sayHello('Bob'));
                 } 
             })
         
-            if (theme === 'vs-dark') {
-                monaco.editor.defineTheme('default', {
+            // Always register custom dark theme so live light↔dark toggles can use it
+            monaco.editor.defineTheme('default', {
                     base: 'vs-dark',
                     inherit: true,
                     rules: [
@@ -972,7 +1036,7 @@ console.log(sayHello('Bob'));
                         },
                         {
                             "foreground": "82b1ff",
-                            "token": "beginning.punctuation.definition.list.markdown"
+                            "token":                         "beginning.punctuation.definition.list.markdown"
                         }
                     ],
                     colors: {
@@ -987,9 +1051,11 @@ console.log(sayHello('Bob'));
                         "minimap.background": "#101723"
                     }
                 });
-            }
 
-            monaco.editor.setTheme('default')
+            monacoEditorReady = true
+            const themeDark = pendingThemeDark !== null ? pendingThemeDark : isDarkMode
+            pendingThemeDark = null
+            applyMonacoTheme(themeDark)
 
             editorPreview.body.innerHTML = CODE
         
@@ -1016,6 +1082,10 @@ console.log(sayHello('Bob'));
             }
 
             window.addEventListener('message', event => {
+                // Theme messages are handled by handleParentThemeMessage
+                if (event.data && (event.data.type === 'data' || event.data.type === 'theme')) {
+                    return
+                }
                 const getCode = event.data.getCode ?? false  // bool
                 const runCode = event.data.runCode ?? false  // bool
                 const saveCode = event.data.saveCode ?? false  // bool

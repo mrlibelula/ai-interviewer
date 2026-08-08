@@ -5,7 +5,7 @@
 
     <iframe :dark-mode="darkMode" :solver-code="'{{ \App\Tool::encode($solverCode) }}'"
         class="code-editor-iframe bg-white dark:bg-black/80 border-gray-300 dark:border-gray-800 overflow-hidden overflow-y-hidden w-full min-h-0"
-        src="{{ route('embed-editor', ['v' => 'js-indent-2']) }}"
+        src="{{ route('embed-editor', ['v' => 'theme-sync-1']) }}"
         width="100%"
         frameborder="0"
         allowfullscreen
@@ -15,11 +15,11 @@
 
     <x-editor-nav class="code-editor-toolbar code-editor-toolbar-bottom shrink-0 border-t border-gray-300 dark:border-gray-600/80 px-2" />
 
-    <div class="code-editor-terminal relative shrink-0 overflow-hidden border-t border-gray-300 dark:border-gray-700/70 bg-black/90 dark:bg-black/70">
-        <div class="absolute z-10 left-0 top-0 px-3 py-1.5 text-gray-500 dark:text-gray-500 font-mono text-xs tracking-wider uppercase pointer-events-none">
+    <div class="code-editor-terminal relative shrink-0 overflow-hidden border-t border-gray-300 dark:border-gray-700/70 bg-gray-200 dark:bg-black/70">
+        <div class="absolute z-10 left-0 top-0 px-3 py-1.5 text-gray-600 dark:text-gray-500 font-mono text-xs tracking-wider uppercase pointer-events-none">
             Output
         </div>
-        <iframe id="output-frame" class="absolute inset-0 w-full h-full bg-black" frameborder="0" width="100%" height="100%"></iframe>
+        <iframe id="output-frame" class="absolute inset-0 w-full h-full bg-gray-200 dark:bg-black" frameborder="0" width="100%" height="100%"></iframe>
     </div>
 
     <script>
@@ -42,6 +42,34 @@
         function sendEventToIframe(message = { getCode: false, runCode: false, saveCode: false, complexity: false, analyze: false }) {
             iframe.contentWindow.postMessage(message, '*')
         }
+
+        function syncEditorTheme() {
+            const isDark = document.documentElement.classList.contains('dark')
+                || localStorage.getItem('dark') === 'true'
+            if (iframe && iframe.contentWindow) {
+                iframe.contentWindow.postMessage({ type: 'theme', darkMode: isDark }, '*')
+            }
+            restyleOutputFrame(isDark)
+        }
+
+        function restyleOutputFrame(isDark) {
+            var outputFrame = document.getElementById('output-frame')
+            if (!outputFrame) return
+            try {
+                var doc = outputFrame.contentDocument
+                if (!doc || !doc.body) return
+                var shell = doc.getElementById('output-shell')
+                if (!shell) return
+                shell.className = isDark
+                    ? 'w-full h-full py-9 px-4 bg-black text-gray-300 font-mono'
+                    : 'w-full h-full py-9 px-4 bg-gray-200 text-gray-800 font-mono'
+                doc.body.style.background = isDark ? '#000' : '#e5e7eb'
+            } catch (e) {}
+        }
+
+        window.addEventListener('theme-changed', () => {
+            requestAnimationFrame(syncEditorTheme)
+        })
 
         fullscreenIcons.forEach(function (el) {
             el.addEventListener('click', toggleFullScreen)
@@ -103,6 +131,13 @@
         }
 
         function runJsCode(code) {
+            var isDark = document.documentElement.classList.contains('dark')
+                || localStorage.getItem('dark') === 'true'
+            var shellClass = isDark
+                ? 'w-full h-full py-9 px-4 bg-black text-gray-300 font-mono'
+                : 'w-full h-full py-9 px-4 bg-gray-200 text-gray-800 font-mono'
+            var bodyBg = isDark ? '#000' : '#e5e7eb'
+
             var outputFrame = document.getElementById('output-frame')
             outputFrame.contentDocument.open()
             outputFrame.contentDocument.write(`<!DOCTYPE html>
@@ -112,9 +147,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sandboxed Script</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.0.3/dist/tailwind.min.css">
+    <style>html, body { margin: 0; height: 100%; background: ${bodyBg}; }</style>
 </head>
 <body>
-    <div class=" w-full h-full py-9 px-4 bg-black rounded-md text-gray-300 font-mono">
+    <div id="output-shell" class="${shellClass}">
         <div id="output"></div>
     </div>
 </body>
