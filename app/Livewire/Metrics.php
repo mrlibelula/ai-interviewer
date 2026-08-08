@@ -37,6 +37,7 @@ class Metrics extends Component
     public function toggleFeedbackType(string $feedback_type)
     {
         $this->feedback_type = $feedback_type ?? 'problem_specific';
+        $this->loadAiFeedback();
     }
 
     /**
@@ -63,14 +64,45 @@ class Metrics extends Component
         }
     }
 
+    /**
+     * Load AI feedback after the metrics shell has already rendered.
+     * Called via wire:init and when switching feedback tabs.
+     */
+    public function loadAiFeedback()
+    {
+        $this->userSolvedChallenges();
+        $this->aiFeedback();
+        $this->checkFeedbackNavNew();
+        $this->dispatch('feedback-loader-off');
+    }
+
+    /**
+     * Show the latest stored feedback immediately (no OpenAI call).
+     */
+    protected function loadCachedAiFeedback(): void
+    {
+        if (!$this->user_solved_challenges->total()) {
+            $this->ai_feedback = 'You must solve at least one challenge in order to get some A.I. feedback.';
+
+            return;
+        }
+
+        $last_feedback = Tool::userFeedbackHistory(auth()->user(), $this->feedback_type)->last();
+        if ($last_feedback && !empty($last_feedback->ai_feedback)) {
+            $this->ai_feedback = $last_feedback->ai_feedback;
+
+            return;
+        }
+
+        $this->ai_feedback = 'Generating A.I. feedback…';
+    }
+
     public function aiFeedback()
     {
         $feedback_type = $this->feedback_type;
         // verify if there's been some new 'solved_challenges' (via nb_solved_challenges)
         // OR if 'metrics.performance.ai_feedback' options is empty
         // achieve this by checking if 'ai_feedback' is empty or if 'prompt' is different than .env generated prompt
-
-        $this->ai_feedback = 'n/a';
 
         if ($this->user_solved_challenges->total()) {
             // generate prompt
@@ -139,7 +171,7 @@ class Metrics extends Component
             $this->ai_feedback = $last_feedback->ai_feedback ?? 'n/a';
 
         } else {
-            // no solved challenges found
+            $this->ai_feedback = 'You must solve at least one challenge in order to get some A.I. feedback.';
         }
     }
 
@@ -192,9 +224,7 @@ class Metrics extends Component
         $solved_challenges = $this->user_solved_challenges;
         
         $this->checkFeedbackNavNew();
-        $this->aiFeedback();
-
-        $this->dispatch('feedback-loader-off');
+        $this->loadCachedAiFeedback();
 
         return view('livewire.metrics', compact(['solved_challenges']));
     }

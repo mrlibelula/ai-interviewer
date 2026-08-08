@@ -1,4 +1,6 @@
-<div x-data="{ spinner: false, toggleSpinner() { this.spinner = this.spinner ? true : false } }" 
+<div
+    wire:init="loadAiFeedback"
+    x-data="{ spinner: {{ (($new_feedback[$feedback_type] ?? false) && $solved_challenges->total()) ? 'true' : 'false' }}, toggleSpinner() { this.spinner = this.spinner ? true : false } }"
     @feedback-loader-on.window="spinner = true"
     @feedback-loader-off.window="spinner = false"
 >
