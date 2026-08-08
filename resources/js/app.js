@@ -1,3 +1,3 @@
 import './bootstrap';
-import './interview-workspace';
+import './chatbot-typewriter';
 import './interview-workspace';

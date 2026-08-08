@@ -1424,8 +1424,8 @@ class Tool
     {
         $completion = preg_replace('/\n/', '??', $completion);
         $completion = preg_replace('/```(javascript)?/', '', $completion);
-        $return = htmlspecialchars_decode($completion);
-        return addslashes($return);
+        // Do not addslashes — Js::from() already JSON-escapes for Alpine/JS.
+        return htmlspecialchars_decode($completion);
     }
 
     /**

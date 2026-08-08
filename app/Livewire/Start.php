@@ -82,6 +82,20 @@ class Start extends Component
             $this->totalUserBonus();
             $this->solvedChallengesCount();
             $this->dispatch('stop-timer');
+
+            // Never remorph the Alpine IDE shell — nested chatbot updates alone; stats go via JS
+            $this->dispatch('session-stats-updated', [
+                'is_challenge_solved' => $this->is_challenge_solved,
+                'has_next_challenge' => $this->is_challenge_solved && count($this->challenge_ids) > 1,
+                'total_user_bonus_xp' => $this->total_user_bonus_xp,
+                'total_user_extra_xp' => $this->total_user_extra_xp,
+                'solved_challenges_count' => $this->solved_challenges_count,
+                'total_challenges_count' => $this->total_challenges_count,
+                'attempts' => $this->attempts,
+                'total_bonus' => $this->total_bonus,
+                'total_user_bonus' => $this->total_user_bonus,
+            ]);
+            $this->skipRender();
         }
     }
     
@@ -103,6 +117,7 @@ class Start extends Component
             $this->dispatch('chatbot-error-true', [
                 'error_message' => $errorMessage,
             ]);
+            $this->skipRender();
             return;
         }
         if (strlen($chatMessage) > 150) {
@@ -114,6 +129,7 @@ class Start extends Component
             $this->dispatch('chatbot-error-true', [
                 'error_message' => $errorMessage,
             ]);
+            $this->skipRender();
             return;
         }
         // append to '$openai_chat_settings->messages' array
@@ -131,6 +147,8 @@ class Start extends Component
 
         // append chat message
         $this->dispatch('appended-chat-message', $this->openai_chat_settings);
+        // Do not remorph the whole Alpine IDE workspace for a chat hand-off
+        $this->skipRender();
     }
 
     public function buildChatWelcomeMessage()

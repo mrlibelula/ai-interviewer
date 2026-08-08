@@ -474,6 +474,19 @@ html.interview-ide .workspace-ide {
 .workspace-classic .panel-meta { grid-area: meta; }
 .workspace-classic .ide-splitter { display: none !important; }
 .workspace-classic .ide-panel-header { display: none !important; }
+/* Static morph-safe classes from IDE must not affect Reader layout */
+.workspace-classic .editor-mount {
+    flex: none !important;
+}
+.workspace-classic .panel-meta-scroll {
+    flex: none !important;
+    overflow: visible !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+}
 
 .workspace-classic .code-editor-iframe {
     height: 33vh;
@@ -485,6 +498,12 @@ html.interview-ide .workspace-ide {
     border-radius: 0.375rem;
 }
 
+/*
+ * IDE layout keys off .workspace-ide AND html.interview-ide .interview-workspace.
+ * Livewire remorph can strip Alpine :class from the root; html.interview-ide is
+ * maintained in JS and keeps the grid/flex height chain intact when chat replies.
+ */
+html.interview-ide .interview-workspace:not(.workspace-classic),
 .workspace-ide {
     height: calc(100vh - 3.8rem);
     display: flex;
@@ -509,7 +528,9 @@ html.interview-ide .workspace-ide {
     border-bottom-color: rgba(55, 65, 81, 0.4) !important;
 }
 
+html.interview-ide .interview-workspace:not(.workspace-classic) .workspace-body,
 .workspace-ide .workspace-body {
+    position: relative;
     flex: 1;
     min-height: 0;
     display: grid;
@@ -629,6 +650,7 @@ html.interview-ide .workspace-ide {
     overflow-x: hidden;
     font-size: 1rem; /* match chatbot text-base */
     line-height: 1.5;
+    padding: 1rem;
 }
 
 /* Challenge card keeps large Reader typography; normalize in IDE only */
@@ -644,6 +666,7 @@ html.interview-ide .workspace-ide {
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    align-items: stretch;
     gap: 0.5rem;
     padding: 0.5rem 0.65rem 0.65rem;
 }
@@ -706,19 +729,29 @@ html.interview-ide .workspace-ide {
     padding: 0;
 }
 
-.workspace-ide .code-editor-root {
-    flex: 1;
+.workspace-ide .editor-mount {
+    overflow: hidden;
     min-height: 0;
-    height: 100%;
+}
+
+.workspace-ide .code-editor-root {
+    flex: 1 1 0%;
+    min-height: 0;
+    overflow: hidden;
+    /* do NOT use height:100% — fights flex and lets iframe content inflate the column */
 }
 
 .workspace-ide .code-editor-iframe {
-    flex: 1 1 auto;
-    height: auto !important;
+    /* height:0 + flex-grow: fill parent without sizing to embed document (was 250vh) */
+    flex: 1 1 0%;
     min-height: 0;
+    height: 0 !important;
+    width: 100%;
+    border: 0;
 }
 
 .workspace-ide .code-editor-terminal {
+    flex: 0 0 var(--ide-bottom, 22%);
     height: var(--ide-bottom, 22%);
     min-height: 4.5rem;
     max-height: 50%;

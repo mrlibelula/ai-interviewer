@@ -5,7 +5,7 @@
 
     <iframe :dark-mode="darkMode" :solver-code="'{{ \App\Tool::encode($solverCode) }}'"
         class="code-editor-iframe bg-white dark:bg-black/80 border-gray-300 dark:border-gray-800 overflow-hidden overflow-y-hidden w-full min-h-0"
-        src="{{ route('embed-editor') }}"
+        src="{{ route('embed-editor', ['v' => 'fill-100']) }}"
         width="100%"
         frameborder="0"
         allowfullscreen

@@ -18,7 +18,6 @@ window.InterviewWorkspace = {
     get() {
         try {
             const stored = localStorage.getItem(LAYOUT_KEY);
-            // Explicit classic choice wins; otherwise default to IDE
             if (stored === 'classic') return 'classic';
             return 'ide';
         } catch {
@@ -47,6 +46,76 @@ window.InterviewWorkspace = {
         );
     },
 
+    restoreDom() {
+        const root = document.querySelector('.interview-workspace');
+        if (!root) {
+            document.documentElement.classList.remove('interview-ide');
+            return;
+        }
+
+        const layout = this.get();
+        const ide = layout === 'ide';
+        root.classList.toggle('workspace-ide', ide);
+        root.classList.toggle('workspace-classic', !ide);
+        this.syncDocClass(layout);
+
+        if (ide) {
+            const panels = this.getPanels();
+            root.style.setProperty('--ide-left', `${panels.left}%`);
+            root.style.setProperty('--ide-right', `${panels.right}%`);
+            root.style.setProperty('--ide-bottom', `${panels.bottom}%`);
+        } else {
+            root.style.removeProperty('--ide-left');
+            root.style.removeProperty('--ide-right');
+            root.style.removeProperty('--ide-bottom');
+        }
+
+        const body = root.querySelector('.workspace-body');
+        if (body) {
+            body.classList.toggle('workspace-body-classic', !ide);
+            body.classList.add('relative');
+        }
+
+        root.querySelectorAll('.editor-mount').forEach((el) => {
+            el.classList.add('flex-1', 'min-h-0', 'flex', 'flex-col', 'relative', 'overflow-hidden');
+        });
+
+        let mobileTab = 'code';
+        try {
+            if (root._x_dataStack?.[0]?.mobileTab) {
+                mobileTab = root._x_dataStack[0].mobileTab;
+            }
+        } catch {
+            /* ignore */
+        }
+        const panelMap = {
+            problem: root.querySelector('.panel-problem'),
+            code: root.querySelector('.panel-editor-col'),
+            chat: root.querySelector('.panel-meta'),
+        };
+        Object.entries(panelMap).forEach(([key, el]) => {
+            if (!el) return;
+            el.classList.add('ide-panel');
+            el.classList.toggle(
+                'is-mobile-active',
+                ide &&
+                    ((key === 'problem' && mobileTab === 'problem') ||
+                        (key === 'code' && mobileTab === 'code') ||
+                        (key === 'chat' && mobileTab === 'chat')),
+            );
+        });
+
+        window.dispatchEvent(new Event('resize'));
+        const iframe = document.getElementById('codeIframe');
+        if (iframe?.contentWindow) {
+            try {
+                iframe.contentWindow.postMessage({ layout: true }, '*');
+            } catch {
+                /* ignore */
+            }
+        }
+    },
+
     getPanels() {
         try {
             const raw = JSON.parse(localStorage.getItem(PANELS_KEY) || 'null');
@@ -70,8 +139,21 @@ window.InterviewWorkspace = {
     },
 };
 
-window.createInterviewWorkspace = function createInterviewWorkspace() {
+/**
+ * @param {{ isChallengeSolved?: boolean, stats?: object, hasNextChallenge?: boolean }} [initial]
+ */
+window.createInterviewWorkspace = function createInterviewWorkspace(initial = {}) {
     const panels = window.InterviewWorkspace.getPanels();
+    const stats = {
+        total_user_bonus_xp: 0,
+        total_user_extra_xp: 0,
+        solved_challenges_count: 0,
+        total_challenges_count: 0,
+        attempts: 0,
+        total_bonus: 0,
+        total_user_bonus: 0,
+        ...(initial.stats || {}),
+    };
 
     return {
         layout: window.InterviewWorkspace.get(),
@@ -79,10 +161,14 @@ window.createInterviewWorkspace = function createInterviewWorkspace() {
         left: panels.left,
         right: panels.right,
         bottom: panels.bottom,
+        isChallengeSolved: !!initial.isChallengeSolved,
+        hasNextChallenge: !!initial.hasNextChallenge,
+        stats,
         dragging: null,
         _onMove: null,
         _onUp: null,
         _onExternal: null,
+        _onSessionStats: null,
 
         init() {
             this.layout = window.InterviewWorkspace.get();
@@ -101,9 +187,32 @@ window.createInterviewWorkspace = function createInterviewWorkspace() {
             };
             window.addEventListener('workspace-layout-changed', this._onExternal);
 
+            // Parent Start skipRender() on solve — stats arrive via browser event only
+            this._onSessionStats = (e) => {
+                const payload = Array.isArray(e.detail) ? e.detail[0] : e.detail;
+                if (!payload || typeof payload !== 'object') return;
+                if (payload.is_challenge_solved != null) {
+                    this.isChallengeSolved = !!payload.is_challenge_solved;
+                }
+                if (payload.has_next_challenge != null) {
+                    this.hasNextChallenge = !!payload.has_next_challenge;
+                }
+                [
+                    'total_user_bonus_xp',
+                    'total_user_extra_xp',
+                    'solved_challenges_count',
+                    'total_challenges_count',
+                    'attempts',
+                    'total_bonus',
+                    'total_user_bonus',
+                ].forEach((key) => {
+                    if (payload[key] != null) this.stats[key] = payload[key];
+                });
+            };
+            window.addEventListener('session-stats-updated', this._onSessionStats);
+
             this.$watch('layout', (value) => {
                 this.ensureEditorVisible();
-                // Persist without re-dispatching into ourselves when already in sync
                 try {
                     localStorage.setItem(LAYOUT_KEY, value === 'ide' ? 'ide' : 'classic');
                 } catch {
@@ -127,8 +236,10 @@ window.createInterviewWorkspace = function createInterviewWorkspace() {
             if (this._onExternal) {
                 window.removeEventListener('workspace-layout-changed', this._onExternal);
             }
+            if (this._onSessionStats) {
+                window.removeEventListener('session-stats-updated', this._onSessionStats);
+            }
             this.stopDrag();
-            // Only clear if this workspace is leaving the page
             queueMicrotask(() => {
                 if (!document.querySelector('.interview-workspace')) {
                     document.documentElement.classList.remove('interview-ide');
@@ -223,10 +334,26 @@ window.createInterviewWorkspace = function createInterviewWorkspace() {
     };
 };
 
+function scheduleWorkspaceRestore() {
+    requestAnimationFrame(() => {
+        window.InterviewWorkspace?.restoreDom();
+    });
+}
+
 document.addEventListener('livewire:navigated', () => {
     window.InterviewWorkspace?.syncDocClass();
+    scheduleWorkspaceRestore();
 });
 
 document.addEventListener('DOMContentLoaded', () => {
     window.InterviewWorkspace?.syncDocClass();
+});
+
+document.addEventListener('livewire:init', () => {
+    Livewire.hook('morph.updated', () => {
+        scheduleWorkspaceRestore();
+    });
+    Livewire.hook('commit', ({ succeed }) => {
+        succeed(() => scheduleWorkspaceRestore());
+    });
 });

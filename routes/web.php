@@ -76,5 +76,8 @@ Route::middleware([
 
 Route::get('/embed-editor', function () {
     $editor = Storage::get('code-editor/editor.html');
-    return response($editor)->header('Content-Type', 'text/html');
+
+    return response($editor)
+        ->header('Content-Type', 'text/html; charset=UTF-8')
+        ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
 })->name('embed-editor');

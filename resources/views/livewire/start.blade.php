@@ -18,8 +18,28 @@
     </x-container>
 </div>
 @else
+{{-- Livewire root stays outside wire:ignore so nested $wire / events still bind to Start --}}
+<div>
+{{--
+  Entire IDE shell is wire:ignore so Start remorphs (or morphdom sibling bugs) can NEVER
+  reorder titlebar / panels. Nested @livewire('chatbot') still updates on its own.
+  Session XP / solved badge update via Alpine + session-stats-updated events.
+--}}
 <div
-    x-data="createInterviewWorkspace()"
+    wire:ignore
+    x-data="createInterviewWorkspace({
+        isChallengeSolved: {{ $is_challenge_solved ? 'true' : 'false' }},
+        hasNextChallenge: {{ ($is_challenge_solved && count($challenge_ids) > 1) ? 'true' : 'false' }},
+        stats: {
+            total_user_bonus_xp: {{ (int) $total_user_bonus_xp }},
+            total_user_extra_xp: {{ (int) $total_user_extra_xp }},
+            solved_challenges_count: {{ (int) $solved_challenges_count }},
+            total_challenges_count: {{ (int) $total_challenges_count }},
+            attempts: {{ (int) $attempts }},
+            total_bonus: {{ (int) $total_bonus }},
+            total_user_bonus: {{ (int) $total_user_bonus }},
+        },
+    })"
     class="interview-workspace"
     :class="layout === 'ide' ? 'workspace-ide' : 'workspace-classic'"
     :style="panelStyle()"
@@ -57,11 +77,9 @@
                 <x-slot name="right">
                     <div class="flex items-center gap-x-4">
                         <x-workspace-layout-toggle />
-                        @if ($is_challenge_solved)
-                        <div class="group w-[2.5rem] h-[2.5rem] md:w-[3.5em] md:h-[3.5em]">
+                        <div x-show="isChallengeSolved" x-cloak class="group w-[2.5rem] h-[2.5rem] md:w-[3.5em] md:h-[3.5em]">
                             <x-icon-shield class=" w-full h-full group-hover:animate-spin-y" />
                         </div>
-                        @endif
                     </div>
                 </x-slot>
             </x-heading-content>
@@ -95,11 +113,9 @@
                 @endforeach
             </x-pill>
             <x-workspace-layout-toggle />
-            @if ($is_challenge_solved)
-            <div class="group w-7 h-7 flex items-center justify-center">
+            <div x-show="isChallengeSolved" x-cloak class="group w-7 h-7 flex items-center justify-center">
                 <x-icon-shield class="w-full h-full group-hover:animate-spin-y" />
             </div>
-            @endif
         </div>
     </div>
 
@@ -118,19 +134,19 @@
     </div>
 
     <div
-        class="workspace-body"
-        :class="layout === 'classic' ? 'workspace-body-classic' : 'relative'"
+        class="workspace-body relative"
+        :class="layout === 'classic' ? 'workspace-body-classic' : ''"
         x-ref="workspaceBody"
     >
         {{-- Problem --}}
         <section
-            class="panel-problem"
-            :class="layout === 'ide' ? ('ide-panel' + (mobileTab === 'problem' ? ' is-mobile-active' : '')) : ''"
+            class="panel-problem ide-panel"
+            :class="mobileTab === 'problem' ? 'is-mobile-active' : ''"
         >
             <div class="ide-panel-header" x-show="layout === 'ide'" x-cloak>
                 <span>Challenge</span>
             </div>
-            <div :class="layout === 'ide' ? 'panel-problem-scroll p-4' : 'flex flex-col gap-y-4'">
+            <div class="panel-problem-body panel-problem-scroll flex flex-col gap-y-4">
                 @livewire('challenge-card', [
                     'challenge' => $challenge,
                     'header' => false,
@@ -144,8 +160,8 @@
 
         {{-- Editor (single instance for both layouts) --}}
         <section
-            class="panel-editor-col"
-            :class="layout === 'ide' ? ('ide-panel relative' + (mobileTab === 'code' ? ' is-mobile-active' : '')) : ''"
+            class="panel-editor-col ide-panel relative"
+            :class="mobileTab === 'code' ? 'is-mobile-active' : ''"
         >
             <div class="ide-panel-header" x-show="layout === 'ide'" x-cloak>
                 <span>Solution</span>
@@ -165,10 +181,8 @@
             </div>
 
             <div
-                class="editor-mount min-h-0 flex flex-col relative"
-                :class="layout === 'ide' ? 'flex-1' : ''"
+                class="editor-mount min-h-0 flex flex-1 flex-col relative overflow-hidden"
                 x-ref="classicEditorBody"
-                wire:ignore
             >
                 <x-code-editor solverCode="{{ $challenge_attributes['solution_code'] ?? '' }}" />
                 <div
@@ -183,37 +197,35 @@
             </div>
         </section>
 
-        {{-- Meta: timer, XP, chat — same pill/chat colors as classic --}}
+        {{-- Meta: timer, XP, chat --}}
         <section
-            class="panel-meta"
-            :class="layout === 'ide' ? ('ide-panel' + (mobileTab === 'chat' ? ' is-mobile-active' : '')) : ''"
+            class="panel-meta ide-panel"
+            :class="mobileTab === 'chat' ? 'is-mobile-active' : ''"
         >
             <div class="ide-panel-header" x-show="layout === 'ide'" x-cloak>
                 <span>Session</span>
             </div>
-            <div :class="layout === 'ide'
-                ? 'panel-meta-scroll'
-                : 'flex flex-col items-center gap-y-10'">
+            <div class="panel-meta-body panel-meta-scroll flex flex-col items-center gap-y-10">
 
                 <div class="session-xp grid grid-cols-2 items-center gap-1 justify-between w-full text-gray-950 dark:text-gray-400 bg-gray-200 dark:bg-gray-800 p-1 rounded-lg shadow shrink-0">
                     <div class="session-timer-row col-span-2">
                         <x-countdown-timer time_limit="{{ $challenge->time_limit }}" class="w-full" />
                     </div>
-                    <x-pill-xp label="Bonus XP">+{{ $total_user_bonus_xp }}</x-pill-xp>
-                    <x-pill-xp label="Extra Bonus">+{{ $total_user_extra_xp }}</x-pill-xp>
+                    <x-pill-xp label="Bonus XP">+<span x-text="stats.total_user_bonus_xp">{{ $total_user_bonus_xp }}</span></x-pill-xp>
+                    <x-pill-xp label="Extra Bonus">+<span x-text="stats.total_user_extra_xp">{{ $total_user_extra_xp }}</span></x-pill-xp>
                     <x-pill-xp label="Solved">
                         <div class="flex items-center gap-x-2 justify-between w-full">
-                            @if ($is_challenge_solved)
-                            <div class="w-5 h-5">
+                            <div x-show="isChallengeSolved" x-cloak class="w-5 h-5">
                                 <x-icon-star class="w-full h-full text-amber-300" fill="currentColor" />
                             </div>
-                            @endif
-                            {{ $solved_challenges_count . '/' . $total_challenges_count }}
+                            <span>
+                                <span x-text="stats.solved_challenges_count">{{ $solved_challenges_count }}</span>/<span x-text="stats.total_challenges_count">{{ $total_challenges_count }}</span>
+                            </span>
                         </div>
                     </x-pill-xp>
-                    <x-pill-xp label="Attempts">{{ $attempts }}</x-pill-xp>
-                    <x-pill-xp class=" col-span-2" label="Total XP gained in this challenge">+{{ $total_bonus }}</x-pill-xp>
-                    <x-pill-xp class=" col-span-2 dark:bg-gray-900/50" label="Overall Total XP">+{{ $total_user_bonus }}</x-pill-xp>
+                    <x-pill-xp label="Attempts"><span x-text="stats.attempts">{{ $attempts }}</span></x-pill-xp>
+                    <x-pill-xp class=" col-span-2" label="Total XP gained in this challenge">+<span x-text="stats.total_bonus">{{ $total_bonus }}</span></x-pill-xp>
+                    <x-pill-xp class=" col-span-2 dark:bg-gray-900/50" label="Overall Total XP">+<span x-text="stats.total_user_bonus">{{ $total_user_bonus }}</span></x-pill-xp>
                 </div>
 
                 <div class="chatbot-panel w-full flex flex-col min-h-0 flex-1">
@@ -224,18 +236,15 @@
                     ], key('chatbot-'.$challenge->id))
                 </div>
 
-                <div class="flex items-center gap-x-3 justify-between shrink-0" :class="layout === 'ide' ? '' : 'mt-16'">
-                    @if ($is_challenge_solved && count($challenge_ids) > 1)
+                <div
+                    x-show="isChallengeSolved && hasNextChallenge"
+                    x-cloak
+                    class="flex items-center gap-x-3 justify-between shrink-0"
+                    :class="layout === 'ide' ? '' : 'mt-16'"
+                >
                     <x-secondary-button wire:click="nextChallenge">
                         Next challenge
                     </x-secondary-button>
-                    @elseif ($is_challenge_solved)
-                    <a wire:navigate href="{{ route('interview') }}">
-                        <x-secondary-button>
-                            Challenges List
-                        </x-secondary-button>
-                    </a>
-                    @endif
                 </div>
             </div>
         </section>
@@ -260,5 +269,6 @@
             title="Drag to resize · double-click to reset"
         ></div>
     </div>
+</div>
 </div>
 @endif

@@ -1,4 +1,4 @@
-@props(['divId' => 'chat-01', 'avatar' => '🤖', 'user' => 'Chatbot', 'color' => 'sky', 'role' => '', 'content' => '', 'speed' => 50, 'animate' => true])
+@props(['divId' => 'chat-01', 'avatar' => '🤖', 'user' => 'Chatbot', 'color' => 'sky', 'role' => '', 'content' => '', 'speed' => 22, 'animate' => true])
 @php
     $tw_colors = [
         'sky' => 'text-sky-700 dark:text-sky-400',
@@ -14,96 +14,17 @@
     ];
     $tw_color = $tw_colors[$color] ?? $tw_colors['green'];
 @endphp
-<div class="flex flex-col gap-y-1">
+<div class="flex flex-col gap-y-1" wire:key="{{ $divId }}">
     <span class="{{ $tw_color }} font-semibold">{{ $avatar }} {{ $user }}:</span>
-    <div class="tracking-wide leading-normal " id="{{ $divId }}" 
+    <div
+        class="tracking-wide leading-normal"
+        id="{{ $divId }}"
         @if ($animate)
-        x-init="slowTextDisplay('{{ \App\Tool::prepareAiAnswerString($content) }}', {{ (int)$speed }}, '{{ $divId }}')"
+        x-data="{ text: {{ \Illuminate\Support\Js::from(\App\Tool::prepareAiAnswerString($content)) }}, speed: {{ (int) $speed }}, id: {{ \Illuminate\Support\Js::from($divId) }} }"
+        x-init="slowTextDisplay(text, speed, id)"
         @else
-        x-init="textDisplay('{{ \App\Tool::prepareAiAnswerString($content) }}', '{{ $divId }}')"
+        x-data="{ text: {{ \Illuminate\Support\Js::from(\App\Tool::prepareAiAnswerString($content)) }}, id: {{ \Illuminate\Support\Js::from($divId) }} }"
+        x-init="textDisplay(text, id)"
         @endif
     ></div>
-
-    <script>
-        var intervalId;
-    
-        function textDisplay(text, divId) {
-            const chatElement = document.getElementById(divId);
-            const lines = text.split(/\n/); // Split text by line breaks
-    
-            lines.forEach((line, lineIndex) => {
-                if (lineIndex > 0) {
-                    chatElement.appendChild(document.createElement("br"));
-                }
-    
-                const parts = line.split(/(\s+)/); // Split line into words and spaces
-                parts.forEach(part => {
-                    const splitPart = part.split('??');
-                    if (splitPart.length > 1) {
-                        chatElement.appendChild(document.createTextNode(splitPart[0]));
-                        chatElement.appendChild(document.createElement("br"));
-                        chatElement.appendChild(document.createElement("br"));
-                        let key = 1;
-                        while (key < splitPart.length && splitPart[key] === '') key++;
-                        if (key < splitPart.length) {
-                            chatElement.appendChild(document.createTextNode(capitalizeFirstLetter(splitPart[key])));
-                        }
-                    } else {
-                        chatElement.appendChild(document.createTextNode(decodeHTML(part)));
-                    }
-                });
-            });
-    
-            return text;
-        }
-    
-        function slowTextDisplay(text, delay = 100, elementId = 'chat--1') {
-            const chatElement = document.getElementById(elementId);
-            const lines = text.split(/\n/); // Split text by line breaks
-            let lineIndex = 0;
-            let wordIndex = 0;
-            let words = lines[0].split(/(\s+)/);
-    
-            intervalId = setInterval(function() {
-                if (wordIndex < words.length) {
-                    const part = words[wordIndex];
-                    const splitPart = part.split('??');
-                    if (splitPart.length > 1) {
-                        chatElement.appendChild(document.createTextNode(splitPart[0]));
-                        chatElement.appendChild(document.createElement("br"));
-                        chatElement.appendChild(document.createElement("br"));
-                        let key = 1;
-                        while (key < splitPart.length && splitPart[key] === '') key++;
-                        if (key < splitPart.length) {
-                            chatElement.appendChild(document.createTextNode(capitalizeFirstLetter(splitPart[key])));
-                        }
-                    } else {
-                        chatElement.appendChild(document.createTextNode(decodeHTML(part)));
-                    }
-                    wordIndex++;
-                } else if (lineIndex < lines.length - 1) {
-                    chatElement.appendChild(document.createElement("br"));
-                    lineIndex++;
-                    words = lines[lineIndex].split(/(\s+)/);
-                    wordIndex = 0;
-                } else {
-                    clearInterval(intervalId);
-                }
-            }, delay);
-    
-            return text;
-        }
-    
-        function capitalizeFirstLetter(str) {
-            return str.charAt(0).toUpperCase() + str.slice(1);
-        }
-    
-        function decodeHTML(html) {
-            var txt = document.createElement("textarea");
-            txt.innerHTML = html;
-            return txt.value;
-        }
-    </script>
-    
-    
 </div>

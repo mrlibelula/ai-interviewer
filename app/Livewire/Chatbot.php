@@ -105,6 +105,7 @@ class Chatbot extends Component
             Tool::toastr($this, [
                 'message' => $completion,
             ], 'error');
+            $this->dispatch('chatbot-loader-off');
             return;
         }
 
@@ -122,6 +123,7 @@ class Chatbot extends Component
 
         $this->getLastChatMessage();
         $this->dispatch('speak');
+        $this->dispatch('chatbot-loader-off');
     }
 
     /**
@@ -164,6 +166,7 @@ class Chatbot extends Component
             Tool::toastr($this, [
                 'message' => $completion,
             ], 'error');
+            $this->dispatch('chatbot-loader-off');
             return;
         }
         
@@ -189,6 +192,7 @@ class Chatbot extends Component
 
         $this->getLastChatMessage();
         $this->dispatch('speak');
+        $this->dispatch('chatbot-loader-off');
     }
 
     public function appendedChatMessage(array $openai_chat_settings)
@@ -232,6 +236,7 @@ class Chatbot extends Component
             Tool::toastr($this, [
                 'message' => is_string($completion) ? $completion : 'Chat completion failed',
             ], 'error');
+            $this->dispatch('chatbot-loader-off');
             return;
         }
         
@@ -248,6 +253,7 @@ class Chatbot extends Component
         auth()->user()->updateChallenge($this->challenge, ['openai_chat_settings' => $this->openai_chat_settings]);
         $this->getLastChatMessage();
         $this->dispatch('speak');
+        $this->dispatch('chatbot-loader-off');
     }
 
     public function mount()
@@ -271,7 +277,7 @@ class Chatbot extends Component
     public function render()
     {
         $this->getLastChatMessage();
-        $this->dispatch('chatbot-loader-off');
+
         return view('livewire.chatbot');
     }
 }
