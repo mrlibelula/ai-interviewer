@@ -286,7 +286,10 @@ class Tool
                     'type' => 'array',
                     'items' => ['type' => 'string'],
                 ],
-                'solution_code' => ['type' => 'string'],
+                'solution_code' => [
+                    'type' => 'string',
+                    'description' => 'Complete runnable solution with tab indentation (not spaces). For JS: vanilla browser script only — no module.exports/export/require/import; end with console.log test cases.',
+                ],
             ],
             'required' => [
                 'title',
@@ -439,6 +442,7 @@ class Tool
      * Strip legacy "no newlines in solution_code" rules and require readable multi-line code.
      * Older enviro prompts banned "\n" in every JSON value (including solution_code), which
      * makes newer models minify solutions into one line that the codebox cannot format.
+     * Also require browser-runnable vanilla scripts (no CommonJS/ESM exports).
      */
     public static function sanitizeChallengeGenerationPrompt(string $prompt): string
     {
@@ -466,10 +470,20 @@ class Tool
             $prompt
         ) ?? $prompt;
 
-        $suffix = ' Important: Put solution_code in the JSON response as readable multi-line source with real newline characters and normal indentation. Never minify or collapse solution_code into a single line.';
+        $suffix = ' Important: Put solution_code in the JSON response as readable multi-line source with real newline characters and perfect tab indentation (tab characters only for indent levels, never spaces). Never minify or collapse solution_code into a single line.';
 
         if (!preg_match('/solution_code MUST be readable multi-line|Never minify or collapse solution_code/i', $prompt)) {
             $prompt = rtrim($prompt) . $suffix;
+        }
+
+        $vanillaSuffix = ' For JavaScript (and browser-run scripts), solution_code MUST be a complete vanilla script with no module.exports, export, require, or import. End with pure console.log test cases that print expected results.';
+
+        if (!preg_match('/no module\.exports|vanilla script|pure console\.log test/i', $prompt)) {
+            $prompt = rtrim($prompt) . $vanillaSuffix;
+        }
+
+        if (!preg_match('/tab indentation|indent.*tabs|tabs for indent/i', $prompt)) {
+            $prompt = rtrim($prompt) . ' Indent solution_code with tab characters only (perfect tab indentation; do not use spaces for indentation).';
         }
 
         return $prompt;
@@ -477,6 +491,7 @@ class Tool
 
     /**
      * Normalize LLM solution_code for display (real newlines, expand minified brace-language code).
+     * Strips Node/ESM export lines that break the in-browser code editor runner.
      */
     public static function normalizeSolutionCode(?string $code): string
     {
@@ -503,12 +518,16 @@ class Tool
             $expanded = [];
             foreach ($lines as $line) {
                 $trim = trim($line);
-                    if (
+                // Expand dense single-line blobs only; keep short already-formatted braced lines.
+                $looksMinified = strlen($trim) > 60
+                    || (substr_count($trim, '{') >= 2 && substr_count($trim, ';') >= 1)
+                    || (substr_count($trim, ';') >= 2 && str_contains($trim, '{'));
+                if (
                     $trim !== ''
                     && !str_starts_with($trim, '//')
                     && substr_count($trim, "\n") === 0
                     && preg_match('/[{;}]/', $trim)
-                    && (strlen($trim) > 60 || substr_count($trim, '{') > 0)
+                    && $looksMinified
                 ) {
                     $expanded[] = self::expandMinifiedBraceCode($trim);
                 } else {
@@ -518,7 +537,129 @@ class Tool
             $code = implode("\n", $expanded);
         }
 
+        $code = self::stripModuleExportStatements($code);
+        $code = self::convertLeadingSpacesToTabs($code);
+
         return trim($code);
+    }
+
+    /**
+     * Convert leading space indentation to tabs so solution_code displays with consistent tab indents.
+     */
+    public static function convertLeadingSpacesToTabs(string $code, ?int $spacesPerTab = null): string
+    {
+        if ($code === '') {
+            return $code;
+        }
+
+        $spacesPerTab = $spacesPerTab ?? self::detectSpacesPerTab($code);
+        $lines = explode("\n", $code);
+        $result = [];
+
+        foreach ($lines as $line) {
+            if (!preg_match('/^([ \t]*)(.*)$/s', $line, $m)) {
+                $result[] = $line;
+                continue;
+            }
+
+            $ws = $m[1];
+            $rest = $m[2];
+            if ($ws === '') {
+                $result[] = $line;
+                continue;
+            }
+
+            $depth = 0;
+            $i = 0;
+            $len = strlen($ws);
+            while ($i < $len) {
+                if ($ws[$i] === "\t") {
+                    $depth++;
+                    $i++;
+                    continue;
+                }
+
+                $spaces = 0;
+                while ($i < $len && $ws[$i] === ' ') {
+                    $spaces++;
+                    $i++;
+                }
+                $depth += intdiv($spaces, $spacesPerTab);
+                if ($spaces % $spacesPerTab !== 0) {
+                    $depth++;
+                }
+            }
+
+            $result[] = str_repeat("\t", $depth) . $rest;
+        }
+
+        return implode("\n", $result);
+    }
+
+    /**
+     * Infer whether leading space indents are 2-space or 4-space style.
+     */
+    public static function detectSpacesPerTab(string $code): int
+    {
+        $counts = [];
+        foreach (explode("\n", $code) as $line) {
+            if (preg_match('/^( +)/', $line, $m)) {
+                $counts[] = strlen($m[1]);
+            }
+        }
+
+        if ($counts === []) {
+            return 2;
+        }
+
+        foreach ($counts as $c) {
+            if ($c === 2 || $c % 4 === 2) {
+                return 2;
+            }
+        }
+
+        return 4;
+    }
+
+    /**
+     * Remove CommonJS / ESM export lines so solution_code runs in the iframe runner.
+     * Keeps declarations when the line starts with `export class|function|const|...`.
+     */
+    public static function stripModuleExportStatements(string $code): string
+    {
+        if ($code === '') {
+            return $code;
+        }
+
+        $lines = preg_split("/\n/", $code) ?: [];
+        $kept = [];
+
+        foreach ($lines as $line) {
+            $trim = trim($line);
+            if (
+                preg_match('/^module\.exports\s*=/', $trim)
+                || preg_match('/^exports\.\w+\s*=/', $trim)
+                || preg_match('/^export\s+default\s+\w+\s*;?\s*$/', $trim)
+                || preg_match('/^export\s*\{[^}]*\}\s*;?\s*$/', $trim)
+            ) {
+                continue;
+            }
+
+            // `export class Foo` / `export function bar` / `export default class` → keep declaration
+            if (preg_match(
+                '/^export\s+(?:default\s+)?(function|class|const|let|var)\b(.*)$/',
+                $trim,
+                $matches
+            )) {
+                $indent = preg_match('/^(\s*)/', $line, $ind) ? $ind[1] : '';
+                $kept[] = $indent . $matches[1] . $matches[2];
+                continue;
+            }
+
+            $kept[] = $line;
+        }
+
+        return implode("\n", $kept);
     }
 
     /**
@@ -564,7 +705,7 @@ class Tool
 
         $newline = function () use (&$out, &$indent) {
             $out = rtrim($out, " \t");
-            $out .= "\n" . str_repeat('  ', max(0, $indent));
+            $out .= "\n" . str_repeat("\t", max(0, $indent));
         };
 
         for ($i = 0; $i < $len; $i++) {
