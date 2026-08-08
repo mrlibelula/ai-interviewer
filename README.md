@@ -18,7 +18,7 @@
 
 This is not a generic chatbot wrapper. It is a full interview workflow: curated coding challenges, timed sessions, an in-session AI assistant, automated solution review, and performance analytics your team can actually use in hiring decisions.
 
-> **Historical note:** This app was built when LLMs returned free-form text only — no JSON schema, no structured outputs, no guaranteed parseable fields. Every AI integration in this repo was engineered around that constraint.
+> **Historical note:** The original app was built when LLMs returned free-form text only — no JSON schema, no structured outputs. That era is preserved in [`docs/LEGACY_AI_SYSTEM.md`](docs/LEGACY_AI_SYSTEM.md) and Git tag/branch `legacy-gpt-3.5-era` / `archive/legacy-gpt-3.5-era`. Current code uses structured outputs where it helps (challenge gen + code analysis) while keeping the same simple `??wildcard` prompt style.
 
 ---
 

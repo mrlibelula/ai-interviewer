@@ -71,7 +71,8 @@ class User extends Authenticatable
     public function challenges()
     {
         return $this->belongsToMany(Challenge::class, 'challenge_solver')
-            ->withPivot('solved_at', 'current_time_limit', 'solution_code', 'attempts', 'bonus_xp', 'openai_chat_settings', 'observations')
+            ->using(ChallengeSolver::class)
+            ->withPivot('solved_at', 'current_time_limit', 'solution_code', 'attempts', 'bonus_xp', 'extra_bonus', 'openai_chat_settings', 'observations', 'solved_time_seconds')
             ->withTimestamps();
     }
 

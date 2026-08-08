@@ -28,9 +28,10 @@
 
 | Technology | Version | Purpose |
 |------------|---------|---------|
-| **openai-php/laravel** | ^0.8.1 | OpenAI API client for Laravel |
-| **OpenAI GPT Models** | Configurable via ENV | AI chat completions, challenge generation |
+| **openai-php/laravel** | ^0.8.1 | OpenAI API client for Laravel (not `laravel/ai`) |
+| **OpenAI GPT Models** | Configurable via ENV (e.g. `gpt-5-mini`) | Chat completions; structured `json_schema` for challenge gen + code analysis |
 | **DALL·E Integration** | API v1 | AI-generated challenge banner images |
+| **Prompt templates** | `config/openai_prompts.php` + `enviros.prompt_templates` | Admin-editable with `.env` / config fallback |
 
 ### Frontend Stack
 
@@ -143,16 +144,19 @@ ai-interviewer/
 The platform uses OpenAI's GPT models to dynamically generate coding challenges:
 
 **Prompt Engineering System:**
-- Configurable prompt blueprints stored in `Enviro` table
-- Dynamic wildcard replacement system (`??topics`, `??languages`, `??difficulty_level`, etc.)
-- Separator-based content splitting for reliable JSON + code extraction
-- Auto-fix for malformed JSON responses from LLM
+- Defaults in `config/openai_prompts.php`; admin overrides in `enviros.prompt_templates` (`Tool::promptTemplate`)
+- Challenge-generation blueprint still built/saved via admin Prompt UI → `enviros.prompt`
+- Dynamic wildcard replacement (`" ??topics "`, `" ??languages "`, etc.)
+- **Structured outputs** (`response_format` / `json_schema`) for challenge generation and analyze-code (`feedback` + `solved`)
+- Legacy `OPENAI_CODE_SEPARATOR` / `fixJsonString` retained only as fallback — see [`docs/LEGACY_AI_SYSTEM.md`](docs/LEGACY_AI_SYSTEM.md)
 
 **Key Methods in `App\Tool`:**
-- `getLLMChallenge()` — Calls OpenAI API, parses response, creates emulated Challenge model
+- `promptTemplate()` / `defaultPromptTemplates()` — Enviro → config resolution
+- `challengeOutputSchema()` / `codeAnalysisOutputSchema()` / `jsonSchemaResponseFormat()`
+- `getLLMCompletion($messages, $responseFormat = null)` — optional structured format
+- `getLLMChallenge()` — Structured challenge JSON (incl. `solution_code`), emulated Challenge model
 - `importAIChallenge()` — Persists AI-generated challenge with all relations
 - `wildcards()` — Injects live database data into prompt templates
-- `fixJsonString()` — Repairs malformed JSON from LLM responses
 - `generateChallengeImage()` — DALL·E integration for banner images
 
 ### 2. Real-Time Interview Sessions
@@ -706,6 +710,18 @@ php artisan optimize  # Route/config caching
 - Real-time feedback accelerates talent matching
 
 ---
+
+## History & archives
+
+- Legacy AI design (gpt-3.5-era, prompt-forced JSON, separators): [`docs/LEGACY_AI_SYSTEM.md`](docs/LEGACY_AI_SYSTEM.md)
+- Git tag: `legacy-gpt-3.5-era` · branch: `archive/legacy-gpt-3.5-era`
+
+## Future (not implemented)
+
+- **HTML/CSS/JS challenges** with sandboxed `srcdoc` preview beside Monaco tabs
+- **Python in-browser** via Pyodide for algorithm practice
+- **PHP/Python server sandbox** (Docker/Judge0-like) only if ops cost is acceptable — do not eval on the Laravel host
+- Optional `ai_feedbacks` table if `users.options` history becomes unwieldy
 
 ## Version Information
 

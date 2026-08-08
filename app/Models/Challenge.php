@@ -20,6 +20,7 @@ class Challenge extends Model
     ])
     {
         return $this->belongsToMany(User::class, 'challenge_solver')
+            ->using(ChallengeSolver::class)
             ->withPivot($pivot_columns)
             ->withTimestamps();
     }

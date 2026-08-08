@@ -2,9 +2,9 @@
 
 ## Stack
 - Backend: Laravel 10 (PHP 8.1), Jetstream Livewire stack, Sanctum sessions, Spatie Permission for roles, Socialite (Google OAuth).
-- AI: openai-php/laravel for chat completions and DALL·E image gen; custom `App\Tool` helpers to build prompts, parse completions, and import AI-created challenges.
+- AI: `openai-php/laravel` for chat completions (optional structured `json_schema` for challenge gen + code analysis); custom `App\Tool` helpers for prompts, schemas, and imports. Not using `laravel/ai` (requires newer Laravel/PHP).
 - Frontend: Blade + Livewire 3 components, Tailwind CSS (forms/typography), Vite build, Axios for HTTP.
-- Data: Eloquent models with rich pivot data (`challenge_solver`), soft deletes, seeders for baseline content.
+- Data: Eloquent models with rich pivot data (`challenge_solver`), soft deletes, seeders for baseline content; `Enviro` holds challenge-gen prompt + admin `prompt_templates`.
 - Tooling: Laravel Pint, PHPUnit, Debugbar; Vite/Tailwind dev workflow.
 
 ## Core User Flows
@@ -16,8 +16,8 @@
   - Tracks attempts, elapsed time, and solved status per user/challenge pivot.
   - Enforces time limits and stops timers when solved or expired.
   - Computes bonus XP and extra bonus based on completion speed; persists to pivot (`challenge_solver`) along with solution timing.
-  - Builds a personalized chat welcome message from env config.
-- **Chatbot assistance**: Validates user chat input, appends to stored `openai_chat_settings` per challenge/user, emits UI events for loader/error states, and keeps the chat transcript for OpenAI follow-ups.
+  - Builds a personalized chat welcome message from `Tool::promptTemplate('welcome')`.
+- **Chatbot assistance**: Validates user chat input, appends to stored `openai_chat_settings` per challenge/user, emits UI events for loader/error states, and keeps the chat transcript for OpenAI follow-ups. Interviewer-style prompts discourage full solutions.
 - **Hints & solutions**: Challenges carry hints, test cases, and solution code (solution stripped for non-admin solvers to prevent leakage).
 - **Gamification & metrics**:
   - Progress counters (total vs solved), percentage solved, per-challenge/user bonus totals.
@@ -30,33 +30,37 @@
   - List, soft-delete, and edit challenges; adjust status/visibility/difficulty and time limits with inline validation.
   - Attach/detach topics, languages, frameworks, packages, and tags; reloads challenge relations after each toggle.
   - Views include AI solution code for privileged roles.
+- **AI admin settings** (`/admin/ai-settings`):
+  - Replaces the old non-functional “Manage Topics” nav stub.
+  - Edit interview-related prompt templates stored in `enviros.prompt_templates` (welcome, recommendations, session system, analyze, complexity, feedback, DALL·E, challenge-generation content rules).
+  - Falls back to `config/openai_prompts.php` / `.env` when DB values are empty.
+  - Documents `??` wildcards for operators.
 - **Admin prompt building**:
-  - Admin-only screens let you curate prompt blueprints stored in the `Enviro` table; blueprints use wildcards (`??topics`, `??languages`, `??difficulty_level`, `??dbchallenges`, `??tags`, `??separator`) so a single template adapts to different interview contexts.
-  - `Tool::replaceWildcards` and `Tool::wildcards` inject live data (topics, languages in DB, tag lists, recent challenge titles) to produce a fully contextualized prompt per request.
-  - Separator-aware splitting (`OPENAI_CODE_SEPARATOR`) keeps narrative and code outputs separated for reliable parsing.
-  - Final prompts are saved (`updateEnviroPromptString`) so operators can preview/iterate before calling OpenAI.
+  - Admin-only screens curate challenge-generation blueprints in `enviros.prompt` with wildcards (`??topics`, `??languages`, `??difficulty_level`, `??dbchallenges`, `??tags`, …).
+  - `Tool::replaceWildcards` / `Tool::wildcards` inject live data.
 - **AI challenge generation**:
-  - Prompt blueprints with wildcard replacement (`??topics`, `??languages`, `??difficulty_level`, `??dbchallenges`, `??tags`, `??separator`).
-  - `Tool::getLLMChallenge` calls OpenAI Chat API, fixes malformed JSON, splits content from code via a configurable separator, and emulates a `Challenge` model from the response.
-  - `Tool::importAIChallenge` persists the challenge, links topics/languages/frameworks/packages/tags, stores the original prompt/completion IDs, and records the model used.
-  - Optional DALL·E image generation for challenge banners (configurable prompt template).
-- **Prompt builder & environment**:
-  - Prompt parts stored in `Enviro` table; utilities to update the final prompt string and to expand separator-based parts for better LLM control.
-  - Helpers to encode/decode route-safe data and to sanitize AI answer strings for storage/display.
-- **Embed editor**: `/embed-editor` serves a stored HTML code editor from `storage/app/code-editor/editor.html` for inline coding previews.
+  - Uses OpenAI **structured outputs** (`response_format` / `json_schema`) so challenge fields + `solution_code` arrive as one JSON object.
+  - Legacy separator (`%%%%%`) + `fixJsonString` kept as fallback only.
+  - `Tool::importAIChallenge` persists the challenge and relations; optional DALL·E banners (prompt template driven).
+- **Embed editor**: `/embed-editor` serves Monaco from `storage/app/code-editor/editor.html`. Host page uses `wire:ignore` around the iframe so Livewire re-renders do not destroy the editor; CDN load is pinned/single-path to reduce blank-iframe races. Host height styling left intentionally as-is.
 
 ## Data Model Highlights
 - `Challenge` belongs to `Difficulty`, `Status`, `Visibility`; many-to-many with `Topic`, `Language`, `Framework`, `Package`, `Tag`, and `User` (as creator and solver).
-- `challenge_solver` pivot includes attempts, time_limit snapshot, solution code, bonus XP, openai chat settings, observations, and solved timestamp.
+- `challenge_solver` pivot includes attempts, time_limit snapshot, solution code, bonus XP, openai chat settings, observations, and solved timestamp; custom `ChallengeSolver` pivot model casts chat settings to array.
+- `enviros.prompt_templates` JSON for admin-editable AI prompt overrides.
 - Utility queries: filter challenges by difficulty/topic, fetch counts per difficulty, compute solved percentage, and paginate solved-challenge metrics.
 
 ## Architecture & Runtime Notes
-- Routes: Authenticated group for landing/dashboard/interview/metrics; role-gated admin group for dashboard, prompt tooling, and challenge management; public login and Google OAuth endpoints.
+- Routes: Authenticated group for landing/dashboard/interview/metrics; role-gated admin group for dashboard, prompt tooling, AI settings, and challenge management; public login and Google OAuth endpoints.
 - Livewire events drive UI feedback (toasts, loaders) and timer control; session storage caches pending challenge queues.
-- Time calculations and XP logic rely on Carbon helpers (`calculateSeconds`, `calculateCompletionTime`, `calculateBonusXP`).
+- Default model via `OPENAI_MODEL` (e.g. `gpt-5-mini`).
 - Security: Role middleware plus Sanctum session guard; solution code stripped for non-admin solvers to avoid leakage.
+
+## History
+- Pre-upgrade (gpt-3.5-era, prompt-forced JSON, separators): see [`docs/LEGACY_AI_SYSTEM.md`](docs/LEGACY_AI_SYSTEM.md).
+- Git snapshot: tag `legacy-gpt-3.5-era`, branch `archive/legacy-gpt-3.5-era`.
 
 ## Developer Experience
 - Build: `npm run dev`/`npm run build` (Vite); Tailwind via PostCSS; Laravel assets via Jetstream presets.
 - Quality: PHPUnit tests scaffolded for auth/profile/token flows; Pint for formatting; Debugbar for local profiling.
-- Config: Requires `OPENAI_API_KEY`, `OPENAI_MODEL`, `OPENAI_CODE_SEPARATOR`, OAuth client IDs/secrets, and DB creds; prompt templates and defaults live in the `enviro` table and `.env`.
+- Config: Requires `OPENAI_API_KEY`, `OPENAI_MODEL`, OAuth client IDs/secrets, and DB creds; prompt defaults in `config/openai_prompts.php` with Enviro/admin overrides.

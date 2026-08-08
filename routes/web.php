@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\LoginController;
+use App\Livewire\Admin\AiSettings;
 use App\Livewire\Admin\Challenge;
 use App\Livewire\Admin\Challenges;
 use App\Livewire\Admin\Dashboard;
@@ -70,6 +71,7 @@ Route::middleware([
     Route::get('/admin/prompt', Prompt::class)->name('admin-prompt');
     Route::get('/admin/challenges', Challenges::class)->name('admin-challenges');
     Route::get('/admin/challenge', Challenge::class)->name('admin-challenge');
+    Route::get('/admin/ai-settings', AiSettings::class)->name('admin-ai-settings');
 });
 
 Route::get('/embed-editor', function () {

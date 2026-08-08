@@ -40,14 +40,14 @@ class Prompt extends Component
 
         // save data to DB
         $enviro = Enviro::first();
-        $enviro->prompt = json_encode([
+        $enviro->prompt = [
             'parts' => $this->prompt_parts,
             'string' => $this->prompt,
             'selected_topic' => $this->selected_topic,
             'selected_difficulty' => $this->selected_difficulty,
             'selected_language' => $this->selected_language,
             'blueprint' => $this->blueprint,
-        ]);
+        ];
         $enviro->save();
     }
 
@@ -87,7 +87,7 @@ class Prompt extends Component
      */
     public function loadBlueprintDataAndStoreToDB(bool $isNew = false): void
     {
-        $prototype_prompt_base_text = env('OPENAI_PROMPT_BASE_TEXT');
+        $prototype_prompt_base_text = Tool::promptTemplate('challenge_generation');
         $parts = explode('. ', $prototype_prompt_base_text);
         
         // search for 'separator/s' and append part/s to the main prompt array of strings
@@ -96,25 +96,27 @@ class Prompt extends Component
         // First or create enviro data
         $enviro = Enviro::first();
         if (!$enviro) {
-            $enviro = Enviro::firstOrCreate([
-                'prompt' => json_encode(['parts' => $final_parts]),
+            $enviro = Enviro::create([
+                'prompt' => ['parts' => $final_parts],
             ]);
         } else {
             if ($isNew) {
-                $enviro->prompt = json_encode(['parts' => $final_parts]);
+                $enviro->prompt = ['parts' => $final_parts];
                 $enviro->save();
             }
         }
 
-        // propagate enviro data into local props
-        $db_prompt = json_decode($enviro->prompt);
+        // propagate enviro data into local props (array cast or legacy JSON string)
+        $db_prompt = is_array($enviro->prompt)
+            ? (object) $enviro->prompt
+            : json_decode($enviro->prompt);
         $this->prompt = $db_prompt->string ?? '';
         $this->selected_topic = $db_prompt->selected_topic ?? 'all topics';
         $this->selected_difficulty = $db_prompt->selected_difficulty ?? 'easy';
         $this->selected_language = $db_prompt->selected_language ?? 'any';
         $this->blueprint = $db_prompt->blueprint ?? '';
-        $db_prompt_parts = $db_prompt->parts;
-        $this->prompt_parts = $db_prompt_parts;
+        $db_prompt_parts = $db_prompt->parts ?? [];
+        $this->prompt_parts = is_array($db_prompt_parts) ? $db_prompt_parts : [];
 
 
         // JSON single option (multiple JSONs in the future)

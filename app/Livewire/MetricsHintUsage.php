@@ -7,6 +7,19 @@ use Carbon\Carbon;
 
 class MetricsHintUsage extends Component
 {
+    protected function pivotChatMessages($pivot): array
+    {
+        $settings = $pivot->openai_chat_settings;
+        if (is_array($settings)) {
+            return $settings['messages'] ?? [];
+        }
+        if (is_string($settings) && $settings !== '') {
+            return json_decode($settings, true)['messages'] ?? [];
+        }
+
+        return [];
+    }
+
     public function getHintChartData()
     {
         $hintCounts = [
@@ -19,7 +32,7 @@ class MetricsHintUsage extends Component
         
         foreach ($challenges as $challenge) {
             $difficulty = strtolower($challenge->difficulty->name);
-            $chatMessages = json_decode($challenge->pivot->openai_chat_settings, true)['messages'] ?? [];
+            $chatMessages = $this->pivotChatMessages($challenge->pivot);
             
             $userMessages = array_filter($chatMessages, function($message) {
                 return $message['role'] === 'user' && !empty(trim($message['content']));
@@ -38,7 +51,7 @@ class MetricsHintUsage extends Component
         
         foreach (auth()->user()->challenges as $challenge) {
             $difficulty = strtolower($challenge->difficulty->name);
-            $chatMessages = json_decode($challenge->pivot->openai_chat_settings, true)['messages'] ?? [];
+            $chatMessages = $this->pivotChatMessages($challenge->pivot);
             $hintCount = count(array_filter($chatMessages, fn($msg) => 
                 $msg['role'] === 'user' && !empty(trim($msg['content']))
             ));
@@ -76,8 +89,7 @@ class MetricsHintUsage extends Component
         foreach ($challenges as $challenge) {
             $date = Carbon::parse($challenge->solved_at)->format('Y-m-d');
             if (isset($allDates[$date])) {
-                $chatSettings = json_decode($challenge->pivot->openai_chat_settings, true);
-                $messages = $chatSettings['messages'] ?? [];
+                $messages = $this->pivotChatMessages($challenge->pivot);
                 
                 $hintCount = count(array_filter($messages, function($msg) {
                     return isset($msg['role']) && 

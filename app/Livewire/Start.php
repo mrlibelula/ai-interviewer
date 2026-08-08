@@ -118,7 +118,8 @@ class Start extends Component
         $attempted_challenge = auth()->user()->challenges->where('id', '=', $this->challenge->id)->first();
         if ($attempted_challenge) {
             $challenge_attributes = $attempted_challenge->pivot;
-            $this->openai_chat_settings = json_decode($challenge_attributes->openai_chat_settings, true);
+            $settings = $challenge_attributes->openai_chat_settings;
+            $this->openai_chat_settings = is_array($settings) ? $settings : (json_decode($settings, true) ?? ['messages' => []]);
         }
 
         $this->openai_chat_settings['messages'][] = [
@@ -132,7 +133,7 @@ class Start extends Component
 
     public function buildChatWelcomeMessage()
     {
-        $this->chat_welcome = 'Hi ' . auth()->user()->name . ', ' . env('OPENAI_CHATBOT_WELCOME_MESSAGE');
+        $this->chat_welcome = 'Hi ' . auth()->user()->name . ', ' . Tool::promptTemplate('welcome');
     }
 
     /**
@@ -163,7 +164,8 @@ class Start extends Component
                 $challenge_attributes->save();
 
                 $this->challenge_attributes = $challenge_attributes->toArray();
-                $this->openai_chat_settings = json_decode($challenge_attributes->openai_chat_settings, true);
+                $settings = $challenge_attributes->openai_chat_settings;
+                $this->openai_chat_settings = is_array($settings) ? $settings : (json_decode($settings, true) ?? ['messages' => []]);
                 
             } else {
                 // attach Challenge to current User (solver)

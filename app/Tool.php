@@ -200,13 +200,146 @@ class Tool
      * @param array $messages
      * @return \OpenAI\Responses\Chat\CreateResponse|string
      */
-    public static function getLLMCompletion(array $messages = ['role' => 'user', 'content' => 'hi']): \OpenAI\Responses\Chat\CreateResponse|string
+    public const PROMPT_TEMPLATE_KEYS = [
+        'welcome',
+        'recommendations',
+        'challenge_system',
+        'analyze_user_code',
+        'complexity_analysis',
+        'feedback',
+        'dalle',
+        'challenge_generation',
+    ];
+
+    /**
+     * Resolve a prompt template: Enviro.prompt_templates → config/openai_prompts (includes .env).
+     */
+    public static function promptTemplate(string $key): string
+    {
+        $enviro = Enviro::first();
+        $templates = $enviro?->prompt_templates;
+
+        if (is_array($templates) && isset($templates[$key]) && is_string($templates[$key]) && $templates[$key] !== '') {
+            return $templates[$key];
+        }
+
+        return (string) config('openai_prompts.' . $key, '');
+    }
+
+    /**
+     * Default prompt templates for admin seeding / AI settings UI.
+     */
+    public static function defaultPromptTemplates(): array
+    {
+        $defaults = [];
+        foreach (self::PROMPT_TEMPLATE_KEYS as $key) {
+            $defaults[$key] = (string) config('openai_prompts.' . $key, '');
+        }
+
+        return $defaults;
+    }
+
+    /**
+     * JSON schema for structured challenge generation (includes solution_code).
+     */
+    public static function challengeOutputSchema(): array
+    {
+        return [
+            'type' => 'object',
+            'additionalProperties' => false,
+            'properties' => [
+                'title' => ['type' => 'string'],
+                'challenge' => ['type' => 'string'],
+                'difficulty_level' => ['type' => 'string', 'enum' => ['easy', 'medium', 'hard']],
+                'time_limit' => ['type' => 'string'],
+                'hints' => ['type' => 'string'],
+                'test_cases' => [
+                    'type' => 'array',
+                    'items' => ['type' => 'string'],
+                ],
+                'topics' => [
+                    'type' => 'array',
+                    'items' => ['type' => 'string'],
+                ],
+                'tags' => [
+                    'type' => 'array',
+                    'items' => ['type' => 'string'],
+                ],
+                'languages' => [
+                    'type' => 'array',
+                    'items' => ['type' => 'string'],
+                ],
+                'frameworks' => [
+                    'type' => 'array',
+                    'items' => ['type' => 'string'],
+                ],
+                'packages' => [
+                    'type' => 'array',
+                    'items' => ['type' => 'string'],
+                ],
+                'solution_code' => ['type' => 'string'],
+            ],
+            'required' => [
+                'title',
+                'challenge',
+                'difficulty_level',
+                'time_limit',
+                'hints',
+                'test_cases',
+                'topics',
+                'tags',
+                'languages',
+                'frameworks',
+                'packages',
+                'solution_code',
+            ],
+        ];
+    }
+
+    /**
+     * JSON schema for code analysis (feedback + solved flag).
+     */
+    public static function codeAnalysisOutputSchema(): array
+    {
+        return [
+            'type' => 'object',
+            'additionalProperties' => false,
+            'properties' => [
+                'feedback' => ['type' => 'string'],
+                'solved' => ['type' => 'boolean'],
+            ],
+            'required' => ['feedback', 'solved'],
+        ];
+    }
+
+    /**
+     * Structured-output response_format wrapper for json_schema.
+     */
+    public static function jsonSchemaResponseFormat(string $name, array $schema): array
+    {
+        return [
+            'type' => 'json_schema',
+            'json_schema' => [
+                'name' => $name,
+                'strict' => true,
+                'schema' => $schema,
+            ],
+        ];
+    }
+
+    public static function getLLMCompletion(array $messages = ['role' => 'user', 'content' => 'hi'], ?array $responseFormat = null): \OpenAI\Responses\Chat\CreateResponse|string
     {
         try {
-            return OpenAI::chat()->create([
-                'model' => env('OPENAI_MODEL'), 
-                'messages' => $messages, 
-            ]);
+            $payload = [
+                'model' => env('OPENAI_MODEL'),
+                'messages' => $messages,
+            ];
+
+            if ($responseFormat) {
+                $payload['response_format'] = $responseFormat;
+            }
+
+            return OpenAI::chat()->create($payload);
         } catch (\OpenAI\Exceptions\ErrorException $ee) {
             info($ee->getMessage());
             $error = $ee->getMessage();
@@ -229,50 +362,54 @@ class Tool
         try {
             $messages = [
                 [
-                    'role' => 'user', 
+                    'role' => 'user',
                     'content' => $prompt,
-                ], 
-            ];
-
-            $completion = OpenAI::chat()->create([
-                'model' => env('OPENAI_MODEL'), 
-                'messages' => $messages, 
-            ]);
-            
-            $completion_text = $completion->choices[0]->message->content;
-
-            $completion_text_parts = explode(env('OPENAI_CODE_SEPARATOR'), $completion_text);
-            
-            // for debugging purposes
-            $info_debug_array = [
-                'in_observation' => [
-                    'completion_text_parts' => $completion_text_parts,
-                    'comment' => 'It\'s still producing bug, null given on [0]. \\App\\Tool::177, log at \\App\\Tool::191'
                 ],
             ];
 
-            $completion_text_parts[0] = Tool::fixJsonString($completion_text_parts[0]);  // try to fix JSON response problems
-            $challenge = json_decode($completion_text_parts[0] ?? 'n/a');
-            
-            // expected bug (usually openai timeout connections)
-            if (!$challenge) {
-                // $component->dispatch('spinner-off');
-                info($info_debug_array);
-                dump('Something went wrong while decoding challenge completion string. "$challenge" is null. Check app log. 🙊', $completion, $completion_text_parts, $completion_text_parts[0], $completion_text_parts[1], json_validate($completion_text_parts[0] ?? 'NULL'), json_decode($completion_text_parts[0] ?? 'n/a'), $challenge);
+            $completion = self::getLLMCompletion(
+                $messages,
+                self::jsonSchemaResponseFormat('llm_challenge', self::challengeOutputSchema())
+            );
+
+            if (!$completion instanceof \OpenAI\Responses\Chat\CreateResponse) {
+                throw new Exception(is_string($completion) ? $completion : 'LLM challenge completion failed');
             }
 
-            // emulated Challenge Model response property
+            $completion_text = $completion->choices[0]->message->content;
+            $challenge = json_decode($completion_text ?? '');
+
+            // Legacy fallback: separator + fixJsonString (pre-structured-output models / failures)
+            if (!$challenge && str_contains((string) $completion_text, (string) env('OPENAI_CODE_SEPARATOR', '%%%%%'))) {
+                $completion_text_parts = explode(env('OPENAI_CODE_SEPARATOR'), $completion_text);
+                $completion_text_parts[0] = Tool::fixJsonString($completion_text_parts[0] ?? '');
+                $challenge = json_decode($completion_text_parts[0] ?? 'n/a');
+                if ($challenge && empty($challenge->solution_code)) {
+                    $challenge->solution_code = $completion_text_parts[1] ?? '';
+                }
+            }
+
+            if (!$challenge) {
+                info([
+                    'getLLMChallenge' => 'Failed to decode structured challenge JSON',
+                    'completion_text' => $completion_text,
+                ]);
+                dump('Something went wrong while decoding challenge completion string. "$challenge" is null. Check app log.', $completion, $completion_text);
+            }
+
             $emulated_challenge_model = new Challenge;
             $emulated_challenge_model->title = $challenge->title ?? 'n/a';
             $emulated_challenge_model->description = $challenge->challenge ?? 'n/a';
             $emulated_challenge_model->challenge_slug = Str::slug($challenge->title ?? 'n/a');
-            $emulated_challenge_model->difficulty_id = Difficulty::where('name', 'like', '%' . $challenge->difficulty_level . '%')->first()->id;
-            $emulated_challenge_model->test_cases = json_encode($challenge->test_cases);
-            $emulated_challenge_model->hints = $challenge->hints;
-            $emulated_challenge_model->time_limit = $challenge->time_limit;
+            $emulated_challenge_model->difficulty_id = Difficulty::where('name', 'like', '%' . ($challenge->difficulty_level ?? '') . '%')->first()->id;
+            $emulated_challenge_model->test_cases = is_string($challenge->test_cases ?? null)
+                ? $challenge->test_cases
+                : json_encode($challenge->test_cases ?? []);
+            $emulated_challenge_model->hints = $challenge->hints ?? '';
+            $emulated_challenge_model->time_limit = $challenge->time_limit ?? '00:30:00';
             $emulated_challenge_model->status_id = Status::where('name', 'like', '%active%')->first()->id;
             $emulated_challenge_model->visibility_id = Visibility::where('name', 'like', '%public%')->first()->id;
-            $emulated_challenge_model->solution_code = $completion_text_parts[1] ?? '';
+            $emulated_challenge_model->solution_code = $challenge->solution_code ?? '';
             $emulated_challenge_model->chatgpt_prompt = $prompt;
             $emulated_challenge_model->completion_id = $completion->id;
             $emulated_challenge_model->ai_model = $completion->model;
@@ -290,6 +427,8 @@ class Tool
             dump($ee->getMessage());
         } catch (\OpenAI\Exceptions\TransporterException $te) {
             dump($te->getMessage());
+        } catch (Exception $e) {
+            dump($e->getMessage());
         }
     }
 
@@ -308,7 +447,9 @@ class Tool
         $completion = $llm_challenge->completion;
         $prompt = $llm_challenge->prompt;
         $completion_text = $llm_challenge->completion_text;
-        $solution_code = $llm_challenge->emulated_challenge_model['solution_code'] ?? '';
+        $solution_code = $llm_challenge->emulated_challenge_model->solution_code
+            ?? $llm_challenge->challenge->solution_code
+            ?? '';
         $challenge_slug = Str::slug($challenge->title ?? '');
 
         // // generate an AI image (DALL-E) about the challenge
@@ -446,7 +587,7 @@ class Tool
         $end_point = 'https://api.openai.com/v1/images/generations';
         
         try {
-            $prompt = Tool::replaceWildcards(env('OPENAI_DALLE_CHALLENGE_PROMPT_BASE_TEXT'), collect([
+            $prompt = Tool::replaceWildcards(self::promptTemplate('dalle'), collect([
                 'challenge_title' => $challenge_title,
                 'challenge_topic' => $challenge_topic,
                 'language' => $language,
@@ -531,7 +672,15 @@ class Tool
         if ($enviro) {
             if ($key === 'root') return !$associative ? (object)$enviro->toArray() : $enviro->toArray();
             if (isset($enviro->$key)) {
-                return $associative ? json_decode($enviro->$key, true) : json_decode($enviro->$key);
+                $value = $enviro->$key;
+                if (is_array($value)) {
+                    return $associative ? $value : json_decode(json_encode($value));
+                }
+                if (is_string($value)) {
+                    return $associative ? json_decode($value, true) : json_decode($value);
+                }
+
+                return $associative ? (array) $value : (object) $value;
             }
         }
         return null;
@@ -681,15 +830,15 @@ class Tool
     public static function updateEnviroPromptString(string $prompt): bool
     {
         $enviro = Enviro::first();
-        $enviro_prompt = json_decode($enviro->prompt, true);
-        $enviro->prompt = json_encode([
+        $enviro_prompt = is_array($enviro->prompt) ? $enviro->prompt : (json_decode($enviro->prompt, true) ?? []);
+        $enviro->prompt = [
             'parts' => self::searchSeparatorsAppendParts(),
             'string' => $prompt,
-            'selected_topic' => $enviro_prompt['selected_topic'],
-            'selected_difficulty' => $enviro_prompt['selected_difficulty'],
-            'selected_language' => $enviro_prompt['selected_language'],
-            'blueprint' => $enviro_prompt['blueprint'],
-        ]);
+            'selected_topic' => $enviro_prompt['selected_topic'] ?? 'all topics',
+            'selected_difficulty' => $enviro_prompt['selected_difficulty'] ?? 'easy',
+            'selected_language' => $enviro_prompt['selected_language'] ?? 'any',
+            'blueprint' => $enviro_prompt['blueprint'] ?? '',
+        ];
 
         return $enviro->save();
     }

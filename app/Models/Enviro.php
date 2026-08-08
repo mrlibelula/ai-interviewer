@@ -12,5 +12,9 @@ class Enviro extends Model
     protected $table = 'enviros';
     protected $guarded = [];
 
-    
+    protected $casts = [
+        'prompt' => 'array',
+        'openai' => 'array',
+        'prompt_templates' => 'array',
+    ];
 }
