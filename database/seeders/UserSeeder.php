@@ -43,35 +43,31 @@ class UserSeeder extends Seeder
         $role_recruiter->givePermissionTo($permission_delete);
 
         // libe - admin
-        $libe = User::firstOrCreate([
-            'name' => 'Libe', 
-            'email' => 'luis@libe.dev', 
-            'password' => Hash::make('password'), 
-        ]);
-
-        $libe->assignRole('admin');
-        // $libe->profile_photo_path = '/images/libe.jpg';
-        $libe->save();
+        $libe = User::firstOrCreate(
+            ['email' => 'luis@libe.dev'],
+            ['name' => 'Libe', 'password' => Hash::make('password')]
+        );
+        if (!$libe->hasRole('admin')) {
+            $libe->assignRole('admin');
+        }
 
         // mrlibelula - guest
-        $mrlibelula = User::firstOrCreate([
-            'name' => 'Luis', 
-            'email' => 'mrlibelula2@gmail.com', 
-            'password' => Hash::make('password'), 
-        ]);
-
-        $mrlibelula->assignRole('guest');
-        $mrlibelula->save();
+        $mrlibelula = User::firstOrCreate(
+            ['email' => 'mrlibelula2@gmail.com'],
+            ['name' => 'Luis', 'password' => Hash::make('password')]
+        );
+        if (!$mrlibelula->hasRole('guest')) {
+            $mrlibelula->assignRole('guest');
+        }
 
         // timo - recruiter
-        $timo = User::firstOrCreate([
-            'name' => 'Timo', 
-            'email' => 'timo@libe.dev', 
-            'password' => Hash::make('password'), 
-        ]);
-
-        $timo->assignRole('recruiter');
-        $timo->save();
+        $timo = User::firstOrCreate(
+            ['email' => 'timo@libe.dev'],
+            ['name' => 'Timo', 'password' => Hash::make('password')]
+        );
+        if (!$timo->hasRole('recruiter')) {
+            $timo->assignRole('recruiter');
+        }
 
         
     }

@@ -139,19 +139,34 @@
             <div class="flex items-center gap-x-4">
                 @if ($this->canRequestAI())
                 <div class="flex items-center gap-x-8">
-                    <!-- request button -->
+                    <div class="flex items-center gap-x-3">
+                        <label for="challenge-quantity" class="text-base whitespace-nowrap">Quantity</label>
+                        <select
+                            id="challenge-quantity"
+                            wire:model.live="quantity"
+                            class="form-select"
+                            :disabled="spinnerOn"
+                        >
+                            @for ($i = 1; $i <= 10; $i++)
+                            <option value="{{ $i }}">{{ $i }}</option>
+                            @endfor
+                        </select>
+                    </div>
+
+                    <!-- request button: one Livewire round-trip per challenge -->
                     <x-secondary-button 
-                        wire:click='requestChallenge'
-                        @click="$dispatch('spinner-on')"
+                        wire:click="startChallengeBatch"
+                        @click="if (!spinnerOn) $dispatch('spinner-on')"
+                        x-bind:disabled="spinnerOn"
                         class=" bg-green-400 dark:bg-green-700"
                     >
                         <div class="relative flex items-start">
-                            <div :class="{ 'text-transparent': spinnerOn }">Request challenge</div>
+                            <div :class="{ 'text-transparent': spinnerOn }">
+                                Request {{ $quantity === 1 ? 'challenge' : $quantity . ' challenges' }}
+                            </div>
                             <div x-cloak x-show="spinnerOn" class=" absolute w-full flex justify-center">
                                 <x-spinner class="w-6 h-6" />
                             </div>
-                            
-                            
                         </div>
                     </x-secondary-button>
 
@@ -167,42 +182,23 @@
                 @endif
             </div>
 
-            <!-- manual request challenge -->
-            @if ($challenge)
-            <div class="mt-6 p-6 bg-white dark:bg-gray-700/50 shadow-md rounded-lg">
-                @livewire('challenge-card', ['challenge' => $challenge], key(uniqid()))
+            <div x-cloak x-show="spinnerOn" class="mt-4 space-y-2">
+                @if ($remaining > 0)
+                <div class="text-sm text-gray-500 dark:text-gray-400">
+                    Importing challenge {{ count($batchChallengeIds) + 1 }} of {{ count($batchChallengeIds) + $remaining }}…
+                </div>
+                @endif
+                <div class="flex items-start gap-x-2 rounded-md border border-amber-300/70 dark:border-amber-600/50 bg-amber-50 dark:bg-amber-950/40 px-3 py-2 text-sm text-amber-800 dark:text-amber-200">
+                    <x-icon-info class="w-5 h-5 shrink-0 mt-0.5 text-amber-600 dark:text-amber-400" stroke-width="2" />
+                    <span>Stay on this page until imports finish. Leaving cancels any challenges still waiting to be requested.</span>
+                </div>
             </div>
-            @endif
 
         </x-descr-list>
 
         <x-h5 id="jump-imported">Imported Challenge/s</x-h5>
-        
-        @if (count($challenges))
-        <x-descr-list>
-            <x-table class="mt-4">
-                <x-slot name="header">
-                    <th class="py-2 w-10 text-lg">#</th>
-                    <th class="w-full text-left text-lg">Challenge title</th>
-                </x-slot>
-                <div>
-                    @foreach ($challenges as $challenge)
-                    <tr class="hover:bg-gray-100 dark:hover:bg-gray-950 smooth-300">
-                        <td class="py-4 text-center">{{ $loop->iteration }}</td>
-                        <td class=" text-left">
-                            {{ $challenge['title'] }}
-                        </td>
-                    </tr>
-                    @endforeach
-                </div>
-            </x-table>
 
-        </x-descr-list>
-        @else
-        <x-descr-list>
-            No A.I. requested challenges yet
-        </x-descr-list>
-        @endif
+        <livewire:admin.imported-challenges wire:key="imported-challenges-list" />
 
     </x-container>
 </div>

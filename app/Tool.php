@@ -691,12 +691,13 @@ class Tool
     }
 
     /**
-     * Obtains a LLM completion response from given prompt
+     * Obtains a LLM completion response from given prompt.
+     * Returns null on API/timeout/decode failures (never dumps into the HTTP response).
      *
      * @param string $prompt
-     * @return stdClass
+     * @return stdClass|null
      */
-    public static function getLLMChallenge(string $prompt): stdClass
+    public static function getLLMChallenge(string $prompt): ?stdClass
     {
         try {
             $prompt = self::sanitizeChallengeGenerationPrompt($prompt);
@@ -714,7 +715,11 @@ class Tool
             );
 
             if (!$completion instanceof \OpenAI\Responses\Chat\CreateResponse) {
-                throw new Exception(is_string($completion) ? $completion : 'LLM challenge completion failed');
+                info([
+                    'getLLMChallenge' => 'LLM completion failed',
+                    'error' => is_string($completion) ? $completion : 'LLM challenge completion failed',
+                ]);
+                return null;
             }
 
             $completion_text = $completion->choices[0]->message->content;
@@ -735,25 +740,35 @@ class Tool
                     'getLLMChallenge' => 'Failed to decode structured challenge JSON',
                     'completion_text' => $completion_text,
                 ]);
-                dump('Something went wrong while decoding challenge completion string. "$challenge" is null. Check app log.', $completion, $completion_text);
+                return null;
             }
 
-            if ($challenge) {
-                $challenge->solution_code = self::normalizeSolutionCode($challenge->solution_code ?? '');
+            $challenge->solution_code = self::normalizeSolutionCode($challenge->solution_code ?? '');
+
+            $difficulty = Difficulty::where('name', 'like', '%' . ($challenge->difficulty_level ?? '') . '%')->first();
+            $status = Status::where('name', 'like', '%active%')->first();
+            $visibility = Visibility::where('name', 'like', '%public%')->first();
+
+            if (!$difficulty || !$status || !$visibility) {
+                info([
+                    'getLLMChallenge' => 'Missing difficulty/status/visibility lookup',
+                    'difficulty_level' => $challenge->difficulty_level ?? null,
+                ]);
+                return null;
             }
 
             $emulated_challenge_model = new Challenge;
             $emulated_challenge_model->title = $challenge->title ?? 'n/a';
             $emulated_challenge_model->description = $challenge->challenge ?? 'n/a';
             $emulated_challenge_model->challenge_slug = Str::slug($challenge->title ?? 'n/a');
-            $emulated_challenge_model->difficulty_id = Difficulty::where('name', 'like', '%' . ($challenge->difficulty_level ?? '') . '%')->first()->id;
+            $emulated_challenge_model->difficulty_id = $difficulty->id;
             $emulated_challenge_model->test_cases = is_string($challenge->test_cases ?? null)
                 ? $challenge->test_cases
                 : json_encode($challenge->test_cases ?? []);
             $emulated_challenge_model->hints = $challenge->hints ?? '';
             $emulated_challenge_model->time_limit = self::normalizeTimeLimit($challenge->time_limit ?? null);
-            $emulated_challenge_model->status_id = Status::where('name', 'like', '%active%')->first()->id;
-            $emulated_challenge_model->visibility_id = Visibility::where('name', 'like', '%public%')->first()->id;
+            $emulated_challenge_model->status_id = $status->id;
+            $emulated_challenge_model->visibility_id = $visibility->id;
             $emulated_challenge_model->solution_code = self::normalizeSolutionCode($challenge->solution_code ?? '');
             $emulated_challenge_model->chatgpt_prompt = $prompt;
             $emulated_challenge_model->completion_id = $completion->id;
@@ -769,11 +784,14 @@ class Tool
             return $result_llm_challenge;
 
         } catch (\OpenAI\Exceptions\ErrorException $ee) {
-            dump($ee->getMessage());
+            info(['getLLMChallenge' => $ee->getMessage()]);
+            return null;
         } catch (\OpenAI\Exceptions\TransporterException $te) {
-            dump($te->getMessage());
+            info(['getLLMChallenge' => $te->getMessage()]);
+            return null;
         } catch (Exception $e) {
-            dump($e->getMessage());
+            info(['getLLMChallenge' => $e->getMessage()]);
+            return null;
         }
     }
 

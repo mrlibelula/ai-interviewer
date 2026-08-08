@@ -1,10 +1,10 @@
 @props(['title' => 'n/a'])
-<div {{ $attributes->merge(['class' => 'flex flex-col gap-y-4']) }}>
-    <button @click="isOpen = !isOpen" class="flex items-center gap-x-2 cursor-pointer font-semibold dark:text-gray-300">
-        <div>
+<div {{ $attributes->merge(['class' => 'flex flex-col gap-y-4 min-w-0']) }}>
+    <button type="button" @click="isOpen = !isOpen" class="flex items-start gap-x-2 w-full min-w-0 cursor-pointer font-semibold dark:text-gray-300 text-left">
+        <div class="min-w-0 flex-1">
             {{ $title }}
         </div>
-        <div class=" text-base text-gray-400 dark:text-gray-500/90 mt-[0.2rem]">
+        <div class="shrink-0 text-base text-gray-400 dark:text-gray-500/90 mt-[0.2rem]">
             <i x-cloak x-show="!isOpen" class="caret right icon "></i>
             <i x-cloak x-show="isOpen" class="caret down icon "></i>
         </div>

@@ -16,6 +16,7 @@ class Interview extends Component
     public int $selected_topic_id;
     public $selected_challenges;
     public string $challenge_list_order = 'squares'; // list|squares
+    public string $search = '';
 
     public function changeChallengeListOrderTo(string $list_order = 'list')
     {
@@ -26,19 +27,35 @@ class Interview extends Component
     {
         $this->selected_challenges = null;
         $this->selected_topic_id = -1;
+        $this->search = '';
     }
 
     public function updatedSelectedTopicId()
     {
+        $this->search = '';
+        $this->loadSelectedChallenges();
+    }
+
+    public function updatedSearch()
+    {
+        $this->loadSelectedChallenges();
+    }
+
+    protected function loadSelectedChallenges(): void
+    {
         $this->selected_challenges = null;
-        if ($this->selected_topic_id && $this->selected_topic_id !== -1) {
-            $this->selected_challenges = Challenge::byDifficultyAndTopic(
-                selected_difficulty: $this->selected_difficulty, 
-                topic_id: $this->selected_topic_id, 
-                user_id: auth()->user()->id,
-                return_cols: ['id', 'title', 'challenge_slug', 'banner_url', 'description'],
-            );
+
+        if (!$this->selected_topic_id || $this->selected_topic_id === -1) {
+            return;
         }
+
+        $this->selected_challenges = Challenge::byDifficultyAndTopic(
+            selected_difficulty: $this->selected_difficulty,
+            topic_id: $this->selected_topic_id,
+            user_id: auth()->user()->id,
+            return_cols: ['id', 'title', 'challenge_slug', 'banner_url', 'description'],
+            search: $this->search,
+        )->load(['languages', 'tags', 'topics']);
     }
 
     public function getTopics()

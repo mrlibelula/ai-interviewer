@@ -24,5 +24,6 @@ return [
     | for a response. By default, the client will time out after 30 seconds.
     */
 
-    'request_timeout' => env('OPENAI_REQUEST_TIMEOUT', 30),
+    // Challenge generation with structured JSON often exceeds 30s on later batch items.
+    'request_timeout' => env('OPENAI_REQUEST_TIMEOUT', 90),
 ];

@@ -27,28 +27,50 @@
     <div class=" hidden md:flex border-r border-gray-200 dark:border-gray-700">
         &nbsp;
     </div>
-    <div class="hidden sm:block w-full px-3">
-        <input wire:model="query" wire:change="search" placeholder="Search challenges" class="form-input dark:bg-gray-800 h-[2.25rem] w-full text-sm placeholder-gray-500 placeholder:text-sm " />
+    <div class="hidden sm:block w-full px-3 relative">
+        <input
+            type="search"
+            wire:model.live.debounce.300ms="query"
+            placeholder="Search challenges"
+            autocomplete="off"
+            class="form-input dark:bg-gray-800 h-[2.25rem] w-full text-sm placeholder-gray-500 placeholder:text-sm"
+        />
     </div>
     <!-- search results -->
-    @if (count($searchResults))
-    <div @click.away="$wire.clearSearch()" class="absolute z-[80] top-[3.7rem] left-0 sm:left-20 w-full sm:w-[94%] bg-gray-100 dark:bg-gray-800 rounded-lg shadow-lg shadow-gray-800/80 dark:shadow-gray-900/80 border-2 border-gray-200 dark:border-gray-700 h-[11.5rem] overflow-y-auto overflow-hidden">
-        @foreach ($searchResults as $challenge)
-        <a wire:navigate href="{{ route('interview-start', [
-            'enc_selected_difficulty' => \App\Tool::encode($challenge->difficulty->name),
-            'enc_selected_topic_id' => \App\Tool::encode($challenge->topics->first()->id),
-            'enc_challenge_id' => \App\Tool::encode($challenge->id),
-            'challenge_slug' => $challenge->challenge_slug,
-        ]) }}" class="group">
-            <div class="p-4 flex items-center justify-between group-hover:bg-gray-200 dark:group-hover:bg-gray-700 smooth-300 cursor-pointer">
-                <div class=" hidden md:block">
-                    <span class="font-mono font-semibold px-2 text-sm md:text-base xl:text-lg bg-gray-200 dark:bg-gray-700 rounded-xl">Challenge</span> 
+    @if ($searchAttempted)
+    <div
+        @click.away="$wire.clearSearch()"
+        class="absolute z-[80] top-[3.7rem] left-0 sm:left-20 w-full sm:w-[94%] bg-gray-100 dark:bg-gray-800 rounded-lg shadow-lg shadow-gray-800/80 dark:shadow-gray-900/80 border-2 border-gray-200 dark:border-gray-700 max-h-[11.5rem] overflow-y-auto overflow-hidden"
+    >
+        @forelse ($searchResults as $challenge)
+            @if ($challenge['difficulty'] && $challenge['topic_id'])
+            <a wire:navigate href="{{ route('interview-start', [
+                'enc_selected_difficulty' => \App\Tool::encode($challenge['difficulty']),
+                'enc_selected_topic_id' => \App\Tool::encode($challenge['topic_id']),
+                'enc_challenge_id' => \App\Tool::encode($challenge['id']),
+                'challenge_slug' => $challenge['challenge_slug'],
+            ]) }}" class="group" wire:key="top-search-{{ $challenge['id'] }}">
+                <div class="p-4 flex items-center justify-between group-hover:bg-gray-200 dark:group-hover:bg-gray-700 smooth-300 cursor-pointer">
+                    <div class="hidden md:block">
+                        <span class="font-mono font-semibold px-2 text-sm md:text-base xl:text-lg bg-gray-200 dark:bg-gray-700 rounded-xl">Challenge</span>
+                    </div>
+                    <div class="px-4 w-full text-left text-sm md:text-base xl:text-lg">{{ $challenge['title'] }}</div>
+                    <div class="hidden md:block font-mono font-semibold px-2 text-sm md:text-base xl:text-lg bg-gray-200 dark:bg-gray-700 rounded-xl">
+                        {{ $challenge['topic_name'] }}
+                    </div>
                 </div>
-                <div class="px-4 w-full text-left text-sm md:text-base xl:text-lg">{{ $challenge->title }}</div>
-                <div class=" hidden md:block font-mono font-semibold px-2 text-sm md:text-base xl:text-lg bg-gray-200 dark:bg-gray-700 rounded-xl">{{ $challenge->topics->first()->name }}</div>
+            </a>
+            @else
+            <div class="p-4 flex items-center justify-between opacity-60" wire:key="top-search-{{ $challenge['id'] }}">
+                <div class="px-4 w-full text-left text-sm md:text-base xl:text-lg">{{ $challenge['title'] }}</div>
+                <div class="hidden md:block text-xs text-gray-500 pr-4">Missing topic</div>
             </div>
-        </a>
-        @endforeach
+            @endif
+        @empty
+            <div class="p-4 text-sm text-gray-500 dark:text-gray-400 text-center">
+                No challenges match “{{ $query }}”
+            </div>
+        @endforelse
     </div>
     @endif
 
@@ -70,7 +92,13 @@
             Full-Stack Software Engineer
         </x-context-item>
         <x-context-item class="sm:hidden">
-            <input wire:model="query" wire:change="search" placeholder="Search challenges" class="form-input h-[2.25rem] w-full text-sm placeholder-gray-500 placeholder:text-sm " />
+            <input
+                type="search"
+                wire:model.live.debounce.300ms="query"
+                placeholder="Search challenges"
+                autocomplete="off"
+                class="form-input h-[2.25rem] w-full text-sm placeholder-gray-500 placeholder:text-sm"
+            />
         </x-context-item>
         <x-context-item wire:navigate href="{{ route('dashboard') }}">
             <x-slot name="icon"><x-icon-squares /></x-slot>

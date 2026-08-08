@@ -33,9 +33,16 @@ class Challenge extends Component
     public int $difficulty_id;
     public int $visibility_id;
     
-    public int $challenge_id;
+    public int $challenge_id = -1;
     public $challenge;
     public bool $challenge_changed = false;
+    public string $search = '';
+
+    /** title_asc|title_desc|newest|oldest */
+    public string $sort = 'title_asc';
+
+    /** Skip re-query when syncing the input label after a selection. */
+    protected bool $syncingSearchLabel = false;
 
     protected $listeners = ['destroyChallenge', 'deleteChallenge'];
 
@@ -52,8 +59,9 @@ class Challenge extends Component
     {
         $this->challenge->delete();
         $this->challenge = null;
-        $this->getChallenges();
         $this->challenge_id = -1;
+        $this->search = '';
+        $this->getChallenges();
     }
 
     public function updatedDifficultyId()
@@ -169,9 +177,56 @@ class Challenge extends Component
         $this->visibilities = Visibility::select('id', 'name')->get();
     }
 
+    public function updatedSearch(): void
+    {
+        if ($this->syncingSearchLabel) {
+            return;
+        }
+
+        $this->getChallenges();
+        $this->dispatch('challenge-picker-open');
+    }
+
+    public function selectChallenge(int $id): void
+    {
+        $this->challenge_id = $id;
+        $this->updatedChallengeId();
+
+        if ($this->challenge) {
+            $this->syncingSearchLabel = true;
+            $this->search = $this->challenge->title;
+            $this->syncingSearchLabel = false;
+        }
+    }
+
+    public function clearChallengeSearch(): void
+    {
+        $this->search = '';
+        $this->getChallenges();
+        $this->dispatch('challenge-picker-open');
+    }
+
+    public function updatedSort(): void
+    {
+        $this->getChallenges();
+        $this->dispatch('challenge-picker-open');
+    }
+
     public function getChallenges()
     {
-        $this->challenges = DBChallenge::with('topics:id,name')->select('id', 'title', 'banner_url')->orderBy('title', 'asc')->get();
+        $query = DBChallenge::query()
+            ->search($this->search)
+            ->with('topics:id,name')
+            ->select('id', 'title', 'banner_url', 'created_at');
+
+        match ($this->sort) {
+            'title_desc' => $query->orderBy('title', 'desc'),
+            'newest' => $query->orderByDesc('created_at')->orderByDesc('id'),
+            'oldest' => $query->orderBy('created_at')->orderBy('id'),
+            default => $query->orderBy('title', 'asc'),
+        };
+
+        $this->challenges = $query->get();
     }
 
     public function loadChallenge()

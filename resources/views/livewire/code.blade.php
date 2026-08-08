@@ -11,6 +11,7 @@
                 this.$nextTick(() => {
                     const el = this.$refs.code;
                     if (!window.hljs || !el) return;
+                    el.textContent = el.textContent;
                     delete el.dataset.highlighted;
                     el.classList.remove('hljs');
                     try { hljs.highlightElement(el); } catch (e) {}
@@ -34,7 +35,7 @@
             <div @click.prevent="wrap = !wrap" class="cursor-pointer mr-1 select-none">word wrap</div>
         </div>
         <pre
-            class="mb-2 min-h-[6rem] rounded-lg max-h-96 overflow-auto bg-white/75 dark:bg-black/40 p-2 text-base leading-relaxed"
+            class="mb-2 min-h-[6rem] rounded-lg max-h-96 overflow-auto bg-white/75 dark:bg-black/40 p-2 text-xl leading-relaxed"
             :class="wrap ? 'whitespace-pre-wrap break-words' : 'whitespace-pre'"
         ><code x-ref="code" class="language-{{ strtolower($language) ?: 'html' }}">{{ $code }}</code></pre>
     </div>

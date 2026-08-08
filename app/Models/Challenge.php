@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -135,6 +136,32 @@ class Challenge extends Model
     }
 
     /*
+        Query scopes
+    */
+
+    /**
+     * Filter challenges by a free-text term across title, description, hints,
+     * test cases, and solution code. Empty terms are a no-op.
+     */
+    public function scopeSearch(Builder $query, ?string $term): Builder
+    {
+        $term = trim((string) $term);
+        if ($term === '') {
+            return $query;
+        }
+
+        $like = '%' . addcslashes($term, '%_\\') . '%';
+
+        return $query->where(function (Builder $q) use ($like) {
+            $q->where('title', 'like', $like)
+                ->orWhere('description', 'like', $like)
+                ->orWhere('hints', 'like', $like)
+                ->orWhere('test_cases', 'like', $like)
+                ->orWhere('solution_code', 'like', $like);
+        });
+    }
+
+    /*
         Static methods
     */
 
@@ -163,9 +190,10 @@ class Challenge extends Model
      * @param boolean $ordered
      * @param string $order_by
      * @param string $order
+     * @param string|null $search
      * @return Collection
      */
-    public static function byDifficultyAndTopic(string $selected_difficulty, int $topic_id, int $user_id, array $return_cols = ['id', 'title'], bool $ordered = true, string $order_by = 'title', string $order = 'asc'): Collection
+    public static function byDifficultyAndTopic(string $selected_difficulty, int $topic_id, int $user_id, array $return_cols = ['id', 'title'], bool $ordered = true, string $order_by = 'title', string $order = 'asc', ?string $search = null): Collection
     {
         $difficulty_id = Difficulty::select('id', 'name')->where('name', '=', strtolower($selected_difficulty))->first()->id;
         $builder = static::select(...$return_cols)
@@ -175,6 +203,7 @@ class Challenge extends Model
             ->whereHas('topics', function ($q) use ($topic_id) {
                 $q->whereIn('topic_id', [$topic_id]);
             })
+            ->search($search)
             ->with(['users' => function ($q) use($user_id) {
                 $q->where('users.id', $user_id);
             }]);

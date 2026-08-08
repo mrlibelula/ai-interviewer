@@ -7,26 +7,56 @@ use Livewire\Component;
 
 class TopHeader extends Component
 {
-    public $query = '';
-    public $searchResults = [];
+    public string $query = '';
 
-    public function search()
+    /** @var array<int, array{id:int,title:string,challenge_slug:string,difficulty:?string,topic_id:?int,topic_name:?string}> */
+    public array $searchResults = [];
+
+    public bool $searchAttempted = false;
+
+    public function updatedQuery(): void
     {
-        $challenges = Challenge::where('title', 'like', '%' . $this->query . '%')
-            ->orWhere('description', 'like', '%' . $this->query . '%')
-            ->orWhere('test_cases', 'like', '%' . $this->query . '%') 
-            ->orWhere('solution_code', 'like', '%' . $this->query . '%')
-            ->with('difficulty')
-            ->with('topics')
-            ->get();
-
-        $this->searchResults = $challenges;
+        $this->runSearch();
     }
 
-    public function clearSearch()
+    public function runSearch(): void
+    {
+        $term = trim($this->query);
+
+        if ($term === '') {
+            $this->searchResults = [];
+            $this->searchAttempted = false;
+
+            return;
+        }
+
+        $this->searchAttempted = true;
+        $this->searchResults = Challenge::search($term)
+            ->with(['difficulty', 'topics'])
+            ->orderBy('title')
+            ->limit(25)
+            ->get()
+            ->map(static function (Challenge $challenge): array {
+                $topic = $challenge->topics->first();
+
+                return [
+                    'id' => (int) $challenge->id,
+                    'title' => (string) $challenge->title,
+                    'challenge_slug' => (string) $challenge->challenge_slug,
+                    'difficulty' => $challenge->difficulty?->name,
+                    'topic_id' => $topic?->id !== null ? (int) $topic->id : null,
+                    'topic_name' => $topic?->name,
+                ];
+            })
+            ->values()
+            ->all();
+    }
+
+    public function clearSearch(): void
     {
         $this->query = '';
         $this->searchResults = [];
+        $this->searchAttempted = false;
     }
 
     public function render()

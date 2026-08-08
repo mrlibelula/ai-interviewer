@@ -10,15 +10,139 @@
     <x-admin.nav currentRoute="{{ $current_route_name }}" />
     
     <x-container>
-        @if (count($challenges))
-            <select wire:model.live="challenge_id" class="form-select text-lg md:text-xl w-full">
-                <option selected value="-1"> -- Challenge list -- </option>
-                @foreach ($challenges as $db_challenge)
-                <option value="{{ $db_challenge->id }}">
-                    {{ $db_challenge->title }} [@foreach ($db_challenge->topics as $topic) {{ $topic->name }}@if(!$loop->last){{ ', ' }}@endif @endforeach]
-                </option>
-                @endforeach
-            </select>
+        @if (count($challenges) || filled($search) || $challenge)
+            <div
+                class="relative w-full"
+                x-data="{ open: false }"
+                @click.away="open = false"
+                @keydown.escape.window="open = false"
+                @challenge-picker-open="open = true"
+            >
+                <div class="relative">
+                    <input
+                        type="search"
+                        wire:model.live.debounce.300ms="search"
+                        @focus="open = true"
+                        @click="open = true"
+                        @keydown.arrow-down.prevent="open = true"
+                        placeholder="Search and select a challenge…"
+                        autocomplete="off"
+                        class="form-input dark:bg-gray-800 text-lg md:text-xl w-full pr-20"
+                    />
+                    <div class="absolute inset-y-0 right-0 flex items-center gap-x-1 pr-3 text-gray-400 dark:text-gray-500">
+                        @if (filled($search))
+                        <button
+                            type="button"
+                            wire:click="clearChallengeSearch"
+                            @click="open = true"
+                            class="p-1 rounded hover:text-gray-700 dark:hover:text-gray-200"
+                            aria-label="Clear search"
+                        >
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                        @endif
+                        <button
+                            type="button"
+                            @click="open = !open"
+                            class="p-1 rounded hover:text-gray-700 dark:hover:text-gray-200"
+                            aria-label="Toggle challenge list"
+                        >
+                            <svg
+                                class="h-5 w-5 transition-transform duration-200"
+                                :class="open ? 'rotate-180' : ''"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke-width="1.5"
+                                stroke="currentColor"
+                                aria-hidden="true"
+                            >
+                                <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div
+                    x-cloak
+                    x-show="open"
+                    x-transition:enter="transition ease-out duration-100"
+                    x-transition:enter-start="opacity-0 -translate-y-1"
+                    x-transition:enter-end="opacity-100 translate-y-0"
+                    x-transition:leave="transition ease-in duration-75"
+                    x-transition:leave-start="opacity-100 translate-y-0"
+                    x-transition:leave-end="opacity-0 -translate-y-1"
+                    class="absolute z-50 mt-2 w-full overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-lg shadow-gray-900/20"
+                >
+                    <div class="flex items-center justify-between gap-x-3 gap-y-2 px-3 py-2 border-b border-gray-200/80 dark:border-gray-700/80 bg-gray-50/80 dark:bg-gray-900/40 flex-wrap">
+                        <span class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                            @if (filled($search))
+                                Search results
+                            @else
+                                All challenges
+                            @endif
+                        </span>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <label class="sr-only" for="challenge-picker-sort">Sort challenges</label>
+                            <select
+                                id="challenge-picker-sort"
+                                wire:model.live="sort"
+                                @click.stop
+                                @mousedown.stop
+                                class="form-select text-xs h-8 py-1 pl-2 pr-7 dark:bg-gray-800 border-gray-200 dark:border-gray-700"
+                            >
+                                <option value="title_asc">Title A–Z</option>
+                                <option value="title_desc">Title Z–A</option>
+                                <option value="newest">Newest first</option>
+                                <option value="oldest">Oldest first</option>
+                            </select>
+                            <span class="inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-semibold tracking-wide uppercase bg-gray-200/80 text-gray-700 dark:bg-gray-700/70 dark:text-gray-300">
+                                {{ count($challenges) }} {{ count($challenges) === 1 ? 'match' : 'matches' }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="max-h-72 overflow-y-auto">
+                        @forelse ($challenges as $db_challenge)
+                            @php
+                                $topicLabel = $db_challenge->topics
+                                    ->pluck('name')
+                                    ->filter()
+                                    ->implode(', ');
+                                $isSelected = (int) $challenge_id === (int) $db_challenge->id;
+                            @endphp
+                            <button
+                                type="button"
+                                wire:click="selectChallenge({{ $db_challenge->id }})"
+                                @click="open = false"
+                                wire:key="challenge-option-{{ $db_challenge->id }}"
+                                class="flex w-full items-start sm:items-center justify-between gap-x-3 gap-y-1 px-3 py-3 text-left smooth-300 {{ $isSelected ? 'bg-sky-100/80 dark:bg-sky-500/15' : 'hover:bg-gray-100 dark:hover:bg-gray-700/70' }}"
+                            >
+                                <span class="min-w-0 flex-1 font-semibold text-base md:text-lg leading-snug break-words {{ $isSelected ? 'text-sky-900 dark:text-sky-200' : 'text-gray-900 dark:text-gray-100' }}">
+                                    {{ $db_challenge->title }}
+                                </span>
+                                <span class="shrink-0 flex items-center gap-2">
+                                    @if ($topicLabel !== '')
+                                    <span class="max-w-[10rem] truncate inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-semibold tracking-wide uppercase bg-gray-200/80 text-gray-700 dark:bg-gray-700/70 dark:text-gray-300" title="{{ $topicLabel }}">
+                                        {{ $topicLabel }}
+                                    </span>
+                                    @endif
+                                    @if ($isSelected)
+                                    <svg class="h-4 w-4 text-sky-600 dark:text-sky-300" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                                    </svg>
+                                    @endif
+                                </span>
+                            </button>
+                        @empty
+                            <div class="px-4 py-8 text-center text-sm text-gray-500 dark:text-gray-400">
+                                No challenges match your search
+                            </div>
+                        @endforelse
+                    </div>
+                </div>
+            </div>
 
             @if ($challenge)
             <x-descr-list>
