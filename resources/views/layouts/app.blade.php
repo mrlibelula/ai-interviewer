@@ -65,7 +65,7 @@
             || request()->routeIs('interview-start')
         )
         <!-- bg effect — Reader grayscale radial fade (also shows through transparent IDE chrome) -->
-        <svg viewBox="0 0 1024 1024" class="interview-bg-glow absolute pointer-events-none hidden lg:block -top-[5rem] xl:-top-[30rem] -z-10 h-[75rem]_ w-[68rem] -translate-y-1/2 [mask-image:radial-gradient(closest-side,white,transparent)] left-1/4 xl:left-1/2 xl:ml-0 xl:-translate-x-1/2 xl:translate-y-0" aria-hidden="true">
+        <svg viewBox="0 0 1024 1024" class="interview-bg-glow absolute pointer-events-none hidden lg:block -top-[5rem] xl:-top-[30rem] -z-10 w-[68rem] -translate-y-1/2 [mask-image:radial-gradient(closest-side,white,transparent)] left-[15%] xl:ml-0 xl:-translate-x-1/2 xl:translate-y-0" aria-hidden="true">
             <circle cx="512" cy="512" r="512" fill="url(#759c1415-0410-454c-8f7c-9a820de03641)" fill-opacity="0.7" />
             <defs>
                 <radialGradient id="759c1415-0410-454c-8f7c-9a820de03641">

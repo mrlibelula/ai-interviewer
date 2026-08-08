@@ -413,13 +413,13 @@ html.interview-ide main {
     background: transparent;
 }
 
-/* Amplify the same Reader grayscale glow behind the glass IDE */
+/* Amplify the same Reader grayscale glow behind the glass IDE (top-left origin) */
 html.interview-ide .interview-bg-glow {
     display: block !important;
     width: min(90vw, 72rem);
     height: auto;
-    top: 35%;
-    left: 50%;
+    top: -5rem;
+    left: 15%;
     transform: translate(-50%, -50%);
     opacity: 1;
     z-index: 0;

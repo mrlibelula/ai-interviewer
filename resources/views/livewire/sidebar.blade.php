@@ -25,12 +25,16 @@
             </x-side-bar-item>
             <!-- stats -->
             <x-side-bar-item link="{{ route('metrics') }}" tooltip="Metrics">
-                <x-icon-progress class="w-7 h-7" />
-                @if ($feedbacks['problem_specific'] || $feedbacks['optimization'] || $feedbacks['best_practices'])
-                <!--red dot-->
-                <span class="absolute inline-flex w-2 h-2 right-[0.9rem] -mt-[1.5rem] bg-rose-400 rounded-full opacity-75 animate-ping"></span>
-                <span class="absolute inline-flex w-2 h-2 right-[0.9rem] -mt-[1.5rem] bg-rose-700 rounded-full"></span>
-                @endif
+                <span class="relative inline-flex">
+                    <x-icon-progress class="w-7 h-7" />
+                    @if ($feedbacks['problem_specific'] || $feedbacks['optimization'] || $feedbacks['best_practices'])
+                    <!--red dot-->
+                    <span class="pointer-events-none absolute top-0 right-0 flex h-2 w-2 -translate-y-1/2 translate-x-1/2">
+                        <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-rose-400 opacity-75"></span>
+                        <span class="relative inline-flex h-2 w-2 rounded-full bg-rose-700"></span>
+                    </span>
+                    @endif
+                </span>
             </x-side-bar-item>
 
             {{-- <a class="flex items-center justify-center w-12 h-12 mt-2 rounded hover:bg-gray-300 dark:hover:bg-gray-700" href="#">

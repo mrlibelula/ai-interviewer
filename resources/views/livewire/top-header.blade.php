@@ -30,9 +30,19 @@
     <div class="hidden sm:block w-full px-3 relative">
         <input
             type="search"
+            name="challenge_search"
             wire:model.live.debounce.300ms="query"
             placeholder="Search challenges"
             autocomplete="off"
+            autocorrect="off"
+            autocapitalize="off"
+            spellcheck="false"
+            data-1p-ignore
+            data-lpignore="true"
+            data-form-type="other"
+            readonly
+            onfocus="this.removeAttribute('readonly')"
+            onmousedown="this.removeAttribute('readonly')"
             class="form-input dark:bg-gray-800 h-[2.25rem] w-full text-sm placeholder-gray-500 placeholder:text-sm"
         />
     </div>
@@ -94,9 +104,19 @@
         <x-context-item class="sm:hidden">
             <input
                 type="search"
+                name="challenge_search_mobile"
                 wire:model.live.debounce.300ms="query"
                 placeholder="Search challenges"
                 autocomplete="off"
+                autocorrect="off"
+                autocapitalize="off"
+                spellcheck="false"
+                data-1p-ignore
+                data-lpignore="true"
+                data-form-type="other"
+                readonly
+                onfocus="this.removeAttribute('readonly')"
+                onmousedown="this.removeAttribute('readonly')"
                 class="form-input h-[2.25rem] w-full text-sm placeholder-gray-500 placeholder:text-sm"
             />
         </x-context-item>
