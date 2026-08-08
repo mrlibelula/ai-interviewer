@@ -123,4 +123,80 @@ class ChallengeSolutionCodePromptTest extends TestCase
     $this->assertStringContainsString('console.log test cases', $prompt);
     $this->assertStringContainsString('perfect tab indentation', $prompt);
   }
+
+  public function test_normalize_keeps_indent_on_long_single_statement_lines(): void
+  {
+    $code = <<<'JS'
+function countWays(n, steps) {
+  // Validate and preprocess steps: unique positive integers only
+  const allowed = Array.from(new Set(steps)).filter(s => Number.isInteger(s) && s > 0);
+  if (n === 0) return 1;
+  return allowed.length;
+}
+JS;
+
+    $result = Tool::normalizeSolutionCode($code);
+    $lines = explode("\n", $result);
+
+    $this->assertSame("\t", substr($lines[1], 0, 1));
+    $this->assertStringStartsWith("\tconst allowed", $lines[2]);
+    $this->assertStringStartsWith("\tif (n === 0)", $lines[3]);
+  }
+
+  public function test_normalize_reindents_expanded_dense_nested_loops(): void
+  {
+    $code = <<<'JS'
+function countWays(n, steps) {
+  const dp = new Array(n + 1).fill(0);
+  dp[0] = 1;
+
+  for (let i = 1; i <= n; i++) { let sum = 0; for (let j = 0; j < allowed.length; j++) { const step = allowed[j]; if (i - step >= 0) sum += dp[i - step]; } dp[i] = sum; }
+
+  return dp[n];
+}
+JS;
+
+    $result = Tool::normalizeSolutionCode($code);
+
+    $this->assertStringContainsString("\n\tfor (let i = 1; i <= n; i++) {", $result);
+    $this->assertStringContainsString("\n\t\tlet sum = 0;", $result);
+    $this->assertStringContainsString("\n\t\tfor (let j = 0; j < allowed.length; j++) {", $result);
+    $this->assertStringContainsString("\n\t\t\tconst step = allowed[j];", $result);
+    $this->assertStringContainsString("\n\t\tdp[i] = sum;", $result);
+    $this->assertStringContainsString("\n\treturn dp[n];", $result);
+  }
+
+  public function test_normalize_reindents_inconsistent_ai_indentation(): void
+  {
+    $code = <<<'JS'
+function countWays(n, steps) {
+  const dp = new Array(n + 1).fill(0);
+dp[0] = 1;
+for (let i = 1; i <= n; i++) {
+    let sum = 0;
+for (let j = 0; j < allowed.length; j++) {
+        const step = allowed[j];
+        if (i - step >= 0) sum += dp[i - step];
+    }
+    dp[i] = sum;
+}
+return dp[n];
+}
+JS;
+
+    $result = Tool::normalizeSolutionCode($code);
+
+    $this->assertStringContainsString("\n\tdp[0] = 1;", $result);
+    $this->assertStringContainsString("\n\tfor (let i = 1; i <= n; i++) {", $result);
+    $this->assertStringContainsString("\n\t\tlet sum = 0;", $result);
+    $this->assertStringContainsString("\n\t\tfor (let j = 0; j < allowed.length; j++) {", $result);
+    $this->assertStringContainsString("\n\t\t\tconst step = allowed[j];", $result);
+    $this->assertStringContainsString("\n\treturn dp[n];", $result);
+  }
+
+  public function test_normalize_does_not_reindent_python(): void
+  {
+    $code = "def add(a, b):\n  return a + b\n";
+    $this->assertSame("def add(a, b):\n\treturn a + b", Tool::normalizeSolutionCode($code));
+  }
 }

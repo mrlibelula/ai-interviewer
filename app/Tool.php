@@ -470,7 +470,7 @@ class Tool
             $prompt
         ) ?? $prompt;
 
-        $suffix = ' Important: Put solution_code in the JSON response as readable multi-line source with real newline characters and perfect tab indentation (tab characters only for indent levels, never spaces). Never minify or collapse solution_code into a single line.';
+        $suffix = ' Important: Put solution_code in the JSON response as readable multi-line source with real newline characters and perfect tab indentation (tab characters only for indent levels, never spaces; every nested block one tab deeper than its parent — never leave statements at column 0 inside a function or loop). Never minify or collapse solution_code into a single line.';
 
         if (!preg_match('/solution_code MUST be readable multi-line|Never minify or collapse solution_code/i', $prompt)) {
             $prompt = rtrim($prompt) . $suffix;
@@ -518,15 +518,16 @@ class Tool
             $expanded = [];
             foreach ($lines as $line) {
                 $trim = trim($line);
-                // Expand dense single-line blobs only; keep short already-formatted braced lines.
-                $looksMinified = strlen($trim) > 60
+                // Require `{` so long single statements (e.g. const x = Array.from...) keep their indent.
+                $looksMinified = str_contains($trim, '{') && (
+                    strlen($trim) > 60
                     || (substr_count($trim, '{') >= 2 && substr_count($trim, ';') >= 1)
-                    || (substr_count($trim, ';') >= 2 && str_contains($trim, '{'));
+                    || (substr_count($trim, ';') >= 2)
+                );
                 if (
                     $trim !== ''
                     && !str_starts_with($trim, '//')
                     && substr_count($trim, "\n") === 0
-                    && preg_match('/[{;}]/', $trim)
                     && $looksMinified
                 ) {
                     $expanded[] = self::expandMinifiedBraceCode($trim);
@@ -538,9 +539,150 @@ class Tool
         }
 
         $code = self::stripModuleExportStatements($code);
-        $code = self::convertLeadingSpacesToTabs($code);
+
+        // Expand path trims per-line indent; LLMs also emit inconsistent spaces — reindent brace languages.
+        if (self::looksLikeBraceLanguage($code)) {
+            $code = self::reindentBraceCode($code);
+        } else {
+            $code = self::convertLeadingSpacesToTabs($code);
+        }
 
         return trim($code);
+    }
+
+    /**
+     * True for C-family / JS-like source where `{}` define blocks (not Python).
+     */
+    public static function looksLikeBraceLanguage(string $code): bool
+    {
+        if ($code === '' || !str_contains($code, '{')) {
+            return false;
+        }
+
+        // Indentation-significant languages: leave leading whitespace alone.
+        if (
+            preg_match('/^\s*(def|elif|except|async\s+def)\b/m', $code)
+            && !preg_match('/\b(function|const|let|var)\b/', $code)
+        ) {
+            return false;
+        }
+
+        return (bool) preg_match('/[{;}]/', $code);
+    }
+
+    /**
+     * Recompute leading tab indentation from `{}` depth (strings/comments ignored).
+     * Fixes LLM-inconsistent indents and expandMinifiedBraceCode losing parent indent.
+     */
+    public static function reindentBraceCode(string $code): string
+    {
+        if ($code === '') {
+            return $code;
+        }
+
+        $lines = explode("\n", $code);
+        $depth = 0;
+        $out = [];
+
+        foreach ($lines as $line) {
+            $content = ltrim($line, " \t");
+            if ($content === '') {
+                $out[] = '';
+                continue;
+            }
+
+            $lineDepth = $depth;
+            if ($content[0] === '}' || $content[0] === ']') {
+                $lineDepth = max(0, $depth - 1);
+            }
+
+            $out[] = str_repeat("\t", $lineDepth) . $content;
+            $depth = max(0, $depth + self::netBraceDelta($content));
+        }
+
+        return implode("\n", $out);
+    }
+
+    /**
+     * Net `{`/`}` delta for a single line, ignoring strings and comments.
+     */
+    public static function netBraceDelta(string $line): int
+    {
+        $delta = 0;
+        $len = strlen($line);
+        $inSingle = false;
+        $inDouble = false;
+        $inBacktick = false;
+        $inLineComment = false;
+        $inBlockComment = false;
+        $escape = false;
+
+        for ($i = 0; $i < $len; $i++) {
+            $ch = $line[$i];
+            $next = $i + 1 < $len ? $line[$i + 1] : '';
+
+            if ($inLineComment) {
+                break;
+            }
+
+            if ($inBlockComment) {
+                if ($ch === '*' && $next === '/') {
+                    $inBlockComment = false;
+                    $i++;
+                }
+                continue;
+            }
+
+            if ($inSingle || $inDouble || $inBacktick) {
+                if ($escape) {
+                    $escape = false;
+                    continue;
+                }
+                if ($ch === '\\') {
+                    $escape = true;
+                    continue;
+                }
+                if ($inSingle && $ch === "'") {
+                    $inSingle = false;
+                } elseif ($inDouble && $ch === '"') {
+                    $inDouble = false;
+                } elseif ($inBacktick && $ch === '`') {
+                    $inBacktick = false;
+                }
+                continue;
+            }
+
+            if ($ch === '/' && $next === '/') {
+                $inLineComment = true;
+                $i++;
+                continue;
+            }
+            if ($ch === '/' && $next === '*') {
+                $inBlockComment = true;
+                $i++;
+                continue;
+            }
+            if ($ch === "'") {
+                $inSingle = true;
+                continue;
+            }
+            if ($ch === '"') {
+                $inDouble = true;
+                continue;
+            }
+            if ($ch === '`') {
+                $inBacktick = true;
+                continue;
+            }
+
+            if ($ch === '{') {
+                $delta++;
+            } elseif ($ch === '}') {
+                $delta--;
+            }
+        }
+
+        return $delta;
     }
 
     /**
@@ -815,9 +957,25 @@ class Tool
 
             if ($ch === ';') {
                 $out .= ';';
-                // Keep for (;;;) headers on one line.
-                if ($paren === 0 && $next !== '}') {
-                    $newline();
+                // Keep for (;;;) headers on one line; avoid blank line before a following `}`.
+                if ($paren === 0) {
+                    $j = $i + 1;
+                    while ($j < $len && ($code[$j] === ' ' || $code[$j] === "\t")) {
+                        $j++;
+                    }
+                    $nextSignificant = $j < $len ? $code[$j] : '';
+                    if ($nextSignificant !== '' && $nextSignificant !== '}') {
+                        $newline();
+                    }
+                }
+                continue;
+            }
+
+            // Skip insignificant whitespace; indent is owned by $newline().
+            if ($ch === ' ' || $ch === "\t" || $ch === "\n") {
+                // Keep a single space between tokens when not at line start.
+                if ($ch === ' ' && $out !== '' && !str_ends_with($out, "\n") && !str_ends_with($out, ' ') && !str_ends_with($out, "\t")) {
+                    $out .= ' ';
                 }
                 continue;
             }
