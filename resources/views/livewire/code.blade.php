@@ -2,6 +2,8 @@
     @if ($code)
     @php
         $startsWrapped = substr_count($code, "\n") === 0;
+        $indentOpts = \App\Tool::monacoIndentOptions($language);
+        $tabSize = (int) ($indentOpts['tabSize'] ?? 2);
     @endphp
     {{-- Outer must not be <pre>: browsers reparent nested <div>s out of <pre>, breaking Alpine `wrap` scope --}}
     <div
@@ -37,6 +39,7 @@
         <pre
             class="mb-2 min-h-[6rem] rounded-lg max-h-96 overflow-auto bg-white/75 dark:bg-black/40 p-2 text-xl leading-relaxed"
             :class="wrap ? 'whitespace-pre-wrap break-words' : 'whitespace-pre'"
+            style="tab-size: {{ $tabSize }}; -moz-tab-size: {{ $tabSize }};"
         ><code x-ref="code" class="language-{{ strtolower($language) ?: 'html' }}">{{ $code }}</code></pre>
     </div>
     @else

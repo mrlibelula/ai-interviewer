@@ -14,7 +14,7 @@ class Code extends Component
   {
     $this->language = $language;
     // Escape in the Blade view ({{ }}); expand minified LLM solutions for readable codebox.
-    $this->code = Tool::normalizeSolutionCode($code ?: '');
+    $this->code = Tool::normalizeSolutionCode($code ?: '', $language);
   }
 
   public function render()

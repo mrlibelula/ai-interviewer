@@ -288,7 +288,7 @@ class Tool
                 ],
                 'solution_code' => [
                     'type' => 'string',
-                    'description' => 'Complete runnable solution with tab indentation (not spaces). For JS: vanilla browser script only — no module.exports/export/require/import; end with console.log test cases.',
+                    'description' => 'Complete runnable solution with language-conventional indentation (JavaScript: 2 spaces per level, never tabs). For JS: vanilla browser script only — no module.exports/export/require/import; end with console.log test cases.',
                 ],
             ],
             'required' => [
@@ -470,7 +470,7 @@ class Tool
             $prompt
         ) ?? $prompt;
 
-        $suffix = ' Important: Put solution_code in the JSON response as readable multi-line source with real newline characters and perfect tab indentation (tab characters only for indent levels, never spaces; every nested block one tab deeper than its parent — never leave statements at column 0 inside a function or loop). Never minify or collapse solution_code into a single line.';
+        $suffix = ' Important: Put solution_code in the JSON response as readable multi-line source with real newline characters and language-conventional indentation (for JavaScript: exactly 2 spaces per indent level — never tabs; every nested block one level deeper than its parent — never leave statements at column 0 inside a function or loop). Never minify or collapse solution_code into a single line.';
 
         if (!preg_match('/solution_code MUST be readable multi-line|Never minify or collapse solution_code/i', $prompt)) {
             $prompt = rtrim($prompt) . $suffix;
@@ -482,18 +482,155 @@ class Tool
             $prompt = rtrim($prompt) . $vanillaSuffix;
         }
 
-        if (!preg_match('/tab indentation|indent.*tabs|tabs for indent/i', $prompt)) {
-            $prompt = rtrim($prompt) . ' Indent solution_code with tab characters only (perfect tab indentation; do not use spaces for indentation).';
+        if (!preg_match('/2 spaces per indent|two-space indent|language-conventional indentation/i', $prompt)) {
+            $prompt = rtrim($prompt) . ' For JavaScript, indent solution_code with exactly 2 spaces per level (never tabs).';
         }
 
         return $prompt;
     }
 
     /**
+     * Resolve indent convention for a language key (see config/code_indent.php).
+     *
+     * @return array{style: string, size: int}
+     */
+    public static function indentConvention(?string $language = null): array
+    {
+        $map = self::codeIndentConfig();
+        $key = strtolower(trim((string) $language));
+        $entry = $key !== '' ? ($map[$key] ?? null) : null;
+
+        if (is_string($entry)) {
+            $entry = $map[$entry] ?? null;
+        }
+
+        if (!is_array($entry)) {
+            $entry = is_array($map['default'] ?? null)
+                ? $map['default']
+                : ['style' => 'tab', 'size' => 1];
+        }
+
+        return [
+            'style' => (($entry['style'] ?? 'tab') === 'space') ? 'space' : 'tab',
+            'size' => max(1, (int) ($entry['size'] ?? 1)),
+        ];
+    }
+
+    /**
+     * @return array<string, array{style?: string, size?: int}|string>
+     */
+    public static function codeIndentConfig(): array
+    {
+        try {
+            if (function_exists('app') && app()->bound('config')) {
+                $loaded = config('code_indent');
+                if (is_array($loaded) && $loaded !== []) {
+                    return $loaded;
+                }
+            }
+        } catch (\Throwable $e) {
+            // PHPUnit unit tests may run without the Laravel container.
+        }
+
+        $path = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'code_indent.php';
+        if (is_file($path)) {
+            $loaded = require $path;
+            if (is_array($loaded)) {
+                return $loaded;
+            }
+        }
+
+        return [
+            'default' => ['style' => 'tab', 'size' => 1],
+            'javascript' => ['style' => 'space', 'size' => 2],
+            'js' => 'javascript',
+            'node' => 'javascript',
+            'nodejs' => 'javascript',
+            'typescript' => 'javascript',
+            'ts' => 'javascript',
+            'tsx' => 'javascript',
+        ];
+    }
+
+    /**
+     * One indent level unit for the language (e.g. "  " for JS, "\t" for default).
+     */
+    public static function indentUnit(?string $language = null): string
+    {
+        $c = self::indentConvention($language);
+
+        return $c['style'] === 'space'
+            ? str_repeat(' ', $c['size'])
+            : str_repeat("\t", $c['size']);
+    }
+
+    /**
+     * Monaco editor options for a language (tabSize / insertSpaces).
+     *
+     * @return array{tabSize: int, insertSpaces: bool, detectIndentation: bool}
+     */
+    public static function monacoIndentOptions(?string $language = null): array
+    {
+        $c = self::indentConvention($language);
+
+        return [
+            'tabSize' => $c['size'],
+            'insertSpaces' => $c['style'] === 'space',
+            'detectIndentation' => false,
+        ];
+    }
+
+    /**
+     * Pick a language key for indentation (explicit name, else infer JS from source).
+     */
+    public static function resolveIndentLanguage(?string $language, string $code = ''): ?string
+    {
+        $lang = strtolower(trim((string) $language));
+        if ($lang !== '' && !in_array($lang, ['code', 'plaintext', 'text', 'html', 'component'], true)) {
+            return $lang;
+        }
+
+        if (
+            self::looksLikeBraceLanguage($code)
+            && preg_match('/\b(function|const|let|var|class|=>)\b/', $code)
+        ) {
+            return 'javascript';
+        }
+
+        return $lang !== '' ? $lang : null;
+    }
+
+    /**
+     * First language name from an LLM challenge payload (languages array).
+     */
+    public static function languageFromChallengePayload(object|array|null $challenge): ?string
+    {
+        if ($challenge === null) {
+            return null;
+        }
+
+        $langs = is_array($challenge)
+            ? ($challenge['languages'] ?? null)
+            : ($challenge->languages ?? null);
+
+        if (!is_array($langs) || $langs === []) {
+            return null;
+        }
+
+        $first = $langs[0] ?? null;
+        if (is_string($first) && trim($first) !== '') {
+            return trim($first);
+        }
+
+        return null;
+    }
+
+    /**
      * Normalize LLM solution_code for display (real newlines, expand minified brace-language code).
      * Strips Node/ESM export lines that break the in-browser code editor runner.
+     * Indent style follows config/code_indent.php (JavaScript: 2 spaces).
      */
-    public static function normalizeSolutionCode(?string $code): string
+    public static function normalizeSolutionCode(?string $code, ?string $language = null): string
     {
         $code = (string) ($code ?? '');
         $code = str_replace(["\r\n", "\r"], "\n", $code);
@@ -504,6 +641,8 @@ class Tool
         }
 
         $code = trim($code);
+        $language = self::resolveIndentLanguage($language, $code);
+        $indentUnit = self::indentUnit($language);
 
         // Minified LLM output often starts with `// comment ... function foo(){...}` on one line.
         // Without a break, `//` would comment out the entire solution.
@@ -511,7 +650,7 @@ class Tool
 
         // Models sometimes still return a single dense line; expand C-like / JS-like source for the codebox.
         if ($code !== '' && substr_count($code, "\n") === 0 && preg_match('/[{;}]/', $code)) {
-            $code = self::expandMinifiedBraceCode($code);
+            $code = self::expandMinifiedBraceCode($code, $indentUnit);
         } elseif ($code !== '' && substr_count($code, "\n") > 0) {
             // Comment was split onto its own line; still expand the remaining dense statement block.
             $lines = explode("\n", $code);
@@ -530,7 +669,7 @@ class Tool
                     && substr_count($trim, "\n") === 0
                     && $looksMinified
                 ) {
-                    $expanded[] = self::expandMinifiedBraceCode($trim);
+                    $expanded[] = self::expandMinifiedBraceCode($trim, $indentUnit);
                 } else {
                     $expanded[] = $line;
                 }
@@ -542,9 +681,9 @@ class Tool
 
         // Expand path trims per-line indent; LLMs also emit inconsistent spaces — reindent brace languages.
         if (self::looksLikeBraceLanguage($code)) {
-            $code = self::reindentBraceCode($code);
+            $code = self::reindentBraceCode($code, $indentUnit);
         } else {
-            $code = self::convertLeadingSpacesToTabs($code);
+            $code = self::applyLeadingIndentConvention($code, $indentUnit);
         }
 
         return trim($code);
@@ -571,10 +710,10 @@ class Tool
     }
 
     /**
-     * Recompute leading tab indentation from `{}` depth (strings/comments ignored).
+     * Recompute leading indentation from `{}` depth (strings/comments ignored).
      * Fixes LLM-inconsistent indents and expandMinifiedBraceCode losing parent indent.
      */
-    public static function reindentBraceCode(string $code): string
+    public static function reindentBraceCode(string $code, string $indentUnit = "\t"): string
     {
         if ($code === '') {
             return $code;
@@ -596,7 +735,7 @@ class Tool
                 $lineDepth = max(0, $depth - 1);
             }
 
-            $out[] = str_repeat("\t", $lineDepth) . $content;
+            $out[] = str_repeat($indentUnit, $lineDepth) . $content;
             $depth = max(0, $depth + self::netBraceDelta($content));
         }
 
@@ -686,15 +825,18 @@ class Tool
     }
 
     /**
-     * Convert leading space indentation to tabs so solution_code displays with consistent tab indents.
+     * Convert leading whitespace to the language indent unit (spaces or tabs).
      */
-    public static function convertLeadingSpacesToTabs(string $code, ?int $spacesPerTab = null): string
+    public static function applyLeadingIndentConvention(string $code, string $indentUnit = "\t"): string
     {
         if ($code === '') {
             return $code;
         }
 
-        $spacesPerTab = $spacesPerTab ?? self::detectSpacesPerTab($code);
+        $spacesPerLevel = str_contains($indentUnit, ' ')
+            ? max(1, strlen(str_replace("\t", '', $indentUnit)) ?: 2)
+            : self::detectSpacesPerTab($code);
+
         $lines = explode("\n", $code);
         $result = [];
 
@@ -726,16 +868,28 @@ class Tool
                     $spaces++;
                     $i++;
                 }
-                $depth += intdiv($spaces, $spacesPerTab);
-                if ($spaces % $spacesPerTab !== 0) {
+                $depth += intdiv($spaces, $spacesPerLevel);
+                if ($spaces % $spacesPerLevel !== 0) {
                     $depth++;
                 }
             }
 
-            $result[] = str_repeat("\t", $depth) . $rest;
+            $result[] = str_repeat($indentUnit, $depth) . $rest;
         }
 
         return implode("\n", $result);
+    }
+
+    /**
+     * @deprecated Use applyLeadingIndentConvention()
+     */
+    public static function convertLeadingSpacesToTabs(string $code, ?int $spacesPerTab = null): string
+    {
+        if ($spacesPerTab !== null) {
+            return self::applyLeadingIndentConvention($code, str_repeat("\t", 1));
+        }
+
+        return self::applyLeadingIndentConvention($code, "\t");
     }
 
     /**
@@ -832,7 +986,7 @@ class Tool
      * Lightweight pretty-printer for minified brace languages (JS, PHP-ish, C-like).
      * Not a full formatter — enough to make admin codebox readable.
      */
-    public static function expandMinifiedBraceCode(string $code): string
+    public static function expandMinifiedBraceCode(string $code, string $indentUnit = "\t"): string
     {
         $out = '';
         $indent = 0;
@@ -845,9 +999,9 @@ class Tool
         $inBlockComment = false;
         $escape = false;
 
-        $newline = function () use (&$out, &$indent) {
+        $newline = function () use (&$out, &$indent, $indentUnit) {
             $out = rtrim($out, " \t");
-            $out .= "\n" . str_repeat("\t", max(0, $indent));
+            $out .= "\n" . str_repeat($indentUnit, max(0, $indent));
         };
 
         for ($i = 0; $i < $len; $i++) {
@@ -1042,7 +1196,10 @@ class Tool
                 return null;
             }
 
-            $challenge->solution_code = self::normalizeSolutionCode($challenge->solution_code ?? '');
+            $challenge->solution_code = self::normalizeSolutionCode(
+                $challenge->solution_code ?? '',
+                self::languageFromChallengePayload($challenge)
+            );
 
             $difficulty = Difficulty::where('name', 'like', '%' . ($challenge->difficulty_level ?? '') . '%')->first();
             $status = Status::where('name', 'like', '%active%')->first();
@@ -1068,7 +1225,10 @@ class Tool
             $emulated_challenge_model->time_limit = self::normalizeTimeLimit($challenge->time_limit ?? null);
             $emulated_challenge_model->status_id = $status->id;
             $emulated_challenge_model->visibility_id = $visibility->id;
-            $emulated_challenge_model->solution_code = self::normalizeSolutionCode($challenge->solution_code ?? '');
+            $emulated_challenge_model->solution_code = self::normalizeSolutionCode(
+                $challenge->solution_code ?? '',
+                self::languageFromChallengePayload($challenge)
+            );
             $emulated_challenge_model->chatgpt_prompt = $prompt;
             $emulated_challenge_model->completion_id = $completion->id;
             $emulated_challenge_model->ai_model = $completion->model;
@@ -1112,7 +1272,8 @@ class Tool
         $solution_code = self::normalizeSolutionCode(
             $llm_challenge->emulated_challenge_model->solution_code
                 ?? $llm_challenge->challenge->solution_code
-                ?? ''
+                ?? '',
+            self::languageFromChallengePayload($llm_challenge->challenge ?? null)
         );
         $challenge_slug = Str::slug($challenge->title ?? '');
 

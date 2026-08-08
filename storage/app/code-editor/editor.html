@@ -179,10 +179,10 @@ console.log(sayHello('Bob'));
         let encSolverCode = parent.document.querySelector('#codeIframe').getAttribute('solver-code') ?? false
 
         var CODE = `// Write your solution code here
-                        
-                        
+
+
 const sayHello = (name) => {
-    return 'Hello ' + name;
+  return 'Hello ' + name;
 }
 
 console.log(sayHello('Bob'));
@@ -242,8 +242,49 @@ console.log(sayHello('Bob'));
                     })
             })
         }
+
+        /**
+         * Convert leading tabs / mixed spaces to N-space indent levels (JS: 2).
+         * Depth is inferred from tabs (1 level) and runs of spaces (grouped by size).
+         */
+        function normalizeLeadingIndent(code, spacesPerLevel = 2) {
+            if (!code) return code
+            const size = Math.max(1, spacesPerLevel | 0)
+            return String(code).split('\n').map(line => {
+                const m = line.match(/^([ \t]*)(.*)$/)
+                if (!m || !m[1]) return line
+                let depth = 0
+                let i = 0
+                const ws = m[1]
+                while (i < ws.length) {
+                    if (ws[i] === '\t') {
+                        depth++
+                        i++
+                        continue
+                    }
+                    let spaces = 0
+                    while (i < ws.length && ws[i] === ' ') {
+                        spaces++
+                        i++
+                    }
+                    depth += Math.floor(spaces / size)
+                    if (spaces % size !== 0) depth++
+                }
+                return ' '.repeat(depth * size) + m[2]
+            }).join('\n')
+        }
         
         function createEditor(editorContainer) {
+            // JS convention (config/code_indent.php): 2 spaces. Future: read from iframe attrs per language.
+            const indentOpts = {
+                tabSize: 2,
+                insertSpaces: true,
+                detectIndentation: false,
+            }
+
+            // Normalize stored tabs / 4-space blobs to 2-space JS indent for display + typing.
+            CODE = normalizeLeadingIndent(CODE, indentOpts.tabSize)
+
             let editor = monaco.editor.create(editorContainer, {
                 value: CODE,
                 language: "javascript",
@@ -252,6 +293,9 @@ console.log(sayHello('Bob'));
                 automaticLayout: true,
                 contextmenu: true,
                 fontSize: 16.5,
+                tabSize: indentOpts.tabSize,
+                insertSpaces: indentOpts.insertSpaces,
+                detectIndentation: indentOpts.detectIndentation,
                 scrollbar: {
                     useShadows: true,
                     vertical: "visible",
