@@ -821,6 +821,26 @@ class Tool
         // $banner_url = self::generateChallengeImage($challenge->title, $challenge->topics[0] ?? '', $challenge->languages[0] ?? '');
         $banner_url = null;
 
+        $result_obj = new stdClass;
+        $result_obj->completion_text = $completion_text;
+        $result_obj->completion = $completion;
+        $result_obj->skipped_duplicate = false;
+
+        $existing = self::findExistingChallengeByTitleOrSlug($challenge->title ?? '', $challenge_slug);
+        if ($existing) {
+            self::syncChallengeTopicsFromLlm($existing, $challenge->topics ?? []);
+            info([
+                'importAIChallenge' => 'skipped_duplicate',
+                'title' => $challenge->title ?? '',
+                'existing_id' => $existing->id,
+            ]);
+            $result_obj->skipped_duplicate = true;
+            $result_obj->challenge = null;
+            $result_obj->existing_challenge = $existing->fresh(['topics']);
+
+            return $result_obj;
+        }
+
         $challenge_db = Challenge::create([
             'title' => $challenge->title,
             'description' => $challenge->challenge,
@@ -838,75 +858,60 @@ class Tool
             'banner_url' => $banner_url,
         ]);
 
-        if ($challenge_db->wasRecentlyCreated) {
-            $challenge_id = $challenge_db->id;
+        self::syncChallengeTopicsFromLlm($challenge_db, $challenge->topics ?? []);
 
-            // assign topic/s
-            $topics = [];
-            foreach ($challenge->topics as $challenge_topic) {
-                $topics[] = Topic::select('id', 'name')->where('name', 'like', '%' . $challenge_topic . '%')->first();
+        // assign framework/s
+        $frameworks = [];
+        if (isset($challenge->frameworks)) {
+            foreach ($challenge->frameworks as $challenge_fw) {
+                $frameworks[] = Framework::select('id', 'name')->where('name', 'like', '%' . $challenge_fw .'%')->first();
             }
-            
-            if (count($topics)) {
-                foreach ($topics as $topic) {
-                    if ($topic) $challenge_db->addTopic($topic);
-                }
-            }
-    
-            // assign framework/s
-            $frameworks = [];
-            if (isset($challenge->frameworks)) {
-                foreach ($challenge->frameworks as $challenge_fw) {
-                    $frameworks[] = Framework::select('id', 'name')->where('name', 'like', '%' . $challenge_fw .'%')->first();
-                }
-            }
-    
-            if (count($frameworks)) {
-                foreach ($frameworks as $framework) {
-                    if ($framework) $challenge_db->addFramework($framework);
-                }
-            }
-    
-            // assign language/s
-            $languages = [];
-            foreach ($challenge->languages as $challenge_lang) {
-                $languages[] = Language::select('id', 'name')->where('name', 'like', '%'. $challenge_lang .'%')->first();
-            }
-    
-            if (count($languages)) {
-                foreach ($languages as $language) {
-                    if ($language) $challenge_db->addLanguage($language);
-                }
-            }
-    
-            // assign package/s
-            $packages = [];
-            foreach ($challenge->packages as $challenge_package) {
-                $packages[] = Package::select('id', 'name')->where('name', 'like', '%'. $challenge_package .'%')->first();
-            }
-    
-            if (count($packages)) {
-                foreach ($packages as $package) {
-                    if ($package) $challenge_db->addPackage($package);
-                }
-            }
-
-            // assign tags/s
-            $tags = [];
-            foreach ($challenge->tags as $challenge_tag) {
-                $tags[] = Tag::select('id', 'name')->where('name', 'like', '%'. $challenge_tag .'%')->first();
-            }
-    
-            if (count($tags)) {
-                foreach ($tags as $tag) {
-                    if ($tag) $challenge_db->addTag($tag);
-                }
-            }
-
-            // assign creator/s
-            $challenge_db->addCreator(auth()->user());
-
         }
+
+        if (count($frameworks)) {
+            foreach ($frameworks as $framework) {
+                if ($framework) $challenge_db->addFramework($framework);
+            }
+        }
+
+        // assign language/s
+        $languages = [];
+        foreach ($challenge->languages as $challenge_lang) {
+            $languages[] = Language::select('id', 'name')->where('name', 'like', '%'. $challenge_lang .'%')->first();
+        }
+
+        if (count($languages)) {
+            foreach ($languages as $language) {
+                if ($language) $challenge_db->addLanguage($language);
+            }
+        }
+
+        // assign package/s
+        $packages = [];
+        foreach ($challenge->packages as $challenge_package) {
+            $packages[] = Package::select('id', 'name')->where('name', 'like', '%'. $challenge_package .'%')->first();
+        }
+
+        if (count($packages)) {
+            foreach ($packages as $package) {
+                if ($package) $challenge_db->addPackage($package);
+            }
+        }
+
+        // assign tags/s
+        $tags = [];
+        foreach ($challenge->tags as $challenge_tag) {
+            $tags[] = Tag::select('id', 'name')->where('name', 'like', '%'. $challenge_tag .'%')->first();
+        }
+
+        if (count($tags)) {
+            foreach ($tags as $tag) {
+                if ($tag) $challenge_db->addTag($tag);
+            }
+        }
+
+        // assign creator/s
+        $challenge_db->addCreator(auth()->user());
 
         // Challenge::with('difficulty:id,name', 'status:id,name', 'visibility:id,name', 'tags:id,name', 'languages:id,name', 'frameworks:id,name', 'packages:id,name', 'topics:id,name', 'creators:id,name')->first()
         $final_challenge = Challenge::with(
@@ -923,18 +928,50 @@ class Tool
             ->whereId($challenge_db->id)
             ->first();
 
-        // info([
-        //     'prompt' => $prompt, 
-        //     'completion_text' => $completion_text, 
-        //     'completion' => $completion, 
-        // ]);
-
-        $result_obj = new stdClass;
         $result_obj->challenge = $final_challenge;
-        $result_obj->completion_text = $completion_text;
-        $result_obj->completion = $completion;
 
         return $result_obj;
+    }
+
+    /**
+     * Find a live challenge that already owns this title or slug (global, any topic).
+     */
+    public static function findExistingChallengeByTitleOrSlug(string $title, ?string $slug = null): ?Challenge
+    {
+        $title = trim($title);
+        if ($title === '') {
+            return null;
+        }
+
+        $slug = $slug ?: Str::slug($title);
+
+        return Challenge::query()
+            ->where(function ($query) use ($title, $slug) {
+                $query->whereRaw('LOWER(title) = ?', [mb_strtolower($title)])
+                    ->orWhere('challenge_slug', $slug);
+            })
+            ->first();
+    }
+
+    /**
+     * Attach LLM topic names onto a challenge when they are missing.
+     *
+     * @param  array<int, string>  $topic_names
+     */
+    public static function syncChallengeTopicsFromLlm(Challenge $challenge, array $topic_names): void
+    {
+        $existing_ids = $challenge->topics()->pluck('topics.id')->all();
+
+        foreach ($topic_names as $challenge_topic) {
+            $topic = Topic::select('id', 'name')
+                ->where('name', 'like', '%' . $challenge_topic . '%')
+                ->first();
+
+            if ($topic && ! in_array($topic->id, $existing_ids, true)) {
+                $challenge->addTopic($topic);
+                $existing_ids[] = $topic->id;
+            }
+        }
     }
 
     /**
@@ -976,7 +1013,8 @@ class Tool
     }
 
     /**
-     * Returns an array of Challenge 'titles' from DB that belongs to some Topic
+     * Returns an array of Challenge 'titles' from DB that belongs to some Topic.
+     * Pass "all topics" (default) for a global occupied-title list used during AI generation.
      *
      * @param string $topic
      * @return array
@@ -990,7 +1028,7 @@ class Tool
                 })
             : Challenge::select('id', 'title');
 
-        return $builder->pluck('title')->toArray();
+        return $builder->pluck('title')->unique()->values()->toArray();
     }
 
     /**
@@ -1133,8 +1171,10 @@ class Tool
             'difficulty_level' => $selected_difficulty, 
             'topics' => json_encode($topics),
             'languages' => json_encode($languages),
-            'tags' => json_encode(Tag::select('id', 'name')->pluck('name')->toArray()), 
-            'dbchallenges' => json_encode(self::challengeTitlesByTopic($selected_topic)),
+            'tags' => json_encode(Tag::select('id', 'name')->pluck('name')->toArray()),
+            // Always global: classic problems (e.g. Valid Parentheses) must not be
+            // re-imported under a different topic just because the topic filter hid them.
+            'dbchallenges' => json_encode(self::challengeTitlesByTopic('all topics')),
         ]);
 
         $wildcards->each(function ($wildcard, $key) use (&$blueprint) {

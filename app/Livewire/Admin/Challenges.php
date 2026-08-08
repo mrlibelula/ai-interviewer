@@ -20,6 +20,8 @@ class Challenges extends Component
     public array $sessionNewChallengeIds = [];
     public int $quantity = 1;
     public int $remaining = 0;
+    /** Retries after skipping an exact title/slug duplicate in the current batch slot. */
+    public int $duplicateRetries = 0;
     /** untested|established|failed */
     public string $openaiConnectionStatus = 'untested';
     public ?string $openaiConnectionError = null;
@@ -87,6 +89,7 @@ class Challenges extends Component
 
         $this->remaining = (int) $this->quantity;
         $this->batchChallengeIds = [];
+        $this->duplicateRetries = 0;
         $this->dispatch(
             'ai-challenges-updated',
             resetPage: true,
@@ -127,6 +130,41 @@ class Challenges extends Component
             */
             $prompt = Tool::wildcards($blueprint, $selected_difficulty, $selected_topic, $selected_language);
             Tool::updateEnviroPromptString($prompt);
+
+            if (! empty($imported_challenge_obj->skipped_duplicate)) {
+                $dupTitle = $imported_challenge_obj->existing_challenge->title
+                    ?? ($llm_challenge->challenge->title ?? 'challenge');
+                $this->duplicateRetries++;
+
+                if ($this->duplicateRetries >= 3) {
+                    $this->duplicateRetries = 0;
+                    $this->remaining--;
+                    Tool::toastr($this, [
+                        'title' => 'Duplicate skipped',
+                        'message' => "\"{$dupTitle}\" already exists — moved on after retries.",
+                    ], 'warning');
+                    $this->dispatch(
+                        'ai-challenges-updated',
+                        newChallengeIds: $this->sessionNewChallengeIds,
+                    );
+                    if ($this->remaining > 0) {
+                        $this->js('setTimeout(() => $wire.requestNextChallenge(), 50)');
+                    } else {
+                        $this->dispatch('spinner-off');
+                    }
+                    return;
+                }
+
+                Tool::toastr($this, [
+                    'title' => 'Duplicate skipped',
+                    'message' => "\"{$dupTitle}\" already exists — requesting a different challenge.",
+                ], 'warning');
+                // Retry this slot with the refreshed occupied-title list (do not decrement).
+                $this->js('setTimeout(() => $wire.requestNextChallenge(), 50)');
+                return;
+            }
+
+            $this->duplicateRetries = 0;
 
             if ($imported_challenge_obj->challenge) {
                 $challengeId = (int) $imported_challenge_obj->challenge->id;
