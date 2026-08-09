@@ -116,12 +116,13 @@ class ChallengeSolutionCodePromptTest extends TestCase
 
   public function test_default_challenge_generation_prompt_requires_vanilla_console_tests(): void
   {
-    $templates = require dirname(__DIR__, 2) . '/config/openai_prompts.php';
-    $prompt = $templates['challenge_generation'];
-
-    $this->assertStringContainsString('no module.exports', $prompt);
-    $this->assertStringContainsString('console.log test cases', $prompt);
-    $this->assertStringContainsString('2 spaces per indent', $prompt);
+    // Assert the committed config default (not a local .env OPENAI_PROMPT_BASE_TEXT override).
+    $source = file_get_contents(dirname(__DIR__, 2) . '/config/openai_prompts.php');
+    $this->assertNotFalse($source);
+    $this->assertStringContainsString("'challenge_generation' => env('OPENAI_PROMPT_BASE_TEXT'", $source);
+    $this->assertStringContainsString('no module.exports', $source);
+    $this->assertStringContainsString('console.log test cases', $source);
+    $this->assertStringContainsString('2 spaces per indent', $source);
   }
 
   public function test_normalize_keeps_indent_on_long_single_statement_lines(): void
