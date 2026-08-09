@@ -63,7 +63,11 @@
         </div>
     </div>
     
-    <x-chatbot-layout>
+    <x-chatbot-layout
+        :user-name="auth()->user()->name"
+        :user-emoji="$user_emoji"
+        :user-color="$user_color"
+    >
         <!-- always needed (avoids first user message bug when hitting enter) -->
         <x-chatbot-message 
             divId="chat-{{ uniqid() }}" 

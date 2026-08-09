@@ -9,11 +9,14 @@ use Livewire\Component;
 
 class Interview extends Component
 {
+    public const SESSION_DIFFICULTY_KEY = 'interview.selected_difficulty';
+    public const SESSION_TOPIC_KEY = 'interview.selected_topic_id';
+
     public $topics;
     public $difficulties;
 
     public string $selected_difficulty = 'easy';
-    public int $selected_topic_id;
+    public int $selected_topic_id = -1;
     public $selected_challenges;
     public string $challenge_list_order = 'squares'; // list|squares
     public string $search = '';
@@ -28,12 +31,14 @@ class Interview extends Component
         $this->selected_challenges = null;
         $this->selected_topic_id = -1;
         $this->search = '';
+        $this->persistSelection();
     }
 
     public function updatedSelectedTopicId()
     {
         $this->search = '';
         $this->loadSelectedChallenges();
+        $this->persistSelection();
     }
 
     public function updatedSearch()
@@ -68,10 +73,43 @@ class Interview extends Component
         $this->difficulties = Difficulty::select('id', 'name')->get();
     }
 
+    protected function persistSelection(): void
+    {
+        session([
+            self::SESSION_DIFFICULTY_KEY => $this->selected_difficulty,
+            self::SESSION_TOPIC_KEY => $this->selected_topic_id,
+        ]);
+    }
+
+    protected function restoreSelection(): void
+    {
+        $difficulty = session(self::SESSION_DIFFICULTY_KEY);
+        $topicId = session(self::SESSION_TOPIC_KEY);
+
+        if (is_string($difficulty) && $difficulty !== '') {
+            $normalized = strtolower($difficulty);
+            $exists = Difficulty::query()
+                ->whereRaw('LOWER(name) = ?', [$normalized])
+                ->exists();
+
+            if ($exists) {
+                $this->selected_difficulty = $normalized;
+            }
+        }
+
+        $topicId = $topicId !== null && $topicId !== '' ? (int) $topicId : -1;
+        $this->selected_topic_id = $topicId > 0 ? $topicId : -1;
+
+        if ($this->selected_topic_id !== -1) {
+            $this->loadSelectedChallenges();
+        }
+    }
+
     public function mount()
     {
         session()->has('challenge_ids') ? session()->remove('challenge_ids') : '';
         $this->getDifficulties();
+        $this->restoreSelection();
     }
 
     public function render()

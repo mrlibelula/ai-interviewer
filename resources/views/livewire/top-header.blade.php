@@ -8,12 +8,21 @@
 
     <img wire:navigate href="{{ route('landing') }}" class="sm:hidden ml-[1rem] w-7 py-[0.195rem] opacity-75 hover:opacity-100 smooth-300 invert hover:invert-0 cursor-pointer animate-pulse" src="https://www.onlygfx.com/wp-content/uploads/2022/04/brain-icon-3.png" alt="">
     
-    <!-- back button -->
-    <button @click="window.history.back()" class="sm:ml-[5rem] p-1">
+    <!-- back button: from challenge session, Interview remount restores filters from session -->
+    @php($interviewBackUrl = $this->interviewBackUrl())
+    @if ($interviewBackUrl)
+    <a href="{{ $interviewBackUrl }}" class="sm:ml-[5rem] p-1" aria-label="Back to interview topics">
+        <svg class="h-7 w-7 text-gray-900 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-200 smooth-300 cursor-pointer" data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"></path>
+        </svg>
+    </a>
+    @else
+    <button type="button" @click="window.history.back()" class="sm:ml-[5rem] p-1" aria-label="Go back">
         <svg class="h-7 w-7 text-gray-900 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-200 smooth-300 cursor-pointer" data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"></path>
         </svg>
     </button>
+    @endif
 
     <a wire:navigate href="{{ route('interview') }}" class=" text-lg font-semibold whitespace-nowrap px-2.5 rounded-full bg-gray-200/50 dark:bg-gray-600 text-gray-600 dark:text-gray-400">
         A.I. Interviewer

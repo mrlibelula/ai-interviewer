@@ -14,6 +14,20 @@ class TopHeader extends Component
 
     public bool $searchAttempted = false;
 
+    /**
+     * Explicit back destination when leaving a challenge session.
+     * Browser history.back() remounts Interview without selection state;
+     * session restores difficulty/topic filters on mount.
+     */
+    public function interviewBackUrl(): ?string
+    {
+        if (! request()->routeIs('interview-start')) {
+            return null;
+        }
+
+        return route('interview');
+    }
+
     public function updatedQuery(): void
     {
         $this->runSearch();

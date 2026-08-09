@@ -201,6 +201,17 @@ class Chatbot extends Component
         $this->messages = $this->openai_chat_settings['messages'] ?? [];
         auth()->user()->updateChallenge($this->challenge, ['openai_chat_settings' => $this->openai_chat_settings]);
 
+        // Remorph with the user message first; LLM runs on the next request
+        $this->dispatch('chatbot-user-message-shown');
+        $this->js('setTimeout(() => $wire.fetchAssistantReply(), 50)');
+    }
+
+    /**
+     * Continue after appendedChatMessage remorphs so the user bubble is visible
+     * while waiting on the model.
+     */
+    public function fetchAssistantReply()
+    {
         $challenge = Challenge::select('id', 'title', 'description', 'difficulty_id')
             ->with(['topics:name', 'difficulty', 'languages:name'])
             ->whereId($this->challenge->id)
@@ -239,10 +250,10 @@ class Chatbot extends Component
             $this->dispatch('chatbot-loader-off');
             return;
         }
-        
+
         $completion_role = $completion->choices[0]->message->role;
         $completion_content = Tool::unwrapAssistantContentIfStructured((string) $completion->choices[0]->message->content);
-        
+
         array_push($this->messages, [
             'role' => $completion_role,
             'content' => $completion_content,

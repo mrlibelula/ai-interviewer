@@ -255,6 +255,10 @@ class Start extends Component
         $this->buildChatWelcomeMessage();
         $this->selected_difficulty = Tool::decode($enc_selected_difficulty);
         $this->selected_topic_id = (int)Tool::decode($enc_selected_topic_id);
+        session([
+            Interview::SESSION_DIFFICULTY_KEY => $this->selected_difficulty,
+            Interview::SESSION_TOPIC_KEY => $this->selected_topic_id,
+        ]);
         $this->challenge_id = $enc_challenge_id ? Tool::decode($enc_challenge_id) : null;
         !$this->challenge_id ? session()->remove('challenge_ids') : '';
         $this->challenge_slug = $challenge_slug;
