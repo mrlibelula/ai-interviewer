@@ -12,7 +12,7 @@ class Start extends Component
     public string $selected_difficulty;
     public int|null $selected_topic_id;
     public int|null $challenge_id;
-    public $challenge = null;
+    public ?Challenge $challenge = null;
     public string|null $challenge_slug;
     public array $challenge_ids = [];
     public bool $random = false;
@@ -108,8 +108,9 @@ class Start extends Component
     public function sendMessage(string $chatMessage = '')
     {
         // validate chat input
-        if (!strlen($chatMessage) || strlen($chatMessage) < 3) {
-            $errorMessage = 'Chat message must be at least 3 characters long';
+        $chatMessage = trim($chatMessage);
+        if ($chatMessage === '') {
+            $errorMessage = 'Chat message cannot be empty';
             Tool::toastr($this, [
                 'message' => $errorMessage,
             ], 'error');
