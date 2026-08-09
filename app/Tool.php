@@ -400,6 +400,25 @@ class Tool
     }
 
     /**
+     * If the model returned code-analysis JSON ({"feedback":...}), return the feedback text.
+     * Plain interviewer replies are returned unchanged. Does not use the solved flag.
+     */
+    public static function unwrapAssistantContentIfStructured(string $content): string
+    {
+        $trimmed = trim($content);
+        if ($trimmed === '') {
+            return $content;
+        }
+
+        $parsed = json_decode($trimmed, true);
+        if (!is_array($parsed) || !array_key_exists('feedback', $parsed)) {
+            return $content;
+        }
+
+        return self::parseCodeAnalysisResponse($trimmed)['feedback'];
+    }
+
+    /**
      * Structured-output response_format wrapper for json_schema.
      */
     public static function jsonSchemaResponseFormat(string $name, array $schema): array
@@ -1922,6 +1941,7 @@ class Tool
      */
     public static function prepareAiAnswerString(string $completion): string
     {
+        $completion = self::unwrapAssistantContentIfStructured($completion);
         $completion = preg_replace('/\n/', '??', $completion);
         $completion = preg_replace('/```(javascript)?/', '', $completion);
         // Do not addslashes — Js::from() already JSON-escapes for Alpine/JS.

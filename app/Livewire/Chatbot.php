@@ -110,7 +110,7 @@ class Chatbot extends Component
         }
 
         $completion_role = $completion->choices[0]->message->role;
-        $completion_content = $completion->choices[0]->message->content;
+        $completion_content = Tool::unwrapAssistantContentIfStructured((string) $completion->choices[0]->message->content);
 
         array_push($this->messages, [
             'role' => $completion_role,
@@ -241,7 +241,7 @@ class Chatbot extends Component
         }
         
         $completion_role = $completion->choices[0]->message->role;
-        $completion_content = $completion->choices[0]->message->content;
+        $completion_content = Tool::unwrapAssistantContentIfStructured((string) $completion->choices[0]->message->content);
         
         array_push($this->messages, [
             'role' => $completion_role,

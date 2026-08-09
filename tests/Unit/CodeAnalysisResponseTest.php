@@ -54,4 +54,38 @@ class CodeAnalysisResponseTest extends TestCase
     $this->assertSame('Solid solution. Consider edge cases with duplicates.', $parsed['feedback']);
     $this->assertTrue($parsed['solved']);
   }
+
+  public function test_unwrap_structured_json_returns_feedback_only(): void
+  {
+    $raw = json_encode([
+      'feedback' => "Libe — good decision to require integer quantities.\n\n1) Public API validation",
+      'solved' => false,
+    ]);
+
+    $unwrapped = Tool::unwrapAssistantContentIfStructured($raw);
+
+    $this->assertSame("Libe — good decision to require integer quantities.\n\n1) Public API validation", $unwrapped);
+    $this->assertStringNotContainsString('"feedback"', $unwrapped);
+    $this->assertStringNotContainsString('"solved"', $unwrapped);
+  }
+
+  public function test_unwrap_plain_prose_unchanged(): void
+  {
+    $plain = 'Quick focused question for you. Do you want addItem to strictly require integers?';
+
+    $this->assertSame($plain, Tool::unwrapAssistantContentIfStructured($plain));
+  }
+
+  public function test_prepare_ai_answer_string_unwraps_structured_json(): void
+  {
+    $raw = json_encode([
+      'feedback' => "Line one.\nLine two.",
+      'solved' => false,
+    ]);
+
+    $prepared = Tool::prepareAiAnswerString($raw);
+
+    $this->assertSame('Line one.??Line two.', $prepared);
+    $this->assertStringNotContainsString('"feedback"', $prepared);
+  }
 }

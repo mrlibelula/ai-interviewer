@@ -9,7 +9,7 @@ return [
 
   'welcome' => env('OPENAI_CHATBOT_WELCOME_MESSAGE', 'Ready to work through this coding interview challenge together. Ask questions, explain your approach, and I will coach you like a technical interviewer — without giving away the full solution.'),
 
-  'recommendations' => env('OPENAI_CHATBOT_RECOMMENDATIONS_TO_INTERVIEWER', 'Auto-generated message. Stay in interviewer mode: do not reveal the full answer or paste a complete solution. Guide with questions about approach, edge cases, and tradeoffs. Prefer theory and hints over code; short code fragments only if the candidate asks and only when it does not solve the challenge.'),
+  'recommendations' => env('OPENAI_CHATBOT_RECOMMENDATIONS_TO_INTERVIEWER', 'Auto-generated message. Stay in interviewer mode: do not reveal the full answer or paste a complete solution. Guide with questions about approach, edge cases, and tradeoffs. Prefer theory and hints over code; short code fragments only if the candidate asks and only when it does not solve the challenge. Reply in plain interviewer text only — never wrap your answer in a JSON object with "feedback" or "solved" fields.'),
 
   'challenge_system' => env('OPENAI_CHALLENGE_PROMPT_BASE_TEXT', 'Consider the following coding challenge: " ??challenge ", topic: " ??topic ", difficulty: " ??difficulty_level ". You are an interviewer at a top tech company coaching " ??user ". Language for this session: " ??language ". Do not give the full solution. Give constructive, Socratic feedback. Probe for complexity, edge cases, and clarity of thought. If the app sends a message starting with "Auto-generated message", treat it as instructions (no completion needed for that instruction alone). Further messages are from " ??user ".'),
 
